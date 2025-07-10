@@ -5,17 +5,22 @@ import {
   ApiResponse,
   ApiErrorResponse
 } from "./types";
+import { isOverdue, isThisWeek, isThisMonth, dateSort } from "./utils";
 
 export class TaskManager {
   private apiUrl = '/api';
   private form: HTMLFormElement;
-  private tasksList: HTMLElement;
+  private tasksListWeek: HTMLElement;
+  private tasksListMonth: HTMLElement;
+  private tasksListRest: HTMLElement;
   private loading: HTMLElement;
   private error: HTMLElement;
 
   constructor() {
     this.form = document.getElementById('addTaskForm') as HTMLFormElement;
-    this.tasksList = document.getElementById('tasksList') as HTMLElement;
+    this.tasksListWeek = document.getElementById('tasksListWeek') as HTMLElement;
+    this.tasksListMonth = document.getElementById('tasksListMonth') as HTMLElement;
+    this.tasksListRest = document.getElementById('tasksListRest') as HTMLElement;
     this.loading = document.getElementById('loading') as HTMLElement;
     this.error = document.getElementById('error') as HTMLElement;
 
@@ -108,33 +113,16 @@ export class TaskManager {
   private async handleEditStart(e: Event, task: TaskItem): Promise<void> {
     const cardArea = e.currentTarget as HTMLElement;
     if (!cardArea) return;
-    const editArea = cardArea.querySelector(`#edit-area`) as HTMLDivElement;
+    const editArea = cardArea.querySelector(`#task-edit-area`) as HTMLDivElement;
     if (!editArea) return;
 
-    const finishDate = task.finish_by !== 'NULL' ? new Date(task.finish_by).toISOString().split('T')[0] : '';
-    const editForm = document.createElement('form') as HTMLFormElement;
-    editForm.id = 'editTaskForm';
-
-    editForm.innerHTML = `
-        <div class="form-group">
-          <label for="edit-task-name">Task Name:</label>
-          <input type="text" id="edit-task-name" name="edit-task-name" required value="${this.escapeHtml(task.title)}">
-        </div>
-        <div class="form-group">
-          <label for="edit-task-finishBy">Finish By:</label>
-          <input type="date" id="edit-task-finishBy" name="edit-task-finishBy" value="${finishDate}">
-        </div>
-        <button type="button" id="btn-cancel" class="btn-cancel">Cancel</button>
-        <button type="button" id="btn-save" class="btn-save">Save</button>
-    `;
-
-    editArea.replaceChildren(editForm);
+    editArea.replaceChildren(this.buildEditArea(task));
   }
 
   private async handleEditCancel(e: Event, task: TaskItem): Promise<void> {
     const cardArea = e.currentTarget as HTMLElement;
     if (!cardArea) return;
-    const editArea = cardArea.querySelector(`#edit-area`) as HTMLDivElement;
+    const editArea = cardArea.querySelector(`#task-edit-area`) as HTMLDivElement;
     if (!editArea) return;
 
     editArea.innerHTML = '';
@@ -214,36 +202,66 @@ export class TaskManager {
 
   private rendertasks(tasks: TaskItem[]): void {
     if (tasks.length === 0) {
-      this.tasksList.innerHTML = '<p>No tasks found. Add some tasks to get started!</p>';
+      this.tasksListRest.innerHTML = '<p>No tasks found. Add some tasks to get started!</p>';
       return;
     }
 
-    this.tasksList.replaceChildren(...tasks.map((task) => {
+    this.tasksListWeek.replaceChildren(...tasks.filter(isThisWeek).sort(dateSort).map(this.buildCardItem.bind(this)));
+    this.tasksListMonth.replaceChildren(...tasks.filter(isThisMonth).sort(dateSort).map(this.buildCardItem.bind(this)));
+    this.tasksListRest.replaceChildren(...tasks.filter(task => !isOverdue(task) && !isThisWeek(task) && !isThisMonth(task)).sort(dateSort).map(this.buildCardItem.bind(this)));
+  }
+
+  private buildCardItem(task: TaskItem): HTMLDivElement {
       const createDate = new Date(task.created_at).toLocaleDateString();
       const finishDate = task.finish_by !== 'NULL' ? new Date(task.finish_by).toLocaleDateString() : '';
       const completedDate = task.completed_at ? new Date(task.completed_at).toLocaleDateString() : '';
       const taskCard = document.createElement('div');
-      taskCard.className = 'task-card';
+      if (task.completed) {
+        taskCard.className = 'task-card task-completed';
+      } else {
+        taskCard.className = 'task-card';
+      }
       taskCard.addEventListener('click', (e) => this.handleClicks(e, task));
       taskCard.innerHTML = `
-        <div>
-          <div class="task-name">${this.escapeHtml(task.title)}</div>
-          <div class="task-finish-by">Finish by: ${this.escapeHtml(finishDate)}</div>
-          ${ completedDate ? `<div class="task-completed-at">Completed at: ${this.escapeHtml(completedDate)}</div>` : ''}
-          <div class="task-date">Added: ${createDate}</div>
-        </div>
-        <div>
-          <div class="task-buttons">
-            <button id="btn-edit" class="btn-task btn-edit">Edit</button>
-            <button id="btn-delete" class="btn-task btn-delete">Delete</button>
-            <button id="btn-done" class="btn-task btn-done">Done</button>
+          <div class="task-info">
+            <div class="task-status ${isOverdue(task) && !task.completed ? 'task-overdue' : ''}">${isOverdue(task) && !task.completed ? 'Overdue' : ''}${task.completed ? 'Done' : ''}</div>
+            <div class="task-name">${this.escapeHtml(task.title)}</div>
           </div>
-          <div id="edit-area" class="edit-area"></div>
-        </div>
+          <div class="task-dates">
+            <div class="task-date">Added: ${createDate}</div>
+            <div class="task-finish-by">Finish by: ${this.escapeHtml(finishDate)}</div>
+            <div class="task-completed-at">${ completedDate ? `Completed at: ${this.escapeHtml(completedDate)}` : ''}</div>
+          </div>
+          <div class="task-buttons">
+            <button type="button" id="btn-edit" class="btn-task btn-edit">Edit</button>
+            <button type="button" id="btn-done" class="btn-task btn-done">Done</button>
+            <button type="button" id="btn-delete" class="btn-task btn-delete">Delete</button>
+          </div>
+          <div id="task-edit-area" class="task-edit-area"></div>
       `;
 
       return taskCard;
-    }));
+  }
+
+  private buildEditArea(task: TaskItem): HTMLFormElement {
+    const finishDate = task.finish_by !== 'NULL' ? new Date(task.finish_by).toISOString().split('T')[0] : '';
+    const editForm = document.createElement('form') as HTMLFormElement;
+    editForm.id = 'editTaskForm';
+
+    editForm.innerHTML = `
+        <div class="form-group">
+          <label for="edit-task-name">Task Name:</label>
+          <input type="text" id="edit-task-name" name="edit-task-name" required value="${this.escapeHtml(task.title)}">
+        </div>
+        <div class="form-group">
+          <label for="edit-task-finishBy">Finish By:</label>
+          <input type="date" id="edit-task-finishBy" name="edit-task-finishBy" value="${finishDate}">
+        </div>
+        <button type="button" id="btn-cancel" class="btn-task btn-cancel">Cancel</button>
+        <button type="button" id="btn-save" class="btn-task btn-save">Save</button>
+    `;
+
+    return editForm;
   }
 
   private showError(message: string): void {
