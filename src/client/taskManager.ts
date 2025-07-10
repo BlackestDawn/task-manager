@@ -5,24 +5,24 @@ import {
   ApiResponse,
   ApiErrorResponse
 } from "./types";
-import { isOverdue, isThisWeek, isThisMonth, dateSort } from "./utils";
+import { isOverdue, isThisWeek, isThisMonth, dateSort, elementNullCheck } from "./utils";
 
 export default class TaskManager {
   private apiUrl = '/api';
   private form: HTMLFormElement;
-  private tasksListWeek: HTMLElement;
-  private tasksListMonth: HTMLElement;
-  private tasksListRest: HTMLElement;
-  private loading: HTMLElement;
-  private error: HTMLElement;
+  private tasksListWeek: HTMLDivElement;
+  private tasksListMonth: HTMLDivElement;
+  private tasksListRest: HTMLDivElement;
+  private loading: HTMLDivElement;
+  private error: HTMLDivElement;
 
   constructor() {
-    this.form = document.getElementById('addTaskForm') as HTMLFormElement;
-    this.tasksListWeek = document.getElementById('tasksListWeek') as HTMLElement;
-    this.tasksListMonth = document.getElementById('tasksListMonth') as HTMLElement;
-    this.tasksListRest = document.getElementById('tasksListRest') as HTMLElement;
-    this.loading = document.getElementById('loading') as HTMLElement;
-    this.error = document.getElementById('error') as HTMLElement;
+    this.form = elementNullCheck<HTMLFormElement>('#addTaskForm');
+    this.tasksListWeek = elementNullCheck<HTMLDivElement>('#tasksListWeek');
+    this.tasksListMonth = elementNullCheck<HTMLDivElement>('#tasksListMonth');
+    this.tasksListRest = elementNullCheck<HTMLDivElement>('#tasksListRest');
+    this.loading = elementNullCheck<HTMLDivElement>('#loading');
+    this.error = elementNullCheck<HTMLDivElement>('#error');
 
     this.init();
   }
@@ -88,51 +88,43 @@ export default class TaskManager {
 
   private async handleClicks(e: Event, task: TaskItem): Promise<void> {
     if (!task) return;
-    const target = e.target as HTMLElement;
-    switch (target.id) {
+    const eventGen = e.target as HTMLElement;
+    const eventCatcher = e.currentTarget as HTMLElement;
+    if (!eventGen || !eventCatcher) return;
+
+    switch (eventGen.id) {
       case 'btn-edit':
-        await this.handleEditStart(e, task);
+        await this.handleEditStart(task, eventCatcher);
         break;
       case 'btn-cancel':
-        await this.handleEditCancel(e, task);
+        await this.handleEditCancel(eventCatcher);
         break;
       case 'btn-save':
-        await this.handleEditSave(e, task);
+        await this.handleEditSave(task, eventCatcher);
         break;
       case 'btn-delete':
-        await this.handleTaskDelete(e, task);
+        await this.handleTaskDelete(task);
         break;
       case 'btn-done':
-        await this.handleTaskDone(e, task);
+        await this.handleTaskDone(task);
         break;
       default:
         break;
       }
   }
 
-  private async handleEditStart(e: Event, task: TaskItem): Promise<void> {
-    const cardArea = e.currentTarget as HTMLElement;
-    if (!cardArea) return;
-    const editArea = cardArea.querySelector(`#task-edit-area`) as HTMLDivElement;
-    if (!editArea) return;
-
+  private handleEditStart(task: TaskItem, eventCatcher: HTMLElement): void {
+    const editArea = elementNullCheck<HTMLDivElement>(`#task-edit-area`, eventCatcher);
     editArea.replaceChildren(this.buildEditArea(task));
   }
 
-  private async handleEditCancel(e: Event, task: TaskItem): Promise<void> {
-    const cardArea = e.currentTarget as HTMLElement;
-    if (!cardArea) return;
-    const editArea = cardArea.querySelector(`#task-edit-area`) as HTMLDivElement;
-    if (!editArea) return;
-
+  private handleEditCancel(eventCatcher: HTMLElement): void {
+    const editArea = elementNullCheck<HTMLDivElement>(`#task-edit-area`, eventCatcher);
     editArea.innerHTML = '';
   }
 
-  private async handleEditSave(e: Event, task: TaskItem): Promise<void> {
-    const cardArea = e.currentTarget as HTMLElement;
-    if (!cardArea) return;
-    const editForm = cardArea.querySelector(`#editTaskForm`) as HTMLFormElement;
-    if (!editForm) return;
+  private async handleEditSave(task: TaskItem, eventCatcher: HTMLElement): Promise<void> {
+    const editForm = elementNullCheck<HTMLFormElement>(`#editTaskForm`, eventCatcher);
 
     const formData = new FormData(editForm);
     const taskData: TaskItemUpdateRequest = {
@@ -160,11 +152,11 @@ export default class TaskManager {
       this.showError("Network error. Please try again.");
       console.error('Error:', error);
     } finally {
-      this.handleEditCancel(e, task);
+      this.handleEditCancel(eventCatcher);
     }
   }
 
-  private async handleTaskDelete(e: Event, task: TaskItem): Promise<void> {
+  private async handleTaskDelete(task: TaskItem): Promise<void> {
     try {
       const response = await fetch(`${this.apiUrl}/tasks/${task.id}`, {
         method: 'DELETE'
@@ -182,7 +174,7 @@ export default class TaskManager {
     }
   }
 
-  private async handleTaskDone(e: Event, task: TaskItem): Promise<void> {
+  private async handleTaskDone(task: TaskItem): Promise<void> {
     try {
       const response = await fetch(`${this.apiUrl}/tasks/${task.id}/done`, {
         method: 'POST'
@@ -225,12 +217,12 @@ export default class TaskManager {
       taskCard.innerHTML = `
           <div class="task-info">
             <div class="task-status ${isOverdue(task) && !task.completed ? 'task-overdue' : ''}">${isOverdue(task) && !task.completed ? 'Overdue' : ''}${task.completed ? 'Done' : ''}</div>
-            <div class="task-name">${this.escapeHtml(task.title)}</div>
+            <div class="task-name">${task.title}</div>
           </div>
           <div class="task-dates">
             <div class="task-date">Added: ${createDate}</div>
-            <div class="task-finish-by">Finish by: ${this.escapeHtml(finishDate)}</div>
-            <div class="task-completed-at">${ completedDate ? `Completed at: ${this.escapeHtml(completedDate)}` : ''}</div>
+            <div class="task-finish-by">Finish by: ${finishDate}</div>
+            <div class="task-completed-at">${ completedDate ? `Completed on: ${completedDate}` : ''}</div>
           </div>
           <div class="task-buttons">
             <button type="button" id="btn-edit" class="btn-task btn-edit">Edit</button>
@@ -251,7 +243,7 @@ export default class TaskManager {
     editForm.innerHTML = `
         <div class="form-group">
           <label for="edit-task-name">Task Name:</label>
-          <input type="text" id="edit-task-name" name="edit-task-name" required value="${this.escapeHtml(task.title)}">
+          <input type="text" id="edit-task-name" name="edit-task-name" required value="${task.title}">
         </div>
         <div class="form-group">
           <label for="edit-task-finishBy">Finish By:</label>

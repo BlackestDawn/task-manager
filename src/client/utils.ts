@@ -30,3 +30,9 @@ export function dateSort(a: TaskItem, b: TaskItem): number {
   const dateB = new Date(b.finish_by);
   return dateA.getTime() - dateB.getTime();
 }
+
+export function elementNullCheck<T extends HTMLElement>(selector: string, searchStart?: HTMLElement): T {
+  const el = (searchStart || document).querySelector<T>(selector);
+  if (!el) throw new Error(`${selector} not found.`);
+  return el;
+}
