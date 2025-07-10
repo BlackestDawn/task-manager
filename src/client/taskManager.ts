@@ -7,7 +7,7 @@ import {
 } from "./types";
 import { isOverdue, isThisWeek, isThisMonth, dateSort } from "./utils";
 
-export class TaskManager {
+export default class TaskManager {
   private apiUrl = '/api';
   private form: HTMLFormElement;
   private tasksListWeek: HTMLElement;
