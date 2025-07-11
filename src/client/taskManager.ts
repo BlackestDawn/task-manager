@@ -94,10 +94,10 @@ export default class TaskManager {
 
     switch (eventGen.id) {
       case 'btn-edit':
-        await this.handleEditStart(task, eventCatcher);
+        this.handleEditStart(task, eventCatcher);
         break;
       case 'btn-cancel':
-        await this.handleEditCancel(eventCatcher);
+        this.handleEditCancel(eventCatcher);
         break;
       case 'btn-save':
         await this.handleEditSave(task, eventCatcher);

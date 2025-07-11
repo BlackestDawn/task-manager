@@ -32,12 +32,6 @@ const server = Bun.serve({
       POST: withConfig(cfg, handlerResetDb),
     }
   },
-  // async fetch(req) {
-  //   const url = new URL(req.url);
-  //   const path = url.pathname;
-
-  //   ret
-  // },
   error(error) {
     return errorHandlingMiddleware(cfg, error);
   }
