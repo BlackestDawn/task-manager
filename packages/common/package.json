@@ -1,0 +1,19 @@
+{
+  "name": "@task-manager/common",
+  "module": "index.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node --format esm --splitting",
+    "dev": "bun --watch src/index.ts",
+    "clean": "rm -rf dist"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

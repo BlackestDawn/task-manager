@@ -1,16 +1,46 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
+    // Environment setup & latest features
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Bundler mode
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "allowSyntheticDefaultImports": true,
+    // "allowImportingTsExtensions": true,
+    // "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": true,
+    // "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // Best practices
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
-    "types": ["bun-types"],
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    // "declaration": true,
+    // "declarationMap": true,
+    "sourceMap": true,
+
+    // Some stricter flags (disabled by default)
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Path resolution
+    "baseUrl": "./",
+    "paths": {
+      "@backend/*": ["./packages/backend/*"],
+      "@frontend/*": ["./packages/frontend/*"],
+      "@common/*": ["./packages/common/*"]
+    }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/client/app.js"]
+  "exclude": ["node_modules", "dist"]
 }

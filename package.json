@@ -1,20 +1,29 @@
 {
-  "name": "task-list",
-  "version": "1.0.0",
-  "description": "A somewhat simple tasks list with permanent storage",
+  "name": "task-manager",
+  "description": "Task Manager",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
-    "dev": "bun run build:client && bun run --watch src/server/index.ts",
-    "dev:watch": "concurrently \"bun run build:client --watch\" \"bun run --watch src/server/index.ts\"",
-    "build": "bun run build:client && bun build src/server/index.ts --outdir dist --target bun",
-    "build:client": "bun build src/client/app.ts --outdir src/client --outfile app.js --target browser",
-    "start": "bun run dist/index.js",
-    "db:migrate": "bun run src/server/database/migrate.ts"
+    "clean": "bun --filter '*' clean",
+    "build:backend": "bun --filter @task-manager/backend build",
+    "build:frontend": "bun --filter @task-manager/frontend build",
+    "build:common": "bun --filter @task-manager/common build",
+    "build": "concurrently 'bun run build:common' 'bun run build:backend' 'bun run build:frontend'",
+    "dev:backend": "bun --filter @task-manager/backend dev",
+    "dev:frontend": "bun --filter @task-manager/frontend dev",
+    "dev:common": "bun --filter @task-manager/common dev",
+    "dev": "concurrently 'bun run build:common' 'bun run dev:backend' 'bun run dev:frontend'",
+    "generate": "bun --filter @task-manager/backend db:generate",
+    "migrate": "bun --filter @task-manager/backend db:migrate"
   },
-  "dependencies": {
-    "bun": "^1.0.0"
-  },
+  "module": "index.ts",
+  "type": "module",
   "devDependencies": {
-    "@types/bun": "^1.0.0",
-    "concurrently": "^8.2.0"
+    "@types/bun": "latest",
+    "concurrently": "^9.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }

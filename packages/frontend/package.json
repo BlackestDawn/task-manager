@@ -1,0 +1,21 @@
+{
+  "name": "@task-manager/frontend",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --base ./",
+    "build": "vite build",
+    "preview": "vite preview",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@task-manager/common": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "vite": "^7.0.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

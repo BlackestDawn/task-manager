@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks manager</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="./src/main.ts" type="module"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tasks manager</h1>
+        </header>
+
+        <main>
+            <section class="form-section">
+                <h2>Add New Task</h2>
+                <form id="addTaskForm">
+                    <div class="form-group">
+                        <label for="task-name">Task:</label>
+                        <input type="text" id="task-name" name="task-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-finishBy">Finish by:</label>
+                        <input type="date" id="task-finishBy" name="task-finishBy">
+                    </div>
+                    <button type="button" id="btn-add-task">Add Task</button>
+                </form>
+            </section>
+
+            <section class="tasks-section">
+                <h2>Tasks</h2>
+                <div id="loading" class="loading">Loading...</div>
+                <div id="error" class="error"></div>
+                <h3>Complete this week</h3>
+                <div id="tasksListWeek" class="tasks-list"></div>
+                <h3>Complete this month</h3>
+                <div id="tasksListMonth" class="tasks-list"></div>
+                <h3>Future tasks</h3>
+                <div id="tasksListRest" class="tasks-list"></div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
