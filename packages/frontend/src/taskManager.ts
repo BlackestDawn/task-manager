@@ -89,7 +89,7 @@ export default class TaskManager {
     }
   }
 
-  private async handleClicks(e: Event, task: TaskItem): Promise<void> {
+  private async handleCardClicks(e: Event, task: TaskItem): Promise<void> {
     if (!task) return;
     const eventGen = e.target as HTMLElement;
     const eventCatcher = e.currentTarget as HTMLElement;
@@ -209,35 +209,36 @@ export default class TaskManager {
   }
 
   private buildCardItem(task: TaskItem): HTMLDivElement {
-      const createDate = new Date(task.createdAt).toLocaleDateString();
-      const finishDate = task.finishBy ? new Date(task.finishBy).toLocaleDateString() : 'Undetermined';
-      const completedDate = task.completedAt ? new Date(task.completedAt).toLocaleDateString() : '';
-      const taskCard = document.createElement('div');
-      if (task.completed) {
-        taskCard.className = 'task-card task-completed';
-      } else {
-        taskCard.className = 'task-card';
-      }
-      taskCard.addEventListener('click', (e) => this.handleClicks(e, task));
-      taskCard.innerHTML = `
-          <div class="task-info">
-            <div class="task-status ${isOverdue(task) && !task.completed ? 'task-overdue' : ''}">${isOverdue(task) && !task.completed ? 'Overdue' : ''}${task.completed ? 'Done' : ''}</div>
-            <div class="task-name">${task.title}</div>
-          </div>
-          <div class="task-dates">
-            <div class="task-date">Added: ${createDate}</div>
-            <div class="task-finish-by">Finish by: ${finishDate}</div>
-            <div class="task-completed-at">${ completedDate ? `Completed on: ${completedDate}` : ''}</div>
-          </div>
-          <div class="task-buttons">
-            <button type="button" id="btn-edit" class="btn-task btn-edit">Edit</button>
-            <button type="button" id="btn-done" class="btn-task btn-done">Done</button>
-            <button type="button" id="btn-delete" class="btn-task btn-delete">Delete</button>
-          </div>
-          <div id="task-edit-area" class="task-edit-area"></div>
-      `;
+    console.log(`task: ${JSON.stringify(task)}`);
 
-      return taskCard;
+    const createDate = new Date(task.createdAt).toLocaleDateString();
+    const finishDate = task.finishBy ? new Date(task.finishBy).toLocaleDateString() : 'Undetermined';
+    const completedDate = task.completedAt ? new Date(task.completedAt).toLocaleDateString() : '';
+    const taskCard = document.createElement('div');
+    if (task.completed) {
+      taskCard.className = 'task-card task-completed';
+    } else {
+      taskCard.className = 'task-card';
+    }
+    taskCard.addEventListener('click', (e) => this.handleCardClicks(e, task));
+    taskCard.innerHTML = `
+        <div class="task-info">
+          <div class="task-status ${isOverdue(task) && !task.completed ? 'task-overdue' : ''}">${isOverdue(task) && !task.completed ? 'Overdue' : ''}${task.completed ? 'Done' : ''}</div>
+          <div class="task-name">${task.title}</div>
+        </div>
+        <div class="task-dates">
+          <div class="task-date">Added: ${createDate}</div>
+          <div class="task-finish-by">Finish by: ${finishDate}</div>
+          <div class="task-completed-at">${ completedDate ? `Completed on: ${completedDate}` : ''}</div>
+        </div>
+        <div class="task-buttons">
+          <button type="button" id="btn-edit" class="btn-task btn-edit">Edit</button>
+          <button type="button" id="btn-done" class="btn-task btn-done">Done</button>
+          <button type="button" id="btn-delete" class="btn-task btn-delete">Delete</button>
+        </div>
+        <div id="task-edit-area" class="task-edit-area"></div>
+    `;
+    return taskCard;
   }
 
   private buildEditArea(task: TaskItem): HTMLFormElement {
