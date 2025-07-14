@@ -14,7 +14,7 @@ export async function handlerGetTasks(cfg: ApiConfig, req: BunRequest) {
 
 export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest) {
   const body = await req.json() as CreateTaskRequest;
-  const task = createTask(cfg.db, body);
+  const task = await createTask(cfg.db, body);
   return respondWithJSON(201, task);
 }
 
@@ -25,7 +25,7 @@ export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest) {
   }
   const params = await req.json() as UpdateTaskRequest;
   params.id = taskId;
-  const task = updateTask(cfg.db, params);
+  const task = await updateTask(cfg.db, params);
   return respondWithJSON(200, task);
 }
 
@@ -34,7 +34,7 @@ export async function handlerDeleteTask(cfg: ApiConfig, req: BunRequest) {
   if (!taskId) {
     throw new BadRequestError("Invalid task ID");
   }
-  deleteTask(cfg.db, taskId);
+  await deleteTask(cfg.db, taskId);
   return respondWithJSON(204, {});
 }
 
@@ -43,7 +43,7 @@ export async function handlerGetTaskById(cfg: ApiConfig, req: BunRequest) {
   if (!taskId) {
     throw new BadRequestError("Invalid task ID");
   }
-  const task = getTaskById(cfg.db, taskId);
+  const task = await getTaskById(cfg.db, taskId);
   return respondWithJSON(200, task);
 }
 
@@ -52,7 +52,7 @@ export async function handlerMarkDone(cfg: ApiConfig, req: BunRequest) {
   if (!taskId) {
     throw new BadRequestError("Invalid task ID");
   }
-  const existingTask = getTaskById(cfg.db, taskId);
-  if (!(await existingTask).completed) markDone(cfg.db, taskId);
+  const existingTask = await getTaskById(cfg.db, taskId);
+  if (!existingTask.completed) await markDone(cfg.db, taskId);
   return respondWithJSON(204, {});
 }
