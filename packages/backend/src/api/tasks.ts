@@ -7,8 +7,6 @@ import { createTask, getTasks, updateTask, deleteTask, getTaskById, markDone } f
 
 export async function handlerGetTasks(cfg: ApiConfig, req: BunRequest) {
   const tasks = await getTasks(cfg.db);
-  // console.log(`returning ${tasks.length} tasks`);
-
   return respondWithJSON(200, tasks);
 }
 
