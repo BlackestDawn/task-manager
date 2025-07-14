@@ -4,7 +4,7 @@ import type {
   UpdateTaskRequest,
   ApiErrorResponse
 } from "@task-manager/common";
-import { isOverdue, isThisWeek, isThisMonth, dateSort, elementNullCheck } from "./utils";
+import { isOverdue, isThisWeek, isThisMonth, dateSort, elementNullCheck, justDate } from "./utils";
 
 export default class TaskManager {
   private apiUrl: string ;
@@ -211,9 +211,9 @@ export default class TaskManager {
   private buildCardItem(task: TaskItem): HTMLDivElement {
     console.log(`task: ${JSON.stringify(task)}`);
 
-    const createDate = new Date(task.createdAt).toLocaleDateString();
-    const finishDate = task.finishBy ? new Date(task.finishBy).toLocaleDateString() : 'Undetermined';
-    const completedDate = task.completedAt ? new Date(task.completedAt).toLocaleDateString() : '';
+    const createDate = justDate(task.createdAt);
+    const finishDate = task.finishBy ? justDate(task.finishBy) : 'Undetermined';
+    const completedDate = task.completedAt ? justDate(task.completedAt) : '';
     const taskCard = document.createElement('div');
     if (task.completed) {
       taskCard.className = 'task-card task-completed';
@@ -242,7 +242,7 @@ export default class TaskManager {
   }
 
   private buildEditArea(task: TaskItem): HTMLFormElement {
-    const finishDate = task.finishBy ? new Date(task.finishBy).toISOString().split('T')[0] : '';
+    const finishDate = task.finishBy ? justDate(task.finishBy) : '';
     const editForm = document.createElement('form') as HTMLFormElement;
     editForm.id = 'editTaskForm';
 

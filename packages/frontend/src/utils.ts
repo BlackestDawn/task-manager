@@ -42,3 +42,7 @@ export function escapeHtml(text: string): string {
   div.textContent = text;
   return div.innerHTML;
 }
+
+export function justDate(date: Date | string): string {
+  return new Date(date).toLocaleDateString();
+}
