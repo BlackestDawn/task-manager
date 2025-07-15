@@ -8,5 +8,11 @@ export const tasks = pgTable("tasks", {
   description: varchar("description", { length: 1024 }),
   finishBy: timestamp("finish_by"),
   completed: boolean("completed").default(false),
-  completedAt: timestamp("completed_at")
+  completedAt: timestamp("completed_at"),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+});
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 256 }).notNull(),
 });

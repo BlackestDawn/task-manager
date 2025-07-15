@@ -1,5 +1,5 @@
 import { type ApiConfig } from "../config";
-import { respondWithJSON } from "../utils/response";
+import { respondWithJSON } from "../lib/utils/response";
 import { UserForbiddenError } from "@task-manager/common";
 import { resetDb } from "../db/queries/admin";
 

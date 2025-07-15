@@ -8,6 +8,13 @@
       "when": 1752348040723,
       "tag": "0000_slippery_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752601766938,
+      "tag": "0001_first_skaar",
+      "breakpoints": true
     }
   ]
 }
