@@ -1,7 +1,7 @@
-import { envOrThrow } from "@task-manager/common";
+import { envOrDefault, envOrThrow } from "@task-manager/common";
 import { newDBConn } from "./db";
 
-const portNum = parseInt(envOrThrow("PORT"));
+const portNum = parseInt(envOrDefault("PORT", "3000"));
 const dbURL = envOrThrow("DB_URL");
 const dbConn = newDBConn(dbURL);
 

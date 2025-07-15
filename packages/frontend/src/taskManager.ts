@@ -17,7 +17,7 @@ export default class TaskManager {
   private error: HTMLDivElement;
 
   constructor() {
-    this.apiUrl = import.meta.env.VITE_API_URL || '/api';
+    this.apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
     this.form = elementNullCheck<HTMLFormElement>('#addTaskForm');
     this.tasksListWeek = elementNullCheck<HTMLDivElement>('#tasksListWeek');
     this.tasksListMonth = elementNullCheck<HTMLDivElement>('#tasksListMonth');
