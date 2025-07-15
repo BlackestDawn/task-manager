@@ -1,8 +1,9 @@
 import { type ApiConfig } from "../config";
 import { respondWithJSON } from "../utils/response";
-import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
 import type { BunRequest } from "bun";
 import type { TaskItem, UpdateTaskRequest, CreateTaskRequest } from "@task-manager/common";
+import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
+import { validateCreateTaskRequest, validateUpdateTaskRequest } from "@task-manager/common";
 import { createTask, getTasks, updateTask, deleteTask, getTaskById, markDone } from "../db/queries/tasks";
 
 export async function handlerGetTasks(cfg: ApiConfig, req: BunRequest) {
@@ -11,8 +12,8 @@ export async function handlerGetTasks(cfg: ApiConfig, req: BunRequest) {
 }
 
 export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest) {
-  const body = await req.json() as CreateTaskRequest;
-  const task = await createTask(cfg.db, body);
+  const params = await req.json() as CreateTaskRequest;
+  const task = await createTask(cfg.db, validateCreateTaskRequest(params));
   return respondWithJSON(201, task);
 }
 
@@ -23,7 +24,7 @@ export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest) {
   }
   const params = await req.json() as UpdateTaskRequest;
   params.id = taskId;
-  const task = await updateTask(cfg.db, params);
+  const task = await updateTask(cfg.db, validateUpdateTaskRequest(params));
   return respondWithJSON(200, task);
 }
 

@@ -1,10 +1,11 @@
-import type {
-  TaskItem,
-  CreateTaskRequest,
-  UpdateTaskRequest,
-  ApiErrorResponse
+import {
+  type TaskItem,
+  type CreateTaskRequest,
+  type UpdateTaskRequest,
+  type ApiErrorResponse,
+  validateTaskItem
 } from "@task-manager/common";
-import { isOverdue, isThisWeek, isThisMonth, dateSort, elementNullCheck, justDate } from "./utils";
+import { isOverdue, isThisWeek, isThisMonth, isFutureTask, sortByFinishDate, elementNullCheck, justDate } from "./utils";
 
 export default class TaskManager {
   private apiUrl: string ;
@@ -38,10 +39,13 @@ export default class TaskManager {
 
     const formData = new FormData(this.form);
     const taskName = formData.get('task-name') as string;
-    const taskFinishBy = formData.get('task-finishBy') as string;
+    // const taskDescription = formData.get('task-description') as string;
+    const taskDescription = '';
+    const taskFinishBy = justDate(formData.get('task-finishBy') as string);
     const taskData: CreateTaskRequest = {
       title: taskName,
-      finishBy: taskFinishBy ? new Date(taskFinishBy) : undefined
+      description: taskDescription,
+      finishBy: new Date(taskFinishBy)
     };
 
     try {
@@ -131,11 +135,14 @@ export default class TaskManager {
 
     const formData = new FormData(editForm);
     const taskName = formData.get('edit-task-name') as string;
-    const taskFinishBy = formData.get('edit-task-finishBy') as string;
+    // const taskDescription = formData.get('edit-task-description') as string;
+    const taskDescription = '';
+    const taskFinishBy = justDate(formData.get('edit-task-finishBy') as string);
     const taskData: UpdateTaskRequest = {
       id: task.id,
       title: taskName,
-      finishBy: taskFinishBy ? new Date(taskFinishBy) : undefined
+      description: taskDescription,
+      finishBy: new Date(taskFinishBy)
     };
 
     try {
@@ -198,19 +205,28 @@ export default class TaskManager {
   }
 
   private rendertasks(tasks: TaskItem[]): void {
+    const loadingDiv = elementNullCheck<HTMLDivElement>('#loading');
     if (tasks.length === 0) {
-      this.tasksListRest.innerHTML = '<p>No tasks found. Add some tasks to get started!</p>';
+      loadingDiv.innerHTML = '<p>No tasks found. Add some tasks to get started!</p>';
+      this.tasksListWeek.style.display = 'none';
+      this.tasksListMonth.style.display = 'none';
+      this.tasksListRest.style.display = 'none';
       return;
     }
 
-    this.tasksListWeek.replaceChildren(...tasks.filter(isThisWeek).sort(dateSort).map(this.buildCardItem.bind(this)));
-    this.tasksListMonth.replaceChildren(...tasks.filter(isThisMonth).sort(dateSort).map(this.buildCardItem.bind(this)));
-    this.tasksListRest.replaceChildren(...tasks.filter(task => !isOverdue(task) && !isThisWeek(task) && !isThisMonth(task)).sort(dateSort).map(this.buildCardItem.bind(this)));
+    this.tasksListWeek.innerHTML = '';
+    this.tasksListMonth.innerHTML = '';
+    this.tasksListRest.innerHTML = '';
+
+    tasks.map(validateTaskItem).sort(sortByFinishDate).forEach((task) => {
+      const taskCard = this.buildCardItem(task);
+      if (isThisWeek(task)) this.tasksListWeek.appendChild(taskCard);
+      if (isThisMonth(task)) this.tasksListMonth.appendChild(taskCard);
+      if (isFutureTask(task)) this.tasksListRest.appendChild(taskCard);
+    });
   }
 
   private buildCardItem(task: TaskItem): HTMLDivElement {
-    console.log(`task: ${JSON.stringify(task)}`);
-
     const createDate = justDate(task.createdAt);
     const finishDate = task.finishBy ? justDate(task.finishBy) : 'Undetermined';
     const completedDate = task.completedAt ? justDate(task.completedAt) : '';
@@ -223,7 +239,7 @@ export default class TaskManager {
     taskCard.addEventListener('click', (e) => this.handleCardClicks(e, task));
     taskCard.innerHTML = `
         <div class="task-info">
-          <div class="task-status ${isOverdue(task) && !task.completed ? 'task-overdue' : ''}">${isOverdue(task) && !task.completed ? 'Overdue' : ''}${task.completed ? 'Done' : ''}</div>
+          <div class="task-status ${isOverdue(task) ? 'task-overdue' : ''}">${isOverdue(task) ? 'Overdue' : ''}${task.completed ? 'Done' : ''}</div>
           <div class="task-name">${task.title}</div>
         </div>
         <div class="task-dates">

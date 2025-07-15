@@ -3,29 +3,21 @@ export interface TaskItem {
   createdAt: Date;
   updatedAt: Date;
   title: string;
-  description?: string;
-  finishBy?: Date;
+  description: string | null;
+  finishBy: Date | null;
   completed: boolean;
-  completedAt?: Date;
+  completedAt: Date | null;
 }
 
 export interface CreateTaskRequest {
   title: string;
-  description?: string;
-  finishBy?: Date;
+  description: string | null;
+  finishBy: Date | null;
 }
 
 export interface UpdateTaskRequest {
   id: string;
-  title?: string;
-  description?: string;
-  finishBy?: Date;
-}
-
-export interface ApiResponse<T> {
-  data: T;
-}
-
-export interface ApiErrorResponse {
-  error: string;
+  title: string;
+  description: string | null;
+  finishBy: Date | null;
 }
