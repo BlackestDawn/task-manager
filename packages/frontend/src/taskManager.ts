@@ -39,8 +39,7 @@ export default class TaskManager {
 
     const formData = new FormData(this.form);
     const taskName = formData.get('task-name') as string;
-    // const taskDescription = formData.get('task-description') as string;
-    const taskDescription = '';
+    const taskDescription = formData.get('task-description') as string;
     const taskFinishBy = justDate(formData.get('task-finishBy') as string);
     const taskData: CreateTaskRequest = {
       title: taskName,
@@ -266,6 +265,7 @@ export default class TaskManager {
         <div class="task-info">
           <div class="task-status ${isOverdue(task) ? 'task-overdue' : ''}">${isOverdue(task) ? 'Overdue' : ''}${task.completed ? 'Done' : ''}</div>
           <div class="task-name">${task.title}</div>
+          <div class="task-description">${task.description ? task.description : ''}</div>
         </div>
         <div class="task-dates">
           <div class="task-date">Added: ${createDate}</div>
@@ -273,9 +273,9 @@ export default class TaskManager {
           <div class="task-completed-at">${ completedDate ? `Completed on: ${completedDate}` : ''}</div>
         </div>
         <div class="task-buttons">
-          <button type="button" id="btn-edit" class="btn-task btn-edit">Edit</button>
-          <button type="button" id="btn-done" class="btn-task btn-done">Done</button>
-          <button type="button" id="btn-delete" class="btn-task btn-delete">Delete</button>
+          <button type="button" id="btn-edit" class="btn-task btn-edit" aria-label="Edit task">Edit</button>
+          <button type="button" id="btn-done" class="btn-task btn-done" aria-label="Mark task done">Done</button>
+          <button type="button" id="btn-delete" class="btn-task btn-delete" aria-label="Delete task">Delete</button>
         </div>
         <div id="task-edit-area" class="task-edit-area"></div>
     `;
@@ -290,11 +290,15 @@ export default class TaskManager {
     editForm.innerHTML = `
         <div class="form-group">
           <label for="edit-task-name">Task Name:</label>
-          <input type="text" id="edit-task-name" name="edit-task-name" required value="${task.title}">
+          <input type="text" id="edit-task-name" name="edit-task-name" required value="${task.title}" aria-label="New task name">
+        </div>
+        <div class="form-group">
+            <label for="task-description">Task description:</label>
+            <input type="text" id="edit-task-description" name="task-description" value="${task.description}" aria-label="New task description">
         </div>
         <div class="form-group">
           <label for="edit-task-finishBy">Finish By:</label>
-          <input type="date" id="edit-task-finishBy" name="edit-task-finishBy" value="${finishDate}">
+          <input type="date" id="edit-task-finishBy" name="edit-task-finishBy" value="${finishDate}" aria-label="New finish date">
         </div>
         <button type="button" id="btn-cancel" class="btn-task btn-cancel">Cancel</button>
         <button type="button" id="btn-save" class="btn-task btn-save">Save</button>
