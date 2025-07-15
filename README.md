@@ -1,5 +1,6 @@
 # Task manager
 
+Work in progress.
 Simple task manager with support for multiple users written in Typescript. Done as capstone project för a frontend development course, also added in backend development to show my potential for fullstack development and working with multiple packages in a monorepo.
 
 ## Installation
@@ -21,3 +22,4 @@ Go to <http://localhost:5173/> for its web interface.
 * [PostgreSQL](https://www.postgresql.org) As database
 * [Drizzle-ORM](https://orm.drizzle.team/) For database connection and management
 * [Vite](https://vite.dev/) For frontend testing and bundling
+* [Zod](https://zod.dev) For type validation and type enforcement
