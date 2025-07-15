@@ -49,7 +49,6 @@ export default class TaskManager {
     };
 
     try {
-      console.log(`creating: ${JSON.stringify(taskData)}`);
       const response = await fetch(`${this.apiUrl}/tasks`, {
         method: 'POST',
         headers: {
@@ -94,6 +93,8 @@ export default class TaskManager {
   }
 
   private async handleCardClicks(e: Event, task: TaskItem): Promise<void> {
+    e.preventDefault();
+
     if (!task) return;
     const eventGen = e.target as HTMLElement;
     const eventCatcher = e.currentTarget as HTMLElement;
@@ -214,16 +215,40 @@ export default class TaskManager {
       return;
     }
 
-    this.tasksListWeek.innerHTML = '';
-    this.tasksListMonth.innerHTML = '';
-    this.tasksListRest.innerHTML = '';
+    let weekList: HTMLDivElement[] = [];
+    let monthList: HTMLDivElement[] = [];
+    let restList: HTMLDivElement[] = [];
 
     tasks.map(validateTaskItem).sort(sortByFinishDate).forEach((task) => {
       const taskCard = this.buildCardItem(task);
-      if (isThisWeek(task)) this.tasksListWeek.appendChild(taskCard);
-      if (isThisMonth(task)) this.tasksListMonth.appendChild(taskCard);
-      if (isFutureTask(task)) this.tasksListRest.appendChild(taskCard);
+      if (isThisWeek(task)) weekList.push(taskCard);
+      if (isThisMonth(task)) monthList.push(taskCard);
+      if (isFutureTask(task)) restList.push(taskCard);
     });
+
+    if (weekList.length > 0) {
+      this.tasksListWeek.className = 'tasks-list';
+      this.tasksListWeek.replaceChildren(...weekList);
+    }  else {
+      this.tasksListWeek.className = 'tasks-list-empty';
+      this.tasksListWeek.textContent = 'No tasks to complete this week';
+    }
+
+    if (monthList.length > 0) {
+      this.tasksListMonth.className = 'tasks-list';
+      this.tasksListMonth.replaceChildren(...monthList);
+    } else {
+      this.tasksListMonth.className = 'tasks-list-empty';
+      this.tasksListMonth.textContent = 'No tasks to complete this month';
+    }
+
+    if (restList.length > 0) {
+      this.tasksListRest.className = 'tasks-list';
+      this.tasksListRest.replaceChildren(...restList);
+    } else {
+      this.tasksListRest.className = 'tasks-list-empty';
+      this.tasksListRest.textContent = 'No tasks to complete in the near future';
+    }
   }
 
   private buildCardItem(task: TaskItem): HTMLDivElement {
