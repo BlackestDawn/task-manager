@@ -5,7 +5,7 @@ import {
   type ApiErrorResponse,
   validateTaskItem
 } from "@task-manager/common";
-import { isOverdue, isThisWeek, isThisMonth, isFutureTask, sortByFinishDate, elementNullCheck, justDate } from "./utils";
+import { isOverdue, isThisWeek, isThisMonth, isFutureTask, sortByFinishDate, getHTMLElement, justDate } from "./utils";
 
 export default class TaskManager {
   private apiUrl: string ;
@@ -18,18 +18,18 @@ export default class TaskManager {
 
   constructor() {
     this.apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-    this.form = elementNullCheck<HTMLFormElement>('#addTaskForm');
-    this.tasksListWeek = elementNullCheck<HTMLDivElement>('#tasksListWeek');
-    this.tasksListMonth = elementNullCheck<HTMLDivElement>('#tasksListMonth');
-    this.tasksListRest = elementNullCheck<HTMLDivElement>('#tasksListRest');
-    this.loading = elementNullCheck<HTMLDivElement>('#loading');
-    this.error = elementNullCheck<HTMLDivElement>('#error');
+    this.form = getHTMLElement<HTMLFormElement>('#addTaskForm');
+    this.tasksListWeek = getHTMLElement<HTMLDivElement>('#tasksListWeek');
+    this.tasksListMonth = getHTMLElement<HTMLDivElement>('#tasksListMonth');
+    this.tasksListRest = getHTMLElement<HTMLDivElement>('#tasksListRest');
+    this.loading = getHTMLElement<HTMLDivElement>('#loading');
+    this.error = getHTMLElement<HTMLDivElement>('#error');
 
     this.init();
   }
 
   private init(): void {
-    const addTaskButton = elementNullCheck<HTMLButtonElement>('#btn-add-task');
+    const addTaskButton = getHTMLElement<HTMLButtonElement>('#btn-add-task');
     addTaskButton.addEventListener('click', this.handleTaskAdd.bind(this));
     this.loadtasks();
   }
@@ -121,17 +121,17 @@ export default class TaskManager {
   }
 
   private handleEditStart(task: TaskItem, eventCatcher: HTMLElement): void {
-    const editArea = elementNullCheck<HTMLDivElement>(`#task-edit-area`, eventCatcher);
+    const editArea = getHTMLElement<HTMLDivElement>(`#task-edit-area`, eventCatcher);
     editArea.replaceChildren(this.buildEditArea(task));
   }
 
   private handleEditCancel(eventCatcher: HTMLElement): void {
-    const editArea = elementNullCheck<HTMLDivElement>(`#task-edit-area`, eventCatcher);
+    const editArea = getHTMLElement<HTMLDivElement>(`#task-edit-area`, eventCatcher);
     editArea.innerHTML = '';
   }
 
   private async handleEditSave(task: TaskItem, eventCatcher: HTMLElement): Promise<void> {
-    const editForm = elementNullCheck<HTMLFormElement>(`#editTaskForm`, eventCatcher);
+    const editForm = getHTMLElement<HTMLFormElement>(`#editTaskForm`, eventCatcher);
 
     const formData = new FormData(editForm);
     const taskName = formData.get('edit-task-name') as string;
@@ -205,7 +205,7 @@ export default class TaskManager {
   }
 
   private rendertasks(tasks: TaskItem[]): void {
-    const loadingDiv = elementNullCheck<HTMLDivElement>('#loading');
+    const loadingDiv = getHTMLElement<HTMLDivElement>('#loading');
     if (tasks.length === 0) {
       loadingDiv.innerHTML = '<p>No tasks found. Add some tasks to get started!</p>';
       this.tasksListWeek.style.display = 'none';

@@ -2,7 +2,11 @@ import z from 'zod';
 
 const UserSchema = z.object({
   id: z.uuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  login: z.string(),
   name: z.string(),
+  email: z.string().nullable(),
 });
 
 export type User = z.infer<typeof UserSchema>;
@@ -16,8 +20,20 @@ export function validateUser(user: unknown): User {
   return result.data;
 }
 
+export function validateUserArray(users: unknown[]): User[] {
+  const result = UserSchema.array().safeParse(users);
+  if (!result.success) {
+    console.error('Invalid users', result.error);
+    throw new Error('Invalid users');
+  }
+  return result.data;
+}
+
 const CreateUserRequestSchema = z.object({
+  login: z.string(),
+  password: z.string(),
   name: z.string(),
+  email: z.string().nullable(),
 });
 
 export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
@@ -33,7 +49,9 @@ export function validateCreateUserRequest(item: unknown): CreateUserRequest {
 
 const UpdateUserRequestSchema = z.object({
   id: z.uuid(),
+  login: z.string(),
   name: z.string(),
+  email: z.string().nullable(),
 });
 
 export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;
@@ -43,6 +61,22 @@ export function validateUpdateUserRequest(item: unknown): UpdateUserRequest {
   if (!result.success) {
     console.error('Invalid update user request:', result.error);
     throw new Error('Invalid update user request');
+  }
+  return result.data;
+}
+
+const updatePasswordRequestSchema = z.object({
+  id: z.uuid(),
+  password: z.string(),
+});
+
+export type UpdatePasswordRequest = z.infer<typeof updatePasswordRequestSchema>;
+
+export function validateUpdatePasswordRequest(item: unknown): UpdatePasswordRequest {
+  const result = updatePasswordRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid update password request:', result.error);
+    throw new Error('Invalid update password request');
   }
   return result.data;
 }

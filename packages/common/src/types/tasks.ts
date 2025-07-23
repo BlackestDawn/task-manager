@@ -34,7 +34,8 @@ export function validateTaskItemArray(items: unknown[]): TaskItem[] {
 const createTaskRequestSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
-  finishBy: z.coerce.date().nullable()
+  finishBy: z.coerce.date().nullable(),
+  userId: z.uuid()
 });
 
 export type CreateTaskRequest = z.infer<typeof createTaskRequestSchema>;
@@ -62,6 +63,21 @@ export function validateUpdateTaskRequest(item: unknown): UpdateTaskRequest {
   if (!result.success) {
     console.error('Invalid update task request:', result.error);
     throw new Error('Invalid update task request');
+  }
+  return result.data;
+}
+
+const getTasksRequestSchema = z.object({
+  userId: z.uuid()
+});
+
+export type GetTasksRequest = z.infer<typeof getTasksRequestSchema>;
+
+export function validateGetTasksRequest(item: unknown): GetTasksRequest {
+  const result = getTasksRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid get tasks request:', result.error);
+    throw new Error('Invalid get tasks request');
   }
   return result.data;
 }

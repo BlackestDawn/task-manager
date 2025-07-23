@@ -5,5 +5,5 @@ import { handlerResetDb } from "../api/admin";
 export const adminRoutes = {
   "/admin/reset": {
     POST: withConfig(cfg, handlerResetDb),
-  }
+  },
 }

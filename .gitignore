@@ -37,3 +37,4 @@ next-env.d.ts
 src/client/app.js
 app.db
 requests.http
+task-manager.code-workspace

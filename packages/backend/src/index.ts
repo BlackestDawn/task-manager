@@ -5,12 +5,14 @@ import { corsHeaders } from "./api/middleware/cors";
 import { adminRoutes } from "./routes/admin";
 import { taskRoutes } from "./routes/tasks";
 import { userRoutes } from "./routes/users";
+import { authRoutes } from "./routes/auth";
 
 const server = Bun.serve({
   port: cfg.port,
   development: cfg.platform === "dev",
   routes: {
     ...adminRoutes,
+    ...authRoutes,
     ...taskRoutes,
     ...userRoutes,
   },
