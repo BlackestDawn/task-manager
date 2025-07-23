@@ -1,15 +1,14 @@
 import z from 'zod';
-import { dateSchema } from './general';
 
 const taskItemSchema = z.object({
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   title: z.string(),
-  description: z.string().nullable(),
-  finishBy: z.coerce.date().nullable(),
+  description: z.string().nullish().default(null),
+  finishBy: z.coerce.date().nullish().default(null),
   completed: z.boolean(),
-  completedAt: z.coerce.date().nullable()
+  completedAt: z.coerce.date().nullish().default(null),
 });
 
 export type TaskItem = z.infer<typeof taskItemSchema>;
@@ -34,8 +33,8 @@ export function validateTaskItemArray(items: unknown[]): TaskItem[] {
 
 const createTaskRequestSchema = z.object({
   title: z.string(),
-  description: z.string().nullable(),
-  finishBy: z.coerce.date().nullable(),
+  description: z.string().nullish().default(null),
+  finishBy: z.coerce.date().nullish().default(null),
   userId: z.uuid()
 });
 
@@ -53,8 +52,8 @@ export function validateCreateTaskRequest(item: unknown): CreateTaskRequest {
 const updateTaskRequestSchema = z.object({
   id: z.uuid(),
   title: z.string(),
-  description: z.string().nullable(),
-  finishBy: z.coerce.date().nullable()
+  description: z.string().nullish().default(null),
+  finishBy: z.coerce.date().nullish().default(null),
 });
 
 export type UpdateTaskRequest = z.infer<typeof updateTaskRequestSchema>;

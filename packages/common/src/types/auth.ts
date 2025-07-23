@@ -46,7 +46,7 @@ const RefreashTokenSchema = z.object({
   updatedAt: z.coerce.date(),
   userId: z.uuid(),
   expiresAt: z.coerce.date(),
-  revokedAt: z.coerce.date().optional(),
+  revokedAt: z.coerce.date().nullish().default(null),
 });
 
 export type RefreashToken = z.infer<typeof RefreashTokenSchema>;
