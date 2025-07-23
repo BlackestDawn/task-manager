@@ -17,3 +17,9 @@ export function validateDoByUUIDRequest(item: unknown): DoByUUIDRequest {
   }
   return result.data;
 }
+
+export const dateSchema = z.union([
+  z.date(),
+  z.string().pipe(z.coerce.date()),
+  z.number().pipe(z.coerce.date())
+]);

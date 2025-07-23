@@ -38,3 +38,4 @@ src/client/app.js
 app.db
 requests.http
 task-manager.code-workspace
+output.log

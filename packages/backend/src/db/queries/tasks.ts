@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { type DBConn } from "../../config";
-import type { TaskItem, CreateTaskRequest, UpdateTaskRequest, GetTasksRequest, DoByUUIDRequest } from "@task-manager/common";
+import type { CreateTaskRequest, UpdateTaskRequest, DoByUUIDRequest } from "@task-manager/common";
 import { tasks } from "../schema";
 
 export async function createTask(db: DBConn, params: CreateTaskRequest) {
@@ -18,7 +18,7 @@ export async function deleteTask(db: DBConn, params: DoByUUIDRequest) {
   return result;
 }
 
-export async function getTasks(db: DBConn) {
+export async function getAllTasks(db: DBConn) {
   const result = await db.select().from(tasks);
   return result;
 }
@@ -31,12 +31,12 @@ export async function getTaskById(db: DBConn, params: DoByUUIDRequest) {
 export async function markDone(db: DBConn, params: DoByUUIDRequest) {
   const [result] = await db.update(tasks).set({
     completed: true,
-    completedAt: new Date()
+    completedAt: sql`now()`
   }).where(eq(tasks.id, params.id)).returning();
   return result;
 }
 
-export async function getTasksByUserId(db: DBConn, params: GetTasksRequest) {
-  const result = await db.select().from(tasks).where(eq(tasks.userId, params.userId));
+export async function getTasksByUserId(db: DBConn, params: DoByUUIDRequest) {
+  const result = await db.select().from(tasks).where(eq(tasks.userId, params.id));
   return result;
 }
