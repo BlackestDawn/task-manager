@@ -6,7 +6,7 @@ const UserSchema = z.object({
   updatedAt: z.coerce.date(),
   login: z.string(),
   name: z.string(),
-  email: z.string().nullable(),
+  email: z.string().nullish().default(null),
 });
 
 export type User = z.infer<typeof UserSchema>;
@@ -33,7 +33,7 @@ const CreateUserRequestSchema = z.object({
   login: z.string(),
   password: z.string(),
   name: z.string(),
-  email: z.string().nullable(),
+  email: z.string().nullish().default(null),
 });
 
 export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
@@ -51,7 +51,7 @@ const UpdateUserRequestSchema = z.object({
   id: z.uuid(),
   login: z.string(),
   name: z.string(),
-  email: z.string().nullable(),
+  email: z.string().nullish().default(null),
 });
 
 export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;

@@ -11,7 +11,7 @@ import { validateJWT, getAuthTokenFromHeaders } from "../lib/auth/authentication
 export async function handlerGetTasksByUserId(cfg: ApiConfig, req: BunRequest) {
   const bearerToken = await getAuthTokenFromHeaders(req.headers);
   if (!bearerToken) {
-    throw new UserNotAuthenticatedError('User not authorized');
+    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
   }
 
   const userId = await validateJWT(bearerToken);
@@ -27,7 +27,7 @@ export async function handlerGetTasksByUserId(cfg: ApiConfig, req: BunRequest) {
 export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest) {
   const bearerToken = await getAuthTokenFromHeaders(req.headers);
   if (!bearerToken) {
-    throw new UserNotAuthenticatedError('User not authorized');
+    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
   }
 
   const userId = await validateJWT(bearerToken);
@@ -37,8 +37,6 @@ export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest) {
 
   const params = await req.json() as CreateTaskRequest;
   params.userId = userId;
-  params.description = params.description ? params.description : null;
-  params.finishBy = params.finishBy ? params.finishBy : null;
   const task = await createTask(cfg.db, validateCreateTaskRequest(params));
   return respondWithJSON(201, validateTaskItem(task));
 }
@@ -46,7 +44,7 @@ export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest) {
 export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest) {
   const bearerToken = await getAuthTokenFromHeaders(req.headers);
   if (!bearerToken) {
-    throw new UserNotAuthenticatedError('User not authorized');
+    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
   }
 
   const userId = await validateJWT(bearerToken);
@@ -65,9 +63,6 @@ export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest) {
 
   const params = await req.json() as UpdateTaskRequest;
   params.id = taskId;
-  params.title = params.title ? params.title : existingTask.title;
-  params.description = params.description ? params.description : existingTask.description;
-  params.finishBy = params.finishBy ? params.finishBy : existingTask.finishBy;
   const task = await updateTask(cfg.db, validateUpdateTaskRequest(params));
   return respondWithJSON(200, validateTaskItem(task));
 }
@@ -75,7 +70,7 @@ export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest) {
 export async function handlerDeleteTask(cfg: ApiConfig, req: BunRequest) {
   const bearerToken = await getAuthTokenFromHeaders(req.headers);
   if (!bearerToken) {
-    throw new UserNotAuthenticatedError('User not authorized');
+    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
   }
 
   const userId = await validateJWT(bearerToken);
@@ -97,7 +92,7 @@ export async function handlerDeleteTask(cfg: ApiConfig, req: BunRequest) {
 export async function handlerGetTaskById(cfg: ApiConfig, req: BunRequest) {
   const bearerToken = await getAuthTokenFromHeaders(req.headers);
   if (!bearerToken) {
-    throw new UserNotAuthenticatedError('User not authorized');
+    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
   }
 
   const userId = await validateJWT(bearerToken);
@@ -117,7 +112,7 @@ export async function handlerGetTaskById(cfg: ApiConfig, req: BunRequest) {
 export async function handlerMarkDone(cfg: ApiConfig, req: BunRequest) {
   const bearerToken = await getAuthTokenFromHeaders(req.headers);
   if (!bearerToken) {
-    throw new UserNotAuthenticatedError('User not authorized');
+    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
   }
 
   const userId = await validateJWT(bearerToken);
