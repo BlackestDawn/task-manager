@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { makeJWT, validateJWT, hashPassword, checkPasswordHash, getAuthTokenFromHeaders } from "./authentication";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
 import jwt from "jsonwebtoken";
+import { cfg } from "../../config";
 
 describe("Password Hashing", () => {
   const password = "correctPassword123!";
@@ -77,14 +78,14 @@ describe("JWT functions", () => {
   });
 
   it("validateJWT should throw an error for a token with no subject", async () => {
-    const tokenWithNoSub = jwt.sign({ iss: "chirpy" }, secret);
+    const tokenWithNoSub = jwt.sign({ iss: cfg.crypto.token_issuer }, secret);
     await expect(validateJWT(tokenWithNoSub, secret)).rejects.toThrow(new UserForbiddenError("No user ID in token"));
   });
 
   it("makeJWT should create a token with correct issuer and subject", async () => {
     const token = await makeJWT(userID, expiresIn, secret);
     const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
-    expect(decoded.iss).toBe("chirpy");
+    expect(decoded.iss).toBe(cfg.crypto.token_issuer);
     expect(decoded.sub).toBe(userID);
   });
 

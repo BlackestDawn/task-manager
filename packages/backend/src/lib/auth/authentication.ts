@@ -40,11 +40,11 @@ export async function validateJWT(tokenString: string, secret: string = cfg.jwt.
   try {
     token = jwt.verify(tokenString, secret) as JwtPayload;
   } catch (err) {
-    throw new UserNotAuthenticatedError("Invalid token");
+    throw new UserForbiddenError("Invalid token");
   }
 
-  if (token.iss !== cfg.crypto.token_issuer) throw new UserNotAuthenticatedError("Invalid issuer");
-  if (!token.sub) throw new UserNotAuthenticatedError("No user ID in token");
+  if (token.iss !== cfg.crypto.token_issuer) throw new UserForbiddenError("Invalid issuer");
+  if (!token.sub) throw new UserForbiddenError("No user ID in token");
 
   return token.sub as string;
 }
