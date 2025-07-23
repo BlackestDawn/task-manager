@@ -1,37 +1,20 @@
 import { cfg } from "./config";
 import { runMigrations, closeConnection } from "./db";
-import { withConfig } from "./api/middleware/config";
 import { errorHandlingMiddleware } from "./api/middleware/errors";
 import { corsHeaders } from "./api/middleware/cors";
-import { handlerResetDb } from "./api/admin";
-import {
-  handlerGetTasks,
-  handlerCreateTask,
-  handlerUpdateTask,
-  handlerDeleteTask,
-  handlerGetTaskById,
-  handlerMarkDone
-} from "./api/tasks";
+import { adminRoutes } from "./routes/admin";
+import { taskRoutes } from "./routes/tasks";
+import { userRoutes } from "./routes/users";
+import { authRoutes } from "./routes/auth";
 
 const server = Bun.serve({
   port: cfg.port,
   development: cfg.platform === "dev",
   routes: {
-    "/api/tasks": {
-      GET: withConfig(cfg, handlerGetTasks),
-      POST: withConfig(cfg, handlerCreateTask),
-    },
-    "/api/tasks/:taskId": {
-      GET: withConfig(cfg, handlerGetTaskById),
-      PUT: withConfig(cfg, handlerUpdateTask),
-      DELETE: withConfig(cfg, handlerDeleteTask),
-    },
-    "/api/tasks/:taskId/done": {
-      POST: withConfig(cfg, handlerMarkDone),
-    },
-    "/admin/reset": {
-      POST: withConfig(cfg, handlerResetDb),
-    }
+    ...adminRoutes,
+    ...authRoutes,
+    ...taskRoutes,
+    ...userRoutes,
   },
   async fetch(req) {
     if (req.method === 'OPTIONS') return new Response(null, {status: 204, headers: corsHeaders});

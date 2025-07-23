@@ -1,4 +1,4 @@
-import { corsHeaders } from "../api/middleware/cors";
+import { corsHeaders } from "../../api/middleware/cors";
 
 export function respondWithJSON(status: number, payload: any, headers: Record<string, string> = {}) {
   const body = JSON.stringify(payload);

@@ -1,6 +1,6 @@
 import type { ApiConfig } from "../../config";
 import { BadRequestError, NotFoundError, UserForbiddenError, UserNotAuthenticatedError } from "@task-manager/common";
-import { respondWithJSON } from "../../utils/response";
+import { respondWithJSON } from "../../lib/utils/response";
 
 export function errorHandlingMiddleware(cfg: ApiConfig, err: unknown,): Response {
   let statusCode = 500;

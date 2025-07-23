@@ -12,10 +12,26 @@ export type ApiConfig = {
   port: number;
   platform: Platform;
   db: DBConn;
+  jwt: {
+    secret: string;
+    defaultExpireTime: number;
+  };
+  crypto: {
+    salt_rounds: number;
+    token_issuer: string;
+  };
 };
 
 export const cfg: ApiConfig = {
   port: isNaN(portNum) ? 3000 : portNum,
   platform: envOrThrow("PLATFORM") as Platform,
   db: dbConn,
+  jwt: {
+    secret: envOrThrow("JWT_SECRET"),
+    defaultExpireTime: 3600,
+  },
+  crypto: {
+    salt_rounds: 10,
+    token_issuer: "taskies-manager",
+  },
 };

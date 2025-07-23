@@ -1,4 +1,5 @@
 import z from 'zod';
+import { dateSchema } from './general';
 
 const taskItemSchema = z.object({
   id: z.uuid(),
@@ -34,7 +35,8 @@ export function validateTaskItemArray(items: unknown[]): TaskItem[] {
 const createTaskRequestSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
-  finishBy: z.coerce.date().nullable()
+  finishBy: z.coerce.date().nullable(),
+  userId: z.uuid()
 });
 
 export type CreateTaskRequest = z.infer<typeof createTaskRequestSchema>;

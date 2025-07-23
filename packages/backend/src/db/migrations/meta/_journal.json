@@ -5,8 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1752348040723,
-      "tag": "0000_slippery_leo",
+      "when": 1752614546913,
+      "tag": "0000_panoramic_redwing",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753171160226,
+      "tag": "0001_exotic_wallop",
       "breakpoints": true
     }
   ]
