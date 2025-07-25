@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { cfg } from "../../config";
 import type { RegisterRefreashToken } from "@task-manager/common";
 import { registerRefreashToken } from "../../db/queries/auth";
+import { validate as validateUUID } from "uuid";
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
@@ -69,4 +70,17 @@ export async function makeRefreshToken(userId: string) {
     throw new Error("failed to create refresh token");
   }
   return result;
+}
+
+export async function getAndValidateUser(headers: Headers) {
+  const bearerToken = await getAuthTokenFromHeaders(headers);
+  if (!bearerToken) {
+    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
+  }
+
+  const userId = await validateJWT(bearerToken);
+  if (!validateUUID(userId)) {
+    throw new BadRequestError("Invalid/malformed user ID");
+  }
+  return userId;
 }
