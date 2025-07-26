@@ -66,35 +66,67 @@ export function validateUpdateGroupRequest(item: unknown): UpdateGroupRequest {
   return result.data;
 }
 
-export const addOrRemoveUserToGroupRequestSchema = z.object({
+export const addUserToGroupRequestSchema = z.object({
   userId: z.uuid(),
   groupId: z.uuid(),
 });
 
-export type AddOrRemoveUserToGroupRequest = z.infer<typeof addOrRemoveUserToGroupRequestSchema>;
+export type AddUserToGroupRequest = z.infer<typeof addUserToGroupRequestSchema>;
 
-export function validateAddUserOrRemoveToGroupRequest(item: unknown): AddOrRemoveUserToGroupRequest {
-  const result = addOrRemoveUserToGroupRequestSchema.safeParse(item);
+export function validateAddUserToGroupRequest(item: unknown): AddUserToGroupRequest {
+  const result = addUserToGroupRequestSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid add or remove user to group request:', result.error);
-    throw new Error('Invalid add or remove user to group request');
+    console.error('Invalid add user to group request:', result.error);
+    throw new Error('Invalid add user to group request');
   }
   return result.data;
 }
 
-export const assignOrRemoveTaskToGroupRequestSchema = z.object({
+export const RemoveUserFromGroupRequestSchema = z.object({
+  userId: z.uuid(),
+  groupId: z.uuid(),
+});
+
+export type RemoveUserFromGroupRequest = z.infer<typeof RemoveUserFromGroupRequestSchema>;
+
+export function validateRemoveUserFromGroupRequest(item: unknown): RemoveUserFromGroupRequest {
+  const result = RemoveUserFromGroupRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid remove user from group request:', result.error);
+    throw new Error('Invalid remove user from group request');
+  }
+  return result.data;
+}
+
+export const assignTaskToGroupRequestSchema = z.object({
   taskId: z.uuid(),
   groupId: z.uuid(),
   assignedBy: z.uuid(),
 });
 
-export type AssignOrRemoveTaskToGroupRequest = z.infer<typeof assignOrRemoveTaskToGroupRequestSchema>;
+export type AssignTaskToGroupRequest = z.infer<typeof assignTaskToGroupRequestSchema>;
 
-export function validateAssignOrRemoveTaskToGroupRequest(item: unknown): AssignOrRemoveTaskToGroupRequest {
-  const result = assignOrRemoveTaskToGroupRequestSchema.safeParse(item);
+export function validateAssignTaskToGroupRequest(item: unknown): AssignTaskToGroupRequest {
+  const result = assignTaskToGroupRequestSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid assign or remove task to group request:', result.error);
-    throw new Error('Invalid assign or remove task to group request');
+    console.error('Invalid assign task to group request:', result.error);
+    throw new Error('Invalid assign task to group request');
+  }
+  return result.data;
+}
+
+export const RemoveTaskFromGroupRequestSchema = z.object({
+  taskId: z.uuid(),
+  groupId: z.uuid(),
+});
+
+export type RemoveTaskFromGroupRequest = z.infer<typeof RemoveTaskFromGroupRequestSchema>;
+
+export function validateRemoveTaskFromGroupRequest(item: unknown): RemoveTaskFromGroupRequest {
+  const result = RemoveTaskFromGroupRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid remove task from group request:', result.error);
+    throw new Error('Invalid remove task from group request');
   }
   return result.data;
 }
