@@ -1,6 +1,6 @@
 import { cfg } from "../config";
 import { withConfig } from "../api/middleware/config";
-import { handlerGetUsers, handlerCreateUser, handlerUpdateUser, handlerUpdateUserPassword, handlerDeleteUser, handlerGetUserById } from "../api/users";
+import { handlerGetUsers, handlerCreateUser, handlerUpdateUser, handlerUpdateUserPassword, handlerDeleteUser, handlerGetUserById, handlerGetTasksForUser, handlerGetGroupsForUser } from "../api/users";
 
 export const userRoutes = {
   "/api/users": {
@@ -14,5 +14,11 @@ export const userRoutes = {
   },
   "/api/users/:userId/password": {
     PUT: withConfig(cfg, handlerUpdateUserPassword),
+  },
+  "/api/users/:userId/tasks": {
+    GET: withConfig(cfg, handlerGetTasksForUser),
+  },
+  "/api/users/:userId/groups": {
+    GET: withConfig(cfg, handlerGetGroupsForUser),
   },
 }

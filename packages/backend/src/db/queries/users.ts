@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray, and, or } from "drizzle-orm";
 import { type DBConn } from "../../config";
-import { users } from "../schema";
+import { users, tasks, groups, taskGroups, userGroups } from "../schema";
 import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest } from "@task-manager/common";
 
 export async function createUser(db: DBConn, params: CreateUserRequest) {
@@ -35,5 +35,35 @@ export async function updatePassword(db: DBConn, params: UpdatePasswordRequest) 
 
 export async function getUserByLogin(db: DBConn, login: string) {
   const [result] = await db.select().from(users).where(eq(users.login, login));
+  return result;
+}
+
+export async function getTasksForUser(db: DBConn, params: DoByUUIDRequest) {
+  const result = await db.selectDistinctOn([tasks.id]).from(tasks)
+    .where(or(
+      eq(tasks.userId, params.id),
+      inArray(tasks.id,
+      db.select({
+        taskId: taskGroups.taskId,
+      }).from(taskGroups)
+        .where(inArray(
+          taskGroups.groupId,
+          db.select({
+            groupId: userGroups.userId,
+          }).from(userGroups).where(eq(userGroups.userId, params.id))
+        ))
+    )
+  ));
+  return result;
+}
+
+export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
+  const result = await db.select().from(groups)
+    .where(inArray(
+      groups.id,
+      db.select({
+        groupId: userGroups.id
+      }).from(userGroups).where(eq(userGroups.userId, params.id))
+    ));
   return result;
 }

@@ -6,35 +6,17 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import { validateCreateTaskRequest, validateUpdateTaskRequest, validateDoByUUIDRequest, validateTaskItem, validateTaskItemArray } from "@task-manager/common";
 import { createTask, getTasksByUserId, updateTask, deleteTask, getTaskById, markDone } from "../db/queries/tasks";
 import { validate as validateUUID } from "uuid";
-import { validateJWT, getAuthTokenFromHeaders } from "../lib/auth/authentication";
+import { validateJWT, getAuthTokenFromHeaders, getAndValidateUser } from "../lib/auth/authentication";
 
 export async function handlerGetTasksByUserId(cfg: ApiConfig, req: BunRequest) {
-  const bearerToken = await getAuthTokenFromHeaders(req.headers);
-  if (!bearerToken) {
-    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-  }
-
-  const userId = await validateJWT(bearerToken);
-  if (!validateUUID(userId)) {
-    throw new BadRequestError("Invalid/malformed user ID");
-  }
-
+  const userId = await getAndValidateUser(req.headers);
   const params = validateDoByUUIDRequest(userId);
   const tasks = await getTasksByUserId(cfg.db, params);
   return respondWithJSON(200, validateTaskItemArray(tasks));
 }
 
 export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest) {
-  const bearerToken = await getAuthTokenFromHeaders(req.headers);
-  if (!bearerToken) {
-    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-  }
-
-  const userId = await validateJWT(bearerToken);
-  if (!validateUUID(userId)) {
-    throw new BadRequestError("Invalid/malformed user ID");
-  }
-
+  const userId = await getAndValidateUser(req.headers);
   const params = await req.json() as CreateTaskRequest;
   params.userId = userId;
   const task = await createTask(cfg.db, validateCreateTaskRequest(params));
@@ -42,16 +24,7 @@ export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest) {
 }
 
 export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest) {
-  const bearerToken = await getAuthTokenFromHeaders(req.headers);
-  if (!bearerToken) {
-    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-  }
-
-  const userId = await validateJWT(bearerToken);
-  if (!validateUUID(userId)) {
-    throw new BadRequestError("Invalid/malformed user ID");
-  }
-
+  const userId = await getAndValidateUser(req.headers);
   const { taskId } = req.params as { taskId: string };
   if (!validateUUID(taskId)) {
     throw new BadRequestError("Invalid/malformed task ID");
@@ -68,16 +41,7 @@ export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest) {
 }
 
 export async function handlerDeleteTask(cfg: ApiConfig, req: BunRequest) {
-  const bearerToken = await getAuthTokenFromHeaders(req.headers);
-  if (!bearerToken) {
-    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-  }
-
-  const userId = await validateJWT(bearerToken);
-  if (!validateUUID(userId)) {
-    throw new BadRequestError("Invalid/malformed user ID");
-  }
-
+  const userId = await getAndValidateUser(req.headers);
   const { taskId } = req.params as { taskId: string };
   const params = validateDoByUUIDRequest(taskId);
   const existingTask = await getTaskById(cfg.db, params);
@@ -90,16 +54,7 @@ export async function handlerDeleteTask(cfg: ApiConfig, req: BunRequest) {
 }
 
 export async function handlerGetTaskById(cfg: ApiConfig, req: BunRequest) {
-  const bearerToken = await getAuthTokenFromHeaders(req.headers);
-  if (!bearerToken) {
-    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-  }
-
-  const userId = await validateJWT(bearerToken);
-  if (!validateUUID(userId)) {
-    throw new BadRequestError("Invalid/malformed user ID");
-  }
-
+  const userId = await getAndValidateUser(req.headers);
   const { taskId } = req.params as { taskId: string };
   const params = validateDoByUUIDRequest(taskId);
   const task = await getTaskById(cfg.db, params);
@@ -110,16 +65,7 @@ export async function handlerGetTaskById(cfg: ApiConfig, req: BunRequest) {
 }
 
 export async function handlerMarkDone(cfg: ApiConfig, req: BunRequest) {
-  const bearerToken = await getAuthTokenFromHeaders(req.headers);
-  if (!bearerToken) {
-    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-  }
-
-  const userId = await validateJWT(bearerToken);
-  if (!validateUUID(userId)) {
-    throw new BadRequestError("Invalid/malformed user ID");
-  }
-
+  const userId = await getAndValidateUser(req.headers);
   const { taskId } = req.params as { taskId: string };
   const params = validateDoByUUIDRequest(taskId);
   const result = await getTaskById(cfg.db, params);
