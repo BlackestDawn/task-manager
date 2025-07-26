@@ -11,3 +11,6 @@ export * from "./functions/env";
 
 // Classes
 export * from "./classes/errors";
+
+// Permissions
+export * from "./permissions/roles"

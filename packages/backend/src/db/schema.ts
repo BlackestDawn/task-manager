@@ -1,10 +1,12 @@
-import { pgTable, timestamp, varchar, uuid, boolean, uniqueIndex } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { pgTable, timestamp, varchar, uuid, boolean, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
+import { groupRoleList } from "@task-manager/common";
 
 export const getCurrentDate = () => {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000);
 }
+
+export const groupRoleEnum = pgEnum("group_role", groupRoleList);
 
 export const tasks = pgTable("tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -43,8 +45,7 @@ export const groups = pgTable("groups", {
   updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getCurrentDate),
   name: varchar("name", { length: 256 }).notNull().unique(),
   description: varchar("description", { length: 1024 }),
-  role: varchar("role", { length: 50 }).default("member"),
-  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  role: groupRoleEnum("role").notNull().default("user"),
 });
 
 export const userGroups = pgTable("user_groups", {
