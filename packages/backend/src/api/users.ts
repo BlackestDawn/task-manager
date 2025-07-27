@@ -1,10 +1,10 @@
 import { type ApiConfig } from "../config";
 import { respondWithJSON } from "../lib/utils/response";
 import type { BunRequest } from "bun";
-import type { User, UpdateUserRequest, CreateUserRequest, UpdatePasswordRequest } from "@task-manager/common";
+import type { User, UpdateUserRequest, CreateUserRequest, UpdatePasswordRequest, disabledUserRequest } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
-import { validateCreateUserRequest, validateUpdateUserRequest, validateUpdatePasswordRequest, validateDoByUUIDRequest, validateUser, validateUserArray, validateTaskItemArray } from "@task-manager/common";
-import { createUser, updateUser, deleteUser, getUsers, getUserById, getUserByLogin, updatePassword, getTasksForUser, getGroupsForUser } from "../db/queries/users";
+import { validateCreateUserRequest, validateUpdateUserRequest, validateUpdatePasswordRequest, validateDoByUUIDRequest, validateUser, validateUserArray, validateTaskItemArray, validateDisabledUserRequest } from "@task-manager/common";
+import { createUser, updateUser, deleteUser, getUsers, getUserById, getUserByLogin, updatePassword, getTasksForUser, getGroupsForUser, disabledUser } from "../db/queries/users";
 import { hashPassword, getAndValidateUser } from "../lib/auth/authentication";
 
 export async function handlerGetUsers(cfg: ApiConfig, req: BunRequest) {
@@ -67,4 +67,12 @@ export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest) {
   const params = validateDoByUUIDRequest(userId);
   const tasks = await getGroupsForUser(cfg.db, params);
   return respondWithJSON(200, validateTaskItemArray(tasks));
+}
+
+export async function handlerDisabledUser(cfg: ApiConfig, req: BunRequest) {
+  const userId = await getAndValidateUser(req.headers);
+  const params = await req.json() as disabledUserRequest;
+  params.id = userId;
+  const user = await disabledUser(cfg.db, validateDisabledUserRequest(params));
+  return respondWithJSON(200, validateUser(user));
 }

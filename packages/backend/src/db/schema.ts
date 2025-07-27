@@ -28,6 +28,7 @@ export const users = pgTable("users", {
   name: varchar("name", { length: 256 }).notNull(),
   password: varchar("password", { length: 256 }).notNull(),
   email: varchar("email", { length: 256 }),
+  disabled: boolean("disabled").default(false),
 });
 
 export const refresh_tokens = pgTable("refresh_tokens", {

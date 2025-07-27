@@ -1,7 +1,7 @@
 import { eq, inArray, and, or } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { users, tasks, groups, taskGroups, userGroups } from "../schema";
-import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest } from "@task-manager/common";
+import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest, disabledUserRequest } from "@task-manager/common";
 
 export async function createUser(db: DBConn, params: CreateUserRequest) {
   const [result] = await db.insert(users).values(params).returning();
@@ -65,5 +65,12 @@ export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
         groupId: userGroups.id
       }).from(userGroups).where(eq(userGroups.userId, params.id))
     ));
+  return result;
+}
+
+export async function disabledUser(db: DBConn, params: disabledUserRequest) {
+  const [result] = await db.update(users).set({
+    disabled: params.enabled,
+  }).where(eq(users.id, params.id)).returning();
   return result;
 }
