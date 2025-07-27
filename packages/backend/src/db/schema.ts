@@ -53,9 +53,9 @@ export const userGroups = pgTable("user_groups", {
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   groupId: uuid("group_id").references(() => groups.id, { onDelete: "cascade" }).notNull(),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
-}, (table) => ({
-  uniqueUserGroup: uniqueIndex("unique_user_group").on(table.userId, table.groupId),
-}));
+}, (table) => ([
+  uniqueIndex("unique_user_group").on(table.userId, table.groupId),
+]));
 
 export const taskGroups = pgTable("task_groups", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -63,6 +63,6 @@ export const taskGroups = pgTable("task_groups", {
   groupId: uuid("group_id").references(() => groups.id, { onDelete: "cascade" }).notNull(),
   assignedAt: timestamp("assigned_at").notNull().defaultNow(),
   assignedBy: uuid("assigned_by").references(() => users.id, { onDelete: "set null" }),
-}, (table) => ({
-  uniqueTaskGroup: uniqueIndex("unique_task_group").on(table.taskId, table.groupId),
-}));
+}, (table) => ([
+  uniqueIndex("unique_task_group").on(table.taskId, table.groupId),
+]));
