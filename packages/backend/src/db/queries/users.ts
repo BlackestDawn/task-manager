@@ -49,7 +49,7 @@ export async function getTasksForUser(db: DBConn, params: DoByUUIDRequest) {
         .where(inArray(
           taskGroups.groupId,
           db.select({
-            groupId: userGroups.userId,
+            groupId: userGroups.groupId,
           }).from(userGroups).where(eq(userGroups.userId, params.id))
         ))
     )
