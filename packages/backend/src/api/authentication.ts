@@ -14,6 +14,7 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
 
   const user = await getUserByLogin(cfg.db, params.login);
   if (!user) throw new UserNotAuthenticatedError("invalid username or password");
+  if (user.disabled) throw new UserNotAuthenticatedError("user is disabled");
   if (!checkPasswordHash(params.password, user.password)) throw new UserNotAuthenticatedError("invalid username or password");
 
   let refreshToken = await getRefreshTokenByUserId(cfg.db, { id: user.id });

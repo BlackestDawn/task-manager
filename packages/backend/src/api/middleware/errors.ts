@@ -1,5 +1,5 @@
 import type { ApiConfig } from "../../config";
-import { BadRequestError, NotFoundError, UserForbiddenError, UserNotAuthenticatedError } from "@task-manager/common";
+import { BadRequestError, NotFoundError, UserForbiddenError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import { respondWithJSON } from "../../lib/utils/response";
 
 export function errorHandlingMiddleware(cfg: ApiConfig, err: unknown,): Response {
@@ -17,6 +17,9 @@ export function errorHandlingMiddleware(cfg: ApiConfig, err: unknown,): Response
     message = err.message;
   } else if (err instanceof NotFoundError) {
     statusCode = 404;
+    message = err.message;
+  } else if (err instanceof AlreadyExistsConflictError) {
+    statusCode = 409;
     message = err.message;
   }
 

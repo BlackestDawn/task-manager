@@ -6,6 +6,7 @@ import { adminRoutes } from "./routes/admin";
 import { taskRoutes } from "./routes/tasks";
 import { userRoutes } from "./routes/users";
 import { authRoutes } from "./routes/auth";
+import { groupRoutes } from "./routes/groups";
 
 const server = Bun.serve({
   port: cfg.port,
@@ -15,6 +16,7 @@ const server = Bun.serve({
     ...authRoutes,
     ...taskRoutes,
     ...userRoutes,
+    ...groupRoutes,
   },
   async fetch(req) {
     if (req.method === 'OPTIONS') return new Response(null, {status: 204, headers: corsHeaders});

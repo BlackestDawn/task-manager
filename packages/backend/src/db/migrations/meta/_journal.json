@@ -15,6 +15,20 @@
       "when": 1753171160226,
       "tag": "0001_exotic_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753432436193,
+      "tag": "0002_left_mysterio",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1753533690398,
+      "tag": "0003_silky_starjammers",
+      "breakpoints": true
     }
   ]
 }
