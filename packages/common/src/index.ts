@@ -14,3 +14,4 @@ export * from "./classes/errors";
 
 // Permissions
 export * from "./permissions/roles"
+export * from "./permissions/helpers"

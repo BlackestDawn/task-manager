@@ -13,6 +13,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@casl/ability": "^6.7.3",
     "@task-manager/common": "workspace:*",
     "@types/uuid": "^10.0.0",
     "bcrypt": "^6.0.0",
