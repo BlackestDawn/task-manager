@@ -1,12 +1,12 @@
-import type { ApiConfig } from "../config";
-import { respondWithJSON } from "../lib/utils/response";
+import type { ApiConfig } from "../../config";
+import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
 import type { LoginRequest, LoginResponse } from "@task-manager/common";
 import { validateLoginRequest, validateLoginResponse } from "@task-manager/common";
 import { UserNotAuthenticatedError, BadRequestError } from "@task-manager/common";
-import { getUserById, getUserByLogin } from "../db/queries/users";
-import { checkPasswordHash, makeJWT, makeRefreshToken, getAuthTokenFromHeaders } from "../lib/auth/authentication";
-import { getRefreshTokenByToken, revokeRefreshToken, getRefreshTokenByUserId } from "../db/queries/auth";
+import { getUserByLogin } from "../../db/queries/users";
+import { checkPasswordHash, makeJWT, makeRefreshToken, getAuthTokenFromHeaders } from "../../lib/auth/authentication";
+import { getRefreshTokenByToken, revokeRefreshToken, getValidRefreshTokenByUserId } from "../../db/queries/auth";
 
 export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
   const params: LoginRequest = validateLoginRequest(await req.json() as LoginRequest);
@@ -14,11 +14,11 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
 
   const user = await getUserByLogin(cfg.db, params.login);
   if (!user) throw new UserNotAuthenticatedError("invalid username or password");
-  if (user.disabled) throw new UserNotAuthenticatedError("user is disabled");
+  if (user.disabled) throw new UserNotAuthenticatedError("invalid username or password");
   if (!checkPasswordHash(params.password, user.password)) throw new UserNotAuthenticatedError("invalid username or password");
 
-  let refreshToken = await getRefreshTokenByUserId(cfg.db, { id: user.id });
-  if (!refreshToken || refreshToken.revokedAt || refreshToken.expiresAt < new Date()) {
+  let refreshToken = await getValidRefreshTokenByUserId(cfg.db, { id: user.id });
+  if (!refreshToken) {
     refreshToken = await makeRefreshToken(user.id);
   }
 

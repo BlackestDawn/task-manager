@@ -9,6 +9,9 @@ const taskItemSchema = z.object({
   finishBy: z.coerce.date().nullish().default(null),
   completed: z.boolean(),
   completedAt: z.coerce.date().nullish().default(null),
+  groups: z.array(z.object({
+    id: z.uuid(),
+  })),
 });
 
 export type TaskItem = z.infer<typeof taskItemSchema>;

@@ -8,6 +8,10 @@ const UserSchema = z.object({
   name: z.string(),
   email: z.string().nullish().default(null),
   disabled: z.boolean().default(false),
+  groups: z.array(z.object({
+    id: z.uuid(),
+    role: z.string(),
+  })),
 });
 
 export type User = z.infer<typeof UserSchema>;
@@ -84,7 +88,7 @@ export function validateUpdatePasswordRequest(item: unknown): UpdatePasswordRequ
 
 const disabledUserRequestSchema = z.object({
   id: z.uuid(),
-  enabled: z.boolean().default(false),
+  disabled: z.boolean().default(false),
 });
 
 export type disabledUserRequest = z.infer<typeof disabledUserRequestSchema>;

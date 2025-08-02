@@ -1,7 +1,7 @@
-import { type ApiConfig } from "../config";
-import { respondWithJSON } from "../lib/utils/response";
+import { type ApiConfig } from "../../config";
+import { respondWithJSON } from "../../lib/utils/response";
 import { UserForbiddenError } from "@task-manager/common";
-import { resetDb } from "../db/queries/admin";
+import { resetDb } from "../../db/queries/admin";
 
 export async function handlerResetDb(cfg: ApiConfig, _: Request) {
   if (cfg.platform !== "dev") {

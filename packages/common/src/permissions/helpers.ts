@@ -1,7 +1,9 @@
+import { subject } from "@casl/ability";
 import { type AppAbility } from "./roles";
 
+// Task checking
 export function canUserManageTask(ability: AppAbility, task: any): boolean {
-  return ability.can('manage', 'Task', task) || ability.can('manage', 'Task', { userId: task.userId });
+  return ability.can('manage', subject('Task', task));
 }
 
 export function canUserCreateTask(ability: AppAbility): boolean {
@@ -9,45 +11,75 @@ export function canUserCreateTask(ability: AppAbility): boolean {
 }
 
 export function canUserAccessTask(ability: AppAbility, task: any): boolean {
-  return ability.can('read', 'Task', task) || ability.can('read', 'Task', { userId: task.userId });
+  return ability.can('read', subject('Task', task));
 }
 
 export function canUserModifyTask(ability: AppAbility, task: any): boolean {
-  return ability.can('update', 'Task', task) || ability.can('update', 'Task', { userId: task.userId });
+  return ability.can('update', subject('Task', task));
 }
 
 export function canUserDeleteTask(ability: AppAbility, task: any): boolean {
-  return ability.can('delete', 'Task', task) || ability.can('delete', 'Task', { userId: task.userId });
+  return ability.can('delete', subject('Task', task));
 }
 
 export function canUserCompleteTask(ability: AppAbility, task: any): boolean {
-  return ability.can('markDone', 'Task', task) || ability.can('markDone', 'Task', { userId: task.userId });
+  return ability.can('markDone', subject('Task', task));
 }
 
-export function canUserManageGroup(ability: AppAbility, groupId: string): boolean {
-  return ability.can('manage', 'Group', { id: groupId });
+// Group checking
+export function canUserManageGroup(ability: AppAbility, group: any): boolean {
+  return ability.can('manage', subject('Group', group));
 }
 
-export function canUserCreateGroup(ability: AppAbility, groupName: string): boolean {
-  return ability.can('create', 'Group', { name: groupName });
+export function canUserCreateGroup(ability: AppAbility): boolean {
+  return ability.can('create', 'Group');
 }
 
-export function canUserAccessGroup(ability: AppAbility, groupId: string): boolean {
-  return ability.can('read', 'Group', { id: groupId });
+export function canUserAccessGroup(ability: AppAbility, group: any): boolean {
+  return ability.can('read', subject('Group', group));
 }
 
-export function canUserModifyGroup(ability: AppAbility, groupId: string): boolean {
-  return ability.can('update', 'Group', { id: groupId });
+export function canUserModifyGroup(ability: AppAbility, group: any): boolean {
+  return ability.can('update', subject('Group', group));
 }
 
-export function canUserDeleteGroup(ability: AppAbility, groupId: string): boolean {
-  return ability.can('delete', 'Group', { id: groupId });
+export function canUserDeleteGroup(ability: AppAbility, group: any): boolean {
+  return ability.can('delete', subject('Group', group));
 }
 
-export function canUserInviteToGroup(ability: AppAbility, groupId: string): boolean {
-  return ability.can('invite', 'Group', { id: groupId });
+export function canUserAssignToGroup(ability: AppAbility, group: any): boolean {
+  return ability.can('assign', subject('Group', group));
 }
 
-export function canUserRemoveFromGroup(ability: AppAbility, groupId: string): boolean {
-  return ability.can('remove', 'Group', { id: groupId });
+export function canUserRemoveFromGroup(ability: AppAbility, group: any): boolean {
+  return ability.can('remove', subject('Group', group));
+}
+
+// User checking
+export function canUserManageUser(ability: AppAbility, user: any): boolean {
+  return ability.can('manage', subject('User', user));
+}
+
+export function canUserCreateUser(ability: AppAbility): boolean {
+  return ability.can('create', 'User');
+}
+
+export function canUserAccessUser(ability: AppAbility, user: any): boolean {
+  return ability.can('read', subject('User', user));
+}
+
+export function canUserModifyUser(ability: AppAbility, user: any): boolean {
+  return ability.can('update', subject('User', user));
+}
+
+export function canUserDeleteUser(ability: AppAbility, user: any): boolean {
+  return ability.can('delete', subject('User', user));
+}
+
+export function canUserModifyPassword(ability: AppAbility, user: any): boolean {
+  return ability.can('update', subject('User', user), 'password');
+}
+
+export function canUserModifyDisabled(ability: AppAbility, user: any): boolean {
+  return ability.can('update', subject('User', user), 'disabled');
 }

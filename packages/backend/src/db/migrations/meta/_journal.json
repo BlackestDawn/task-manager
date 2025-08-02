@@ -29,6 +29,13 @@
       "when": 1753533690398,
       "tag": "0003_silky_starjammers",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1754042898328,
+      "tag": "0004_dark_giant_man",
+      "breakpoints": true
     }
   ]
 }

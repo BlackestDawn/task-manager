@@ -5,17 +5,30 @@ import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByU
 
 export async function createUser(db: DBConn, params: CreateUserRequest) {
   const [result] = await db.insert(users).values(params).returning();
-  return result;
+  return {
+    ...result,
+    groups: [],
+  };
 }
 
 export async function updateUser(db: DBConn, params: UpdateUserRequest) {
   const [result] = await db.update(users).set(params).where(eq(users.id, params.id)).returning();
-  return result;
+  if (!result) return null;
+  const groups = await db.select(
+    {
+      id: userGroups.groupId,
+      role: userGroups.role,
+    }
+  ).from(userGroups).where(eq(userGroups.userId, params.id));
+
+  return {
+    ...result,
+    groups: groups,
+  };
 }
 
 export async function deleteUser(db: DBConn, params: DoByUUIDRequest) {
-  const [result] = await db.delete(users).where(eq(users.id, params.id)).returning();
-  return result;
+  await db.delete(users).where(eq(users.id, params.id)).returning();
 }
 
 export async function getUsers(db: DBConn) {
@@ -25,17 +38,50 @@ export async function getUsers(db: DBConn) {
 
 export async function getUserById(db: DBConn, params: DoByUUIDRequest) {
   const [result] = await db.select().from(users).where(eq(users.id, params.id));
-  return result;
+  if (!result) return null;
+  const groups = await db.select(
+    {
+      id: userGroups.groupId,
+      role: userGroups.role,
+    }
+  ).from(userGroups).where(eq(userGroups.userId, result.id));
+
+  return {
+    ...result,
+    groups: groups,
+  };
 }
 
 export async function updatePassword(db: DBConn, params: UpdatePasswordRequest) {
   const [result] = await db.update(users).set(params).where(eq(users.id, params.id)).returning();
-  return result;
+  if (!result) return null;
+  const groups = await db.select(
+    {
+      id: userGroups.groupId,
+      role: userGroups.role,
+    }
+  ).from(userGroups).where(eq(userGroups.userId, result.id));
+
+  return {
+    ...result,
+    groups: groups,
+  };
 }
 
 export async function getUserByLogin(db: DBConn, login: string) {
   const [result] = await db.select().from(users).where(eq(users.login, login));
-  return result;
+  if (!result) return null;
+  const groups = await db.select(
+    {
+      id: userGroups.groupId,
+      role: userGroups.role,
+    }
+  ).from(userGroups).where(eq(userGroups.userId, result.id));
+
+  return {
+    ...result,
+    groups: groups,
+  };
 }
 
 export async function getTasksForUser(db: DBConn, params: DoByUUIDRequest) {
@@ -70,7 +116,18 @@ export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
 
 export async function disabledUser(db: DBConn, params: disabledUserRequest) {
   const [result] = await db.update(users).set({
-    disabled: params.enabled,
+    disabled: params.disabled,
   }).where(eq(users.id, params.id)).returning();
-  return result;
+  if (!result) return null;
+  const groups = await db.select(
+    {
+      id: userGroups.groupId,
+      role: userGroups.role,
+    }
+  ).from(userGroups).where(eq(userGroups.userId, result.id));
+
+  return {
+    ...result,
+    groups: groups,
+  };
 }
