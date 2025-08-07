@@ -27,21 +27,22 @@ export function defineAbilityFor(user: UserContext): AppAbility {
         allow("manage", "all");
         break;
       case "manager":
-        allow(["assign", "remove", "update", "read"], "Group", { id: groupId });
-        allow("manage", "Task", { 'groups.id': groupId });
-        allow("update", "User", ["disabled", "name", "email"], { 'groups.id': groupId });
+        allow(["assign", "remove", "update"], "Group", { id: groupId });
+        allow("read", "Group");
+        allow("manage", "Task", { groups: { id: groupId }});
+        allow("update", "User", ["disabled", "name", "email"], { groups: { id: groupId }});
         break;
       case "editor":
-        allow(["create", "update", "delete", "read"], "Task", { 'groups.id': groupId });
+        allow(["create", "update", "delete", "read"], "Task", { groups: { id: groupId }});
         allow("read", "Group");
         forbid("delete", "Task", { completed: true });
         break;
       case "user":
-        allow(["read", "markDone"], "Task", { 'groups.id': groupId });
+        allow(["read", "markDone"], "Task", { groups: { id: groupId }});
         allow("read", "Group");
-        break
+        break;
       case "viewer":
-        allow("read", "Task", { 'groups.id': groupId });
+        allow("read", "Task", { groups: { id: groupId }});
         allow("read", "Group");
         break;
       case "none":

@@ -6,10 +6,10 @@ import { type loggedinUser } from "@task-manager/common";
 import { getUserById } from "../../db/queries/users";
 import { getAuthTokenFromHeaders, validateJWT } from "../../lib/auth/authentication";
 
-type HandlerWithConfig = (cfg: ApiConfig, req: BunRequest, user: loggedinUser) => Promise<Response>;
+type HandlerWithConfig = (cfg: ApiConfig, req: BunRequest, user?: loggedinUser) => Promise<Response>;
 
 export function withConfig<T extends any>(cfg: ApiConfig, handler: HandlerWithConfig, ...args: T[]) {
-  return (req: BunRequest) => handler(cfg, req, {} as loggedinUser);
+  return (req: BunRequest) => handler(cfg, req);
 }
 
 export function restrictedEndpoint<T extends any>(cfg: ApiConfig, handler: HandlerWithConfig, ...args: T[]) {

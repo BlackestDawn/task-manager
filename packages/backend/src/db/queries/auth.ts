@@ -1,6 +1,6 @@
 import { eq, and, isNull, gt, sql } from "drizzle-orm";
 import { type DBConn } from "../../config";
-import { refresh_tokens } from "../schema";
+import { refresh_tokens, userGroups } from "../schema";
 import type { RegisterRefreashToken, DoRefreashTokenByToken, DoByUUIDRequest } from "@task-manager/common";
 
 export async function registerRefreashToken(db: DBConn, params: RegisterRefreashToken) {

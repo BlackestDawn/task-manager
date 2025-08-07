@@ -11,7 +11,7 @@ const UserSchema = z.object({
   groups: z.array(z.object({
     id: z.uuid(),
     role: z.string(),
-  })),
+  })).default([]),
 });
 
 export type User = z.infer<typeof UserSchema>;

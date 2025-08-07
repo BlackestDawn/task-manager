@@ -7,7 +7,7 @@ const UserContextSchema = z.object({
   groups: z.array(z.object({
     id: z.uuid(),
     role: z.string(),
-  })),
+  })).default([]),
 });
 
 export type UserContext = z.infer<typeof UserContextSchema>;

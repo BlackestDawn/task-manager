@@ -10,11 +10,15 @@ import { canUserAccessUser, canUserCreateUser } from "@task-manager/common";
 
 export async function handlerGetUsers(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const users = await getUsers(cfg.db);
-  const result = users.filter(u => canUserAccessUser(user.capabilities, u));
+  const result = users.filter(u => {
+    const canAccess = canUserAccessUser(user.capabilities, u)
+    return canAccess;
+  });
   return respondWithJSON(200, validateUserArray(result));
 }
 
 export async function handlerCreateUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
+  const createUserRule = user.capabilities.relevantRuleFor("create", "User");
   if (!canUserCreateUser(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
   }

@@ -11,7 +11,7 @@ const taskItemSchema = z.object({
   completedAt: z.coerce.date().nullish().default(null),
   groups: z.array(z.object({
     id: z.uuid(),
-  })),
+  })).default([]),
 });
 
 export type TaskItem = z.infer<typeof taskItemSchema>;
