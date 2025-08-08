@@ -1,7 +1,7 @@
 import z from 'zod';
 
 const taskItemSchema = z.object({
-  __typename: z.literal('Task'),
+  __typename: z.literal('Task').default('Task'),
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),

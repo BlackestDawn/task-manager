@@ -1,7 +1,7 @@
 import z from 'zod';
 
 const UserSchema = z.object({
-  __typename: z.literal('User'),
+  __typename: z.literal('User').default('User'),
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
