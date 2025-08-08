@@ -29,20 +29,20 @@ export function defineAbilityFor(user: UserContext): AppAbility {
       case "manager":
         allow(["assign", "remove", "update"], "Group", { id: groupId });
         allow("read", "Group");
-        allow("manage", "Task", { groups: { id: groupId }});
-        allow("update", "User", ["disabled", "name", "email"], { groups: { id: groupId }});
+        allow("manage", "Task", { 'groups.id': groupId });
+        allow("update", "User", ["disabled", "name", "email"], { 'groups.id': groupId });
         break;
       case "editor":
-        allow(["create", "update", "delete", "read"], "Task", { groups: { id: groupId }});
+        allow(["create", "update", "delete", "read"], "Task", { 'groups.id': groupId });
         allow("read", "Group");
         forbid("delete", "Task", { completed: true });
         break;
       case "user":
-        allow(["read", "markDone"], "Task", { groups: { id: groupId }});
+        allow(["read", "markDone"], "Task", { 'groups.id': groupId });
         allow("read", "Group");
         break;
       case "viewer":
-        allow("read", "Task", { groups: { id: groupId }});
+        allow("read", "Task", { 'groups.id': groupId });
         allow("read", "Group");
         break;
       case "none":
@@ -54,5 +54,7 @@ export function defineAbilityFor(user: UserContext): AppAbility {
   allow("update", "User", { id: user.id });
   allow("manage", "Task", { userId: user.id });
 
-  return build();
+  return build({ detectSubjectType: (object: any) => {
+    return object.__typename || object.type;
+  }});
 }

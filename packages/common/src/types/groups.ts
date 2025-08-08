@@ -2,6 +2,7 @@ import z from 'zod';
 import { groupRoleList } from "@task-manager/common";
 
 const groupSchema = z.object({
+  __typename: z.literal('Group'),
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
