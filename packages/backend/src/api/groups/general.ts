@@ -4,18 +4,13 @@ import type { BunRequest } from "bun";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import type { Group, CreateGroupRequest, loggedinUser } from "@task-manager/common";
 import { validateGroup, validateGroupArray, validateCreateGroupRequest } from "@task-manager/common";
-import { createGroup, checkExistingGroup, getGroups } from "../../db/queries/groups";
+import { createGroup, getGroups } from "../../db/queries/groups";
 import { canUserAccessGroup, canUserCreateGroup } from "@task-manager/common";
 
 export async function handlerCreateGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as CreateGroupRequest;
   if (!canUserCreateGroup(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
-  }
-
-  const existingGroup = await checkExistingGroup(cfg.db, jsonBody.name);
-  if (existingGroup) {
-    throw new AlreadyExistsConflictError("Group already exists");
   }
 
   const result = await createGroup(cfg.db, validateCreateGroupRequest(jsonBody));

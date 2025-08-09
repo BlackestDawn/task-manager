@@ -4,7 +4,8 @@ import type { BunRequest } from "bun";
 import type { User, UpdatePasswordRequest, disabledUserRequest, DoByUUIDRequest, loggedinUser } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import { validateUpdatePasswordRequest, validateDoByUUIDRequest, validateUser, validateTaskItemArray, validateDisabledUserRequest } from "@task-manager/common";
-import { getUserById, updatePassword, getTasksForUser, getGroupsForUser, disabledUser } from "../../db/queries/users";
+import { getUserById, updatePassword, getGroupsForUser, disabledUser } from "../../db/queries/users";
+import { getAllTasksForUser } from "../../db/queries/tasks";
 import { hashPassword } from "../../lib/auth/authentication";
 import { canUserAccessUser, canUserModifyPassword, canUserModifyDisabled } from "@task-manager/common";
 
@@ -36,7 +37,7 @@ export async function handlerGetTasksForUser(cfg: ApiConfig, req: BunRequest, us
   if (!canUserAccessUser(user.capabilities, existingUser)) {
     throw new UserForbiddenError("User not authorized");
   }
-  const tasks = await getTasksForUser(cfg.db, params);
+  const tasks = await getAllTasksForUser(cfg.db, params);
   return respondWithJSON(200, validateTaskItemArray(tasks));
 }
 

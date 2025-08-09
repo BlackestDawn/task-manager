@@ -5,7 +5,7 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import type { AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
 import { validateDoByUUIDRequest, validateUserArray, validateTaskItemArray,
   validateAddUserToGroupRequest, validateRemoveUserFromGroupRequest, validateAssignTaskToGroupRequest, validateRemoveTaskFromGroupRequest } from "@task-manager/common";
-import { getGroupById, getGroupMembers, getGroupTasks, assignTaskToGroup, removeTaskFromGroup, addUserToGroup, removeUserFromGroup, checkExistingUserInGroup, checkExistingTaskInGroup } from "../../db/queries/groups";
+import { getGroupById, getGroupMembers, getGroupTasks, assignTaskToGroup, removeTaskFromGroup, addUserToGroup, removeUserFromGroup } from "../../db/queries/groups";
 import { canUserAssignToGroup, canUserRemoveFromGroup } from "@task-manager/common";
 
 export async function handlerGetGroupMembers(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
@@ -43,11 +43,6 @@ export async function handlerAddUserToGroup(cfg: ApiConfig, req: BunRequest, use
     throw new UserForbiddenError("User not authorized");
   }
 
-  const existing = await checkExistingUserInGroup(cfg.db, validateAddUserToGroupRequest(jsonBody));
-  if (existing) {
-    throw new AlreadyExistsConflictError("User already in group");
-  }
-
   const result = await addUserToGroup(cfg.db, validateAddUserToGroupRequest(jsonBody));
   return respondWithJSON(201, result);
 }
@@ -81,11 +76,6 @@ export async function handlerAssignTaskToGroup(cfg: ApiConfig, req: BunRequest, 
   }
   if (!canUserAssignToGroup(user.capabilities, group)) {
     throw new UserForbiddenError("User not authorized");
-  }
-
-  const existing = await checkExistingTaskInGroup(cfg.db, validateAssignTaskToGroupRequest(jsonBody));
-  if (existing) {
-    throw new AlreadyExistsConflictError("Task already assigned to group");
   }
 
   const result = await assignTaskToGroup(cfg.db, validateAssignTaskToGroupRequest(jsonBody));

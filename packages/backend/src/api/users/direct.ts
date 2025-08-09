@@ -29,7 +29,7 @@ export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: l
     email: params.email || existingUser.email,
     login: params.login || existingUser.login,
   }
-  const result = await updateUser(cfg.db, validateUpdateUserRequest(updateParams));
+  const result = await updateUser(cfg.db, validateUpdateUserRequest(updateParams)) as User;
   return respondWithJSON(200, validateUser(result));
 }
 
