@@ -1,17 +1,13 @@
 import { pgTable, timestamp, varchar, uuid, boolean, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
-import { groupRoleList } from "@task-manager/common";
-
-export const getCurrentDate = () => {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-}
+import { relations } from "drizzle-orm";
+import { groupRoleList, getTZNormalizedDate } from "@task-manager/common";
 
 export const groupRoleEnum = pgEnum("group_role", groupRoleList);
 
 export const tasks = pgTable("tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getCurrentDate),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getTZNormalizedDate),
   title: varchar("title", { length: 256 }).notNull(),
   description: varchar("description", { length: 1024 }),
   finishBy: timestamp("finish_by"),
@@ -23,7 +19,7 @@ export const tasks = pgTable("tasks", {
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getCurrentDate),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getTZNormalizedDate),
   login: varchar("login", { length: 256 }).notNull().unique(),
   name: varchar("name", { length: 256 }).notNull(),
   password: varchar("password", { length: 256 }).notNull(),
@@ -34,7 +30,7 @@ export const users = pgTable("users", {
 export const refresh_tokens = pgTable("refresh_tokens", {
   token: varchar("token", { length: 256 }).primaryKey(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getCurrentDate),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getTZNormalizedDate),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at").notNull(),
   revokedAt: timestamp("revoked_at"),
@@ -43,10 +39,9 @@ export const refresh_tokens = pgTable("refresh_tokens", {
 export const groups = pgTable("groups", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getCurrentDate),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(getTZNormalizedDate),
   name: varchar("name", { length: 256 }).notNull().unique(),
   description: varchar("description", { length: 1024 }),
-  role: groupRoleEnum("role").notNull().default("user"),
 });
 
 export const userGroups = pgTable("user_groups", {
@@ -54,6 +49,7 @@ export const userGroups = pgTable("user_groups", {
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   groupId: uuid("group_id").references(() => groups.id, { onDelete: "cascade" }).notNull(),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  role: groupRoleEnum("role").notNull().default("user"),
 }, (table) => ([
   uniqueIndex("unique_user_group").on(table.userId, table.groupId),
 ]));
@@ -67,3 +63,51 @@ export const taskGroups = pgTable("task_groups", {
 }, (table) => ([
   uniqueIndex("unique_task_group").on(table.taskId, table.groupId),
 ]));
+
+// export const groupsRelations = relations(groups, ({ one, many }) => ({
+//   creator: one(users, {
+//     references: [users.id],
+//   }),
+//   userGroups: many(userGroups),
+//   taskGroups: many(taskGroups),
+// }));
+
+export const userGroupsRelations = relations(userGroups, ({ one }) => ({
+  user: one(users, {
+    fields: [userGroups.userId],
+    references: [users.id],
+  }),
+  group: one(groups, {
+    fields: [userGroups.groupId],
+    references: [groups.id],
+  }),
+}));
+
+export const taskGroupsRelations = relations(taskGroups, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskGroups.taskId],
+    references: [tasks.id],
+  }),
+  group: one(groups, {
+    fields: [taskGroups.groupId],
+    references: [groups.id],
+  }),
+  assignedByUser: one(users, {
+    fields: [taskGroups.assignedBy],
+    references: [users.id],
+  }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  tasks: many(tasks),
+  userGroups: many(userGroups),
+  createdGroups: many(groups),
+}));
+
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  user: one(users, {
+    fields: [tasks.userId],
+    references: [users.id],
+  }),
+  taskGroups: many(taskGroups),
+}));

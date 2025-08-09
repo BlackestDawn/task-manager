@@ -1,6 +1,6 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, gt, sql } from "drizzle-orm";
 import { type DBConn } from "../../config";
-import { refresh_tokens } from "../schema";
+import { refresh_tokens, userGroups } from "../schema";
 import type { RegisterRefreashToken, DoRefreashTokenByToken, DoByUUIDRequest } from "@task-manager/common";
 
 export async function registerRefreashToken(db: DBConn, params: RegisterRefreashToken) {
@@ -20,11 +20,12 @@ export async function revokeRefreshToken(db: DBConn, params: DoRefreashTokenByTo
   return result;
 }
 
-export async function getRefreshTokenByUserId(db: DBConn, params: DoByUUIDRequest) {
+export async function getValidRefreshTokenByUserId(db: DBConn, params: DoByUUIDRequest) {
   const [result] = await db.select().from(refresh_tokens)
     .where(and(
       eq(refresh_tokens.userId, params.id),
-      isNull(refresh_tokens.revokedAt)
+      isNull(refresh_tokens.revokedAt),
+      gt(refresh_tokens.expiresAt, sql`now()`)
     ));
   return result;
 }

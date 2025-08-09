@@ -1,11 +1,13 @@
 # Task manager
 
 Work in progress.
-Simple task manager with support for multiple users written in Typescript. Done as capstone project för a frontend development course, also added in backend development to show my potential for fullstack development and working with multiple packages in a monorepo.
+Task manager with support for multiple users and and groups. This project is done to showcase my skills in frontend and backend development.
+
+It's written in Typescript and is structured as separate packages.
 
 ## Installation
 
-* Install Bun: [Instructions](https://bun.sh/install) For multiple platforms.
+* Install Bun: [Instructions](https://bun.sh/install) for multiple platforms.
 * Clone repo and enter it: `https://github.com/BlackestDawn/task-manager`
 * Install dependencies. `bun install`
 * Install or gain access to a Postgres server.
@@ -23,8 +25,9 @@ Simple task manager with support for multiple users written in Typescript. Done 
 
 ## Technologies and packages used
 
-* [Bun](https://bun.sh/) For runtime and backend.
+* [Bun](https://bun.sh/) For backend handling and general runtime.
 * [PostgreSQL](https://www.postgresql.org) As database
 * [Drizzle-ORM](https://orm.drizzle.team/) For database connection and management
-* [Vite](https://vite.dev/) For frontend testing and bundling
+* [Vite](https://vite.dev/) For frontend handling
 * [Zod](https://zod.dev) For type validation and type enforcement
+* [CASL](https://casl.js.org) For authorization and permission handling

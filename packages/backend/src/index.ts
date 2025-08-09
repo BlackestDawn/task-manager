@@ -2,11 +2,11 @@ import { cfg } from "./config";
 import { runMigrations, closeConnection } from "./db";
 import { errorHandlingMiddleware } from "./api/middleware/errors";
 import { corsHeaders } from "./api/middleware/cors";
-import { adminRoutes } from "./routes/admin";
-import { taskRoutes } from "./routes/tasks";
-import { userRoutes } from "./routes/users";
-import { authRoutes } from "./routes/auth";
-import { groupRoutes } from "./routes/groups";
+import { adminRoutes } from "./api/admin/routes";
+import { taskRoutes } from "./api/tasks/routes";
+import { userRoutes } from "./api/users/routes";
+import { authRoutes } from "./api/auth/routes";
+import { groupRoutes } from "./api/groups/routes";
 
 const server = Bun.serve({
   port: cfg.port,

@@ -1,4 +1,5 @@
 import z from 'zod';
+import { BadRequestError } from '../classes/errors';
 
 const DoByUUIDRequestSchema = z.object({
   id: z.uuid(),
@@ -12,8 +13,8 @@ export function validateDoByUUIDRequest(item: unknown): DoByUUIDRequest {
   }
   const result = DoByUUIDRequestSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid get by UUID request:', result.error);
-    throw new Error('Invalid get by UUID request');
+    console.error('Invalid/malformed UUID:', result.error);
+    throw new BadRequestError('Invalid/malformed UUID');
   }
   return result.data;
 }

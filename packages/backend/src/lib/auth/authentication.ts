@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { cfg } from "../../config";
 import type { RegisterRefreashToken } from "@task-manager/common";
 import { registerRefreashToken } from "../../db/queries/auth";
-import { validate as validateUUID } from "uuid";
+import { getTZNormalizedDate } from "@task-manager/common";
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
@@ -63,24 +63,11 @@ export async function makeRefreshToken(userId: string) {
   const params: RegisterRefreashToken = {
     userId,
     token: tokenString,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60),
+    expiresAt: getTZNormalizedDate(cfg.refreashToken.defaultExpireTime),
   };
   const result = await registerRefreashToken(cfg.db, params);
   if (!result) {
     throw new Error("failed to create refresh token");
   }
   return result;
-}
-
-export async function getAndValidateUser(headers: Headers) {
-  const bearerToken = await getAuthTokenFromHeaders(headers);
-  if (!bearerToken) {
-    throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-  }
-
-  const userId = await validateJWT(bearerToken);
-  if (!validateUUID(userId)) {
-    throw new BadRequestError("Invalid/malformed user ID");
-  }
-  return userId;
 }

@@ -1,6 +1,7 @@
 import z from 'zod';
 
 const UserSchema = z.object({
+  __typename: z.literal('User').default('User'),
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -8,6 +9,10 @@ const UserSchema = z.object({
   name: z.string(),
   email: z.string().nullish().default(null),
   disabled: z.boolean().default(false),
+  groups: z.array(z.object({
+    id: z.uuid(),
+    role: z.string(),
+  })).default([]),
 });
 
 export type User = z.infer<typeof UserSchema>;
@@ -50,8 +55,8 @@ export function validateCreateUserRequest(item: unknown): CreateUserRequest {
 
 const UpdateUserRequestSchema = z.object({
   id: z.uuid(),
-  login: z.string(),
-  name: z.string(),
+  login: z.string().nullish().default(null),
+  name: z.string().nullish().default(null),
   email: z.string().nullish().default(null),
 });
 
@@ -84,7 +89,7 @@ export function validateUpdatePasswordRequest(item: unknown): UpdatePasswordRequ
 
 const disabledUserRequestSchema = z.object({
   id: z.uuid(),
-  enabled: z.boolean().default(false),
+  disabled: z.boolean().default(false),
 });
 
 export type disabledUserRequest = z.infer<typeof disabledUserRequestSchema>;

@@ -2,6 +2,7 @@ import z from 'zod';
 import { groupRoleList } from "@task-manager/common";
 
 const groupSchema = z.object({
+  __typename: z.literal('Group').default('Group'),
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -33,7 +34,6 @@ export function validateGroupArray(groups: unknown[]): Group[] {
 const createGroupRequestSchema = z.object({
   name: z.string(),
   description: z.string().nullish().default(null),
-  role: z.enum(groupRoleList).default("user"),
 });
 
 export type CreateGroupRequest = z.infer<typeof createGroupRequestSchema>;
@@ -50,7 +50,6 @@ export function validateCreateGroupRequest(item: unknown): CreateGroupRequest {
 export const updateGroupRequestSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  role: z.enum(groupRoleList).default("user"),
   description: z.string().nullish().default(null),
 });
 
@@ -68,6 +67,7 @@ export function validateUpdateGroupRequest(item: unknown): UpdateGroupRequest {
 export const addUserToGroupRequestSchema = z.object({
   userId: z.uuid(),
   groupId: z.uuid(),
+  role: z.enum(groupRoleList).default("user"),
 });
 
 export type AddUserToGroupRequest = z.infer<typeof addUserToGroupRequestSchema>;

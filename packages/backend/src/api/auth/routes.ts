@@ -1,6 +1,6 @@
-import { cfg } from "../config";
-import { withConfig } from "../api/middleware/config";
-import { handlerLoginUser, handlerRefreshAccessToken, handlerRevokeRefreshToken } from "../api/authentication";
+import { cfg } from "../../config";
+import { withConfig } from "../middleware/config";
+import { handlerLoginUser, handlerRefreshAccessToken, handlerRevokeRefreshToken } from "./auth";
 
 export const authRoutes = {
   "/api/login": {

@@ -1,6 +1,7 @@
 import z from 'zod';
 
 const taskItemSchema = z.object({
+  __typename: z.literal('Task').default('Task'),
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -9,6 +10,9 @@ const taskItemSchema = z.object({
   finishBy: z.coerce.date().nullish().default(null),
   completed: z.boolean(),
   completedAt: z.coerce.date().nullish().default(null),
+  groups: z.array(z.object({
+    id: z.uuid(),
+  })).default([]),
 });
 
 export type TaskItem = z.infer<typeof taskItemSchema>;

@@ -10,7 +10,7 @@
     "build:frontend": "bun --filter @task-manager/frontend build",
     "build:common": "bun --filter @task-manager/common build",
     "build": "concurrently 'bun run build:common' 'bun run build:backend' 'bun run build:frontend'",
-    "dev:backend": "bun --filter @task-manager/backend dev",
+    "dev:backend": "bun --elide-lines=40 --filter @task-manager/backend dev",
     "dev:frontend": "bun --filter @task-manager/frontend dev",
     "dev:common": "bun --filter @task-manager/common dev",
     "dev": "concurrently 'bun run build:common' 'bun run dev:backend' 'bun run dev:frontend'",

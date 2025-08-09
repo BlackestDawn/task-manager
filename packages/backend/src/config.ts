@@ -20,6 +20,9 @@ export type ApiConfig = {
     salt_rounds: number;
     token_issuer: string;
   };
+  refreashToken: {
+    defaultExpireTime: number;
+  };
 };
 
 export const cfg: ApiConfig = {
@@ -33,5 +36,8 @@ export const cfg: ApiConfig = {
   crypto: {
     salt_rounds: 10,
     token_issuer: "taskies-manager",
+  },
+  refreashToken: {
+    defaultExpireTime: 60 * 60 * 24 * 60,
   },
 };
