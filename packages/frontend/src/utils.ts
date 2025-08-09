@@ -49,10 +49,3 @@ export function escapeHtml(text: string): string {
   div.textContent = text;
   return div.innerHTML;
 }
-
-export function justDate(date: Date | string): string {
-  if (!date) return '';
-  if (typeof date === 'string') return date.split('T')[0] || '';
-  if (date instanceof Date) return date.toISOString().split('T')[0] || '';
-  return new Date(date).toLocaleDateString();
-}
