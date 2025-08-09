@@ -10,12 +10,10 @@ import { canUserAccessUser, canUserDeleteUser, canUserModifyUser } from "@task-m
 export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as UpdateUserRequest;
   const reqParam = req.params as { userId: string };
-  const params = {
+  const params: UpdateUserRequest = validateUpdateUserRequest({
+    ...jsonBody,
     id: reqParam.userId,
-    name: jsonBody.name,
-    email: jsonBody.email,
-    login: jsonBody.login,
-  } as UpdateUserRequest;
+  });
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");
@@ -23,19 +21,19 @@ export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: l
   if (!canUserModifyUser(user.capabilities, existingUser)) {
     throw new UserForbiddenError("User not authorized");
   }
-  const updateParams = {
-    id: reqParam.userId,
+  const updateParams = validateUpdateUserRequest({
+    id: params.id,
     name: params.name || existingUser.name,
     email: params.email || existingUser.email,
     login: params.login || existingUser.login,
-  }
-  const result = await updateUser(cfg.db, validateUpdateUserRequest(updateParams)) as User;
+  });
+  const result = await updateUser(cfg.db, updateParams) as User;
   return respondWithJSON(200, validateUser(result));
 }
 
 export async function handlerDeleteUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const params = validateDoByUUIDRequest(reqParam);
+  const reqParam = req.params as { userId: string };
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (existingUser) {
     if (!canUserDeleteUser(user.capabilities, existingUser)) {
@@ -47,8 +45,8 @@ export async function handlerDeleteUser(cfg: ApiConfig, req: BunRequest, user: l
 }
 
 export async function handlerGetUserById(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const params = validateDoByUUIDRequest(reqParam);
+  const reqParam = req.params as { userId: string };
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");

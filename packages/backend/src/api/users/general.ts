@@ -18,17 +18,16 @@ export async function handlerGetUsers(cfg: ApiConfig, req: BunRequest, user: log
 }
 
 export async function handlerCreateUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const createUserRule = user.capabilities.relevantRuleFor("create", "User");
   if (!canUserCreateUser(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
   }
   const jsonBody = await req.json() as CreateUserRequest;
-  const params = {
+  const params: CreateUserRequest = validateCreateUserRequest({
     login: jsonBody.login,
     name: jsonBody.name,
     email: jsonBody.email,
     password: await hashPassword(jsonBody.password),
-  } as CreateUserRequest;
-  const result = await createUser(cfg.db, validateCreateUserRequest(params)) as User;
+  });
+  const result = await createUser(cfg.db, params) as User;
   return respondWithJSON(201, validateUser(result));
 }

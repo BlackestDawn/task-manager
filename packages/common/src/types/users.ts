@@ -55,8 +55,8 @@ export function validateCreateUserRequest(item: unknown): CreateUserRequest {
 
 const UpdateUserRequestSchema = z.object({
   id: z.uuid(),
-  login: z.string(),
-  name: z.string(),
+  login: z.string().nullish().default(null),
+  name: z.string().nullish().default(null),
   email: z.string().nullish().default(null),
 });
 

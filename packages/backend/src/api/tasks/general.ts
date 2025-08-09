@@ -16,10 +16,13 @@ export async function handlerGetTasksByUserId(cfg: ApiConfig, req: BunRequest, u
 
 export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as CreateTaskRequest;
-  jsonBody.userId = user.userInfo.id;
   if (!canUserCreateTask(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
   }
+  const params: CreateTaskRequest = validateCreateTaskRequest({
+    ...jsonBody,
+    userId: user.userInfo.id,
+  });
   const result = await createTask(cfg.db, validateCreateTaskRequest(jsonBody));
   return respondWithJSON(201, validateTaskItem(result) as TaskItem);
 }

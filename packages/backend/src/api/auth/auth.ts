@@ -22,17 +22,13 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
     refreshToken = await makeRefreshToken(user.id);
   }
 
-  const response: LoginResponse = {
-    id: user.id,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-    login: user.login,
-    name: user.name,
+  const response: LoginResponse = validateLoginResponse({
+    ...user,
     token: await makeJWT(user.id),
     refreshToken: refreshToken.token,
-  };
+  });
 
-  return respondWithJSON(200, validateLoginResponse(response));
+  return respondWithJSON(200, response);
 }
 
 export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest) {

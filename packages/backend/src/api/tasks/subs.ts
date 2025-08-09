@@ -8,11 +8,12 @@ import { getTaskById, markDone } from "../../db/queries/tasks";
 import { canUserCompleteTask } from "@task-manager/common";
 
 export async function handlerMarkDone(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const task = await getTaskById(cfg.db, validateDoByUUIDRequest(reqParam));
+  const reqParam = req.params as { taskId: string };
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.taskId);
+  const task = await getTaskById(cfg.db, params);
   if (!canUserCompleteTask(user.capabilities, task)) {
     throw new UserForbiddenError("User not authorized");
   }
-  if (!task.completed) await markDone(cfg.db, reqParam);
+  if (!task.completed) await markDone(cfg.db, params);
   return respondWithJSON(204, {});
 }

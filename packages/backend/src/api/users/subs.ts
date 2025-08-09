@@ -11,11 +11,11 @@ import { canUserAccessUser, canUserModifyPassword, canUserModifyDisabled } from 
 
 export async function handlerUpdateUserPassword(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as { password: string };
-  const reqParam = req.params as DoByUUIDRequest;
-  const params = {
-    id: reqParam.id,
+  const reqParam = req.params as { userId: string };
+  const params: UpdatePasswordRequest = validateUpdatePasswordRequest({
+    id: reqParam.userId,
     password: await hashPassword(jsonBody.password),
-  } as UpdatePasswordRequest;
+  });
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");
@@ -23,13 +23,13 @@ export async function handlerUpdateUserPassword(cfg: ApiConfig, req: BunRequest,
   if (!canUserModifyPassword(user.capabilities, existingUser)) {
     throw new UserForbiddenError("User not authorized");
   }
-  const result = await updatePassword(cfg.db, validateUpdatePasswordRequest(params));
+  const result = await updatePassword(cfg.db, params);
   return respondWithJSON(200, validateUser(result));
 }
 
 export async function handlerGetTasksForUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const params = validateDoByUUIDRequest(reqParam);
+  const reqParam = req.params as { userId: string };
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.userId);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");
@@ -42,8 +42,8 @@ export async function handlerGetTasksForUser(cfg: ApiConfig, req: BunRequest, us
 }
 
 export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const params = validateDoByUUIDRequest(reqParam);
+  const reqParam = req.params as { userId: string };
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.userId);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");
@@ -56,8 +56,12 @@ export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest, u
 }
 
 export async function handlerDisabledUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as disabledUserRequest;
-  const params = validateDisabledUserRequest(reqParam);
+  const jsonBody = await req.json() as { disabled: boolean };
+  const reqParam = req.params as { userId: string };
+  const params: disabledUserRequest = validateDisabledUserRequest({
+    id: reqParam.userId,
+    disabled: jsonBody.disabled,
+  });
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");

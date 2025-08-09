@@ -9,33 +9,33 @@ import { getGroupById, getGroupMembers, getGroupTasks, assignTaskToGroup, remove
 import { canUserAssignToGroup, canUserRemoveFromGroup } from "@task-manager/common";
 
 export async function handlerGetGroupMembers(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam));
+  const reqParam = req.params as { groupId: string };
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.groupId);
+  const group = await getGroupById(cfg.db, params);
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-
-  const members = await getGroupMembers(cfg.db, reqParam);
+  const members = await getGroupMembers(cfg.db, params);
   return respondWithJSON(200, validateUserArray(members));
 }
 
 export async function handlerGetGroupTasks(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam));
+  const reqParam = req.params as { groupId: string };
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.groupId);
+  const group = await getGroupById(cfg.db, params);
   if (!group) {
     throw new NotFoundError("Group not found");
   }
 
-  const tasks = await getGroupTasks(cfg.db, reqParam);
+  const tasks = await getGroupTasks(cfg.db, params);
   return respondWithJSON(200, validateTaskItemArray(tasks));
 }
 
 export async function handlerAddUserToGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
+  const reqParam = req.params as { groupId: string };
   const jsonBody = await req.json() as AddUserToGroupRequest;
-  jsonBody.groupId = reqParam.id;
 
-  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam));
+  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam.groupId));
   if (!group) {
     throw new NotFoundError("Group not found");
   }
@@ -43,16 +43,19 @@ export async function handlerAddUserToGroup(cfg: ApiConfig, req: BunRequest, use
     throw new UserForbiddenError("User not authorized");
   }
 
-  const result = await addUserToGroup(cfg.db, validateAddUserToGroupRequest(jsonBody));
+  const params: AddUserToGroupRequest = validateAddUserToGroupRequest({
+    ...jsonBody,
+    groupId: reqParam.groupId,
+  });
+  const result = await addUserToGroup(cfg.db, params);
   return respondWithJSON(201, result);
 }
 
 export async function handlerRemoveUserFromGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
+  const reqParam = req.params as { groupId: string };
   const jsonBody = await req.json() as RemoveUserFromGroupRequest;
-  jsonBody.groupId = reqParam.id;
 
-  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam));
+  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam.groupId));
   if (!group) {
     throw new NotFoundError("Group not found");
   }
@@ -60,17 +63,19 @@ export async function handlerRemoveUserFromGroup(cfg: ApiConfig, req: BunRequest
     throw new UserForbiddenError("User not authorized");
   }
 
-  await removeUserFromGroup(cfg.db, validateRemoveUserFromGroupRequest(jsonBody));
+  const params: RemoveUserFromGroupRequest = validateRemoveUserFromGroupRequest({
+    ...jsonBody,
+    groupId: reqParam.groupId,
+  });
+  await removeUserFromGroup(cfg.db, params);
   return respondWithJSON(204, {});
 }
 
 export async function handlerAssignTaskToGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
+  const reqParam = req.params as { groupId: string };
   const jsonBody = await req.json() as AssignTaskToGroupRequest;
-  jsonBody.groupId = reqParam.id;
-  jsonBody.assignedBy = user.userInfo.id;
 
-  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam));
+  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam.groupId));
   if (!group) {
     throw new NotFoundError("Group not found");
   }
@@ -78,16 +83,20 @@ export async function handlerAssignTaskToGroup(cfg: ApiConfig, req: BunRequest, 
     throw new UserForbiddenError("User not authorized");
   }
 
-  const result = await assignTaskToGroup(cfg.db, validateAssignTaskToGroupRequest(jsonBody));
+  const params: AssignTaskToGroupRequest = validateAssignTaskToGroupRequest({
+    ...jsonBody,
+    groupId: reqParam.groupId,
+    assignedBy: user.userInfo.id,
+  });
+  const result = await assignTaskToGroup(cfg.db, params);
   return respondWithJSON(201, result);
 }
 
 export async function handlerRemoveTaskFromGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
+  const reqParam = req.params as { groupId: string };
   const jsonBody = await req.json() as RemoveTaskFromGroupRequest;
-  jsonBody.groupId = reqParam.id;
 
-  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam));
+  const group = await getGroupById(cfg.db, validateDoByUUIDRequest(reqParam.groupId));
   if (!group) {
     throw new NotFoundError("Group not found");
   }
@@ -95,6 +104,10 @@ export async function handlerRemoveTaskFromGroup(cfg: ApiConfig, req: BunRequest
     throw new UserForbiddenError("User not authorized");
   }
 
+  const params: RemoveTaskFromGroupRequest = validateRemoveTaskFromGroupRequest({
+    ...jsonBody,
+    groupId: reqParam.groupId,
+  });
   await removeTaskFromGroup(cfg.db, validateRemoveTaskFromGroupRequest(jsonBody));
   return respondWithJSON(204, {});
 }
