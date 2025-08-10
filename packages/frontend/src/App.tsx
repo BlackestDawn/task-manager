@@ -1,9 +1,17 @@
 import SiteHeader from "./siteHeader/siteHeader"
-import MainContent from "./mainContent/mainContent"
 import SiteFooter from "./siteFooter/siteFooter"
 import "./App.css"
+import { RouterProvider, createRouter } from "@tanstack/react-router"
+import { routeTree } from "./routeTree.gen"
 
-function App() {
+const router = createRouter({ routeTree })
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
+export default function App() {
   return (
     <>
       <header>
@@ -11,7 +19,7 @@ function App() {
       </header>
 
       <main>
-        <MainContent />
+        <RouterProvider router={router} />
       </main>
 
       <footer>
@@ -20,5 +28,3 @@ function App() {
     </>
   )
 }
-
-export default App

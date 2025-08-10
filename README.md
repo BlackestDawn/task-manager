@@ -26,8 +26,11 @@ It's written in Typescript and is structured as separate packages.
 ## Technologies and packages used
 
 * [Bun](https://bun.sh/) For backend handling and general runtime.
-* [PostgreSQL](https://www.postgresql.org) As database
+* [PostgreSQL](https://www.postgresql.org/) As database
 * [Drizzle-ORM](https://orm.drizzle.team/) For database connection and management
 * [Vite](https://vite.dev/) For frontend handling
-* [Zod](https://zod.dev) For type validation and type enforcement
-* [CASL](https://casl.js.org) For authorization and permission handling
+* [Zod](https://zod.dev/) For type validation and type enforcement
+* [CASL](https://casl.js.org/) For authorization and permission handling
+* [React](https://react.dev/) Frontend framework
+* [TanStack](https://tanstack.com/) Utility packages for routing, state management, querying, etc
+* [Axios](https://axios-http.com/) Better web request/fetch utility

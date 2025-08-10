@@ -1,6 +1,6 @@
 import { justDate } from "@task-manager/common"
 
-function MainContent() {
+export default function MainContent() {
   return (
     <div>
       <p>Main Content</p>
@@ -8,5 +8,3 @@ function MainContent() {
     </div>
   )
 }
-
-export default MainContent
