@@ -1,6 +1,7 @@
 import SiteHeader from "./siteHeader/siteHeader"
 import MainContent from "./mainContent/mainContent"
 import SiteFooter from "./siteFooter/siteFooter"
+import "./App.css"
 
 function App() {
   return (
