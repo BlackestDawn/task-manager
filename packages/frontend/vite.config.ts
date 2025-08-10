@@ -1,16 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [react()],
-  // Keep your existing configuration for accessing common package
+  plugins: [
+    tanstackRouter({
+      target: "react",
+      autoCodeSplitting: true,
+    }),
+    react()
+  ],
   resolve: {
     alias: {
-      // Preserve any existing aliases for your common package
       '@common': path.resolve(__dirname, '../common/src'),
-      // or whatever structure you're using
     }
   },
-  // Keep any other existing config
 })
