@@ -1,0 +1,23 @@
+import Link from "next/link"
+
+const LinkList = [
+  { href: "/", label: "Home" },
+  { href: "/tasks", label: "Tasks" },
+  { href: "/groups", label: "Groups" },
+  { href: "/users", label: "Users" },
+  { href: "/settings", label: "Settings" }
+];
+
+export default function HeaderNavbar() {
+  return (
+    <nav>
+      <ul className="flex items-center justify-center gap-4 text-lg font-semibold">
+        {LinkList.map((link) => (
+          <li key={link.href} className="">
+            <Link href={link.href} className="gap-2 hover:underline hover:underline-offset-4">{link.label}</Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

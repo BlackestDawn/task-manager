@@ -3,24 +3,40 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
-    "jsx": "react-jsx",
-    "outDir": "dist",
-    "rootDir": "src",
+    "jsx": "preserve",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/components/*": ["./components/*"]
+    },
+    "noEmit": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    ".next/types/**/*.ts",
+    "app/**/*",
+    "components/**/*"
+  ],
   "references": [
-    { "path": "../common" }
+    {
+      "path": "../common"
+    }
   ]
 }

@@ -1,9 +1,0 @@
-.navbar a {
-   display: inline-block;
-   margin-right: 20px;
-}
-
-.navbar a[data-status="active"] {
-   font-weight: bold;
-   color: #418712;
-}
