@@ -11,9 +11,9 @@ const LinkList = [
 export default function HeaderNavbar() {
   return (
     <nav>
-      <ul className="flex items-center justify-center gap-4 text-lg font-semibold">
+      <ul className="flex items-center justify-center text-lg font-semibold">
         {LinkList.map((link) => (
-          <li key={link.href} className="">
+          <li key={link.href} className="border-solid border-white border-2 p-2 rounded-t-xl">
             <Link href={link.href} className="gap-2 hover:underline hover:underline-offset-4">{link.label}</Link>
           </li>
         ))}
