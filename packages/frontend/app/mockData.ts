@@ -145,7 +145,7 @@ export const testTask2: TaskItem = {
 };
 
 export const testGroups = [testGroup1, testGroup2];
-export const testUsers = [adminUser, managerUser, editoruser, normalUser, viewerUser];
+export const testUsers = [adminUser, managerUser, editoruser, normalUser, viewerUser, noneUser];
 export const testTasks = [testTask1, testTask2];
 const mockData = {
   users: testUsers,
