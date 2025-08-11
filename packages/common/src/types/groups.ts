@@ -8,7 +8,6 @@ const groupSchema = z.object({
   updatedAt: z.coerce.date(),
   name: z.string(),
   description: z.string().nullish().default(null),
-  role: z.enum(groupRoleList).default("user"),
 });
 
 export type Group = z.infer<typeof groupSchema>;
