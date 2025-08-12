@@ -24,8 +24,9 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/components/*": ["./components/*"]
+      "@/*": ["./*"]
     },
     "noEmit": true
   },

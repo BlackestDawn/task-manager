@@ -1,4 +1,4 @@
-import HeaderNavbar from "../nav/mainbar"
+import HeaderNavbar from "@/components/nav/mainbar"
 
 export default function SiteHeader() {
   return (
