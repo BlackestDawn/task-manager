@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${robotoFlex.className} ${robotoMono.className} antialiased`}>
-        <header>
+        <header className="pt-5 pb-5">
           <SiteHeader />
         </header>
 
@@ -36,7 +36,7 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer>
+        <footer className="pt-5">
           <SiteFooter />
         </footer>
       </body>

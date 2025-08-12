@@ -10,10 +10,10 @@ const LinkList = [
 
 export default function HeaderNavbar() {
   return (
-    <nav>
+    <nav className="border-b-2 border-gray-200">
       <ul className="flex items-center justify-center text-lg font-semibold">
         {LinkList.map((link) => (
-          <li key={link.href} className="border-solid border-white border-2 p-2 rounded-t-xl">
+          <li key={link.href} className="border-t-2 border-r-2 border-l-2 border-gray-200 p-2 rounded-t-xl">
             <Link href={link.href} className="gap-2 hover:underline hover:underline-offset-4">{link.label}</Link>
           </li>
         ))}

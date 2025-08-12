@@ -1,5 +1,5 @@
 export default function SiteFooter() {
   return (
-    <p>Footer Content</p>
+    <p className="border-t-2 border-gray-200">Footer Content</p>
   )
 }
