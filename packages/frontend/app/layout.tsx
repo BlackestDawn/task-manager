@@ -27,7 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${robotoFlex.className} ${robotoMono.className} antialiased`}>
+      <body className={`${robotoFlex.className} ${robotoMono.className} antialiased text-center`}>
         <header className="pt-5 pb-5">
           <SiteHeader />
         </header>
