@@ -1,6 +1,6 @@
 import type { User, Group, TaskItem } from "@task-manager/common";
 
-const baseTime = new Date("2025-08-10T00:00:00Z");
+const baseTime = new Date();
 const days = 24 * 60 * 60 * 1000; // milliseconds in a day
 const hours = 60 * 60 * 1000;
 
@@ -119,7 +119,7 @@ export const testTask1: TaskItem = {
   updatedAt: new Date(baseTime.getTime() - 3 * hours),
   title: "Test Task",
   description: "This is a task created for testing purposes.",
-  finishBy: new Date(baseTime.getTime() + 20 * days),
+  finishBy: new Date(baseTime.getTime() + 10 * days),
   userId: managerUser.id,
   completed: false,
   completedAt: null,
@@ -135,18 +135,34 @@ export const testTask2: TaskItem = {
   updatedAt: new Date(baseTime.getTime() - 5 * hours),
   title: "Another Test Task",
   description: "This is another task created for testing purposes.",
-  finishBy: new Date(baseTime.getTime() + 15 * days),
+  finishBy: new Date(baseTime.getTime() + 3 * days),
   userId: editoruser.id,
-  completed: false,
+  completed: true,
   completedAt: null,
   groups: [
     { id: testGroup2.id },
   ],
 };
 
+export const testTask3: TaskItem = {
+  __typename: "Task",
+  id: "c7d8e9f0-1a2b-3c4d-5e6f-7g8h9i0j1k2",
+  createdAt: new Date(baseTime.getTime() - 8 * hours),
+  updatedAt: new Date(baseTime.getTime() - 7 * hours),
+  title: "Overdue Test Task",
+  description: "This task is overdue and should be highlighted.",
+  finishBy: new Date(baseTime.getTime() - 1 * days), // Overdue
+  userId: normalUser.id,
+  completed: false,
+  completedAt: null,
+  groups: [
+    { id: testGroup1.id },
+  ],
+};
+
 export const testGroups = [testGroup1, testGroup2];
 export const testUsers = [adminUser, managerUser, editoruser, normalUser, viewerUser, noneUser];
-export const testTasks = [testTask1, testTask2];
+export const testTasks = [testTask1, testTask2, testTask3];
 const mockData = {
   users: testUsers,
   groups: testGroups,
