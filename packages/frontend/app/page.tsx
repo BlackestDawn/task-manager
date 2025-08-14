@@ -1,5 +1,11 @@
 import { justDate } from '@task-manager/common';
+import type { Metadata } from 'next';
 // import Styles from './page.module.css';
+
+export const metadata: Metadata = {
+  title: 'Task Manager - Welcome',
+  description: 'Task amanger homepage',
+};
 
 export default function Page() {
   return (

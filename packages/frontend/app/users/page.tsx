@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Task Manager - Users',
+  description: 'Display and manage users',
+};
+
 export default function UsersPage() {
   return (
     <>

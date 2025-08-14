@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Task Manager - Settings',
+  description: 'Settings page',
+};
+
 export default function SettingsPage() {
   return (
     <div>

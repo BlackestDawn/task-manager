@@ -2,6 +2,12 @@ import GetNextTaskToFinish from "@/components/pages/tasks/nextToFinish";
 import TasksForThisWeek from "@/components/pages/tasks/tasksForThisWeek";
 import TasksForThisMonth from "@/components/pages/tasks/tasksForThisMonth";
 import { testTasks } from "@/lib/data/mockData";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Task Manager - Tasks',
+  description: 'Displaying and manage tasks.',
+};
 
 export default function TasksPage() {
   return (

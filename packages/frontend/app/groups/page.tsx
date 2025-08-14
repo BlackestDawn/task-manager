@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Task Manager - Groups',
+  description: 'Display and manage user groups',
+};
+
 export default function GroupsPage() {
   return (
     <div>
