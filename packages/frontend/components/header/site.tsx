@@ -1,7 +1,7 @@
 'use client'
 import { useState } from "react"
 import HeaderNavbar from "@/components/nav/headerbar"
-import HamburgerButton from "../nav/hamburgermenu";
+import HamburgerButton from "@/components/nav/hamburgermenu";
 
 export default function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -11,7 +11,7 @@ export default function SiteHeader() {
   return (
     <>
       <div className="flex items-center justify-between mb-4 pr-4 pl-4">
-        <h1 className="font-bold text-5xl mb-4 text-left flex-1 md:text-center md:justify-center">Task Manager</h1>
+        <h1 className="font-bold font-serif text-5xl mb-4 text-left flex-1 md:text-center md:justify-center">Task Manager</h1>
         <HamburgerButton isOpen={isMenuOpen} onClick={toggleMenu} />
       </div>
       <HeaderNavbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />

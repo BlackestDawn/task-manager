@@ -1,6 +1,6 @@
 // This file is used to define the root layout of the application.
 import type { Metadata } from 'next';
-import { Roboto_Flex, Roboto_Mono } from "next/font/google";
+import { Roboto_Flex, Roboto_Mono, Roboto_Serif } from "next/font/google";
 import './globals.css';
 import SiteHeader from '@/components/header/site';
 import SiteFooter from '@/components/footer/site';
@@ -12,6 +12,11 @@ const robotoFlex = Roboto_Flex({
 
 const robotoMono = Roboto_Mono({
   variable: '--font-roboto-mono',
+  subsets: ['latin'],
+});
+
+const robotoSerif = Roboto_Serif({
+  variable: '--font-roboto-serif',
   subsets: ['latin'],
 });
 
@@ -27,18 +32,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${robotoFlex.className} ${robotoMono.className} antialiased text-center`}>
-        <header className="pt-5 pb-5">
-          <SiteHeader />
-        </header>
-
-        <main>
-          {children}
-        </main>
-
-        <footer className="pt-5">
-          <SiteFooter />
-        </footer>
+      <body className={`${robotoMono.variable} ${robotoSerif.variable} ${robotoFlex.variable} antialiased`}>
+        <div className="max-w-[1280px] text-center font-sans">
+          <header className="pt-5 pb-5">
+            <SiteHeader />
+          </header>
+          <main>
+            {children}
+          </main>
+          <footer className="pt-5">
+            <SiteFooter />
+          </footer>
+        </div>
       </body>
     </html>
   )
