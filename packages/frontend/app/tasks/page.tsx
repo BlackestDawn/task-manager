@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { fetchTasks } from "@/lib/api/task";
 import { Suspense } from "react";
 import type { TaskItem } from "@task-manager/common";
-import { isThisMonth, isThisWeek, sortByFinishDate } from "@task-manager/common";
+import { isThisMonth, isThisWeek, sortTasksByFinishDate } from "@task-manager/common";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Tasks',
@@ -23,9 +23,9 @@ export default async function TasksPageWrapper() {
 }
 
 function TasksPage({ tasks }: { tasks: TaskItem[] }) {
-  const tasksForThisWeek = tasks.filter(task => isThisWeek(task));
-  const tasksForThisMonth = tasks.filter(task => isThisMonth(task));
-  const nextTask: TaskItem | undefined = tasks.filter(t => !t.completed && t.finishBy ).sort(sortByFinishDate)[0];
+  const tasksForThisWeek = tasks.filter(task => isThisWeek(task.finishBy || '')).sort(sortTasksByFinishDate);
+  const tasksForThisMonth = tasks.filter(task => isThisMonth(task.finishBy || '')).sort(sortTasksByFinishDate);
+  const nextTask: TaskItem | undefined = tasks.filter(t => !t.completed && t.finishBy ).sort(sortTasksByFinishDate)[0];
 
   return (
     <div>
