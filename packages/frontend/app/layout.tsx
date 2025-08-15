@@ -34,13 +34,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${robotoMono.variable} ${robotoSerif.variable} ${robotoFlex.variable} antialiased`}>
         <div className="max-w-[1280px] text-center font-sans">
-          <header className="pt-5 pb-5">
+          <header className="pt-5 bg-gray-300 dark:bg-gray-800">
             <SiteHeader />
           </header>
-          <main>
+          <main className="py-5 border-y-2 border-gray-900 dark:border-gray-200">
             {children}
           </main>
-          <footer className="pt-5">
+          <footer className="pb-5 bg-gray-300 dark:bg-gray-800">
             <SiteFooter />
           </footer>
         </div>

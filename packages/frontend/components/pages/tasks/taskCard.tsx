@@ -6,7 +6,7 @@ export default function TaskCard({ task }: { task: TaskItem }) {
   return (
     <Link href={`/tasks/${task.id}`} className="block hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
       <div className="grid grid-rows-subgrid row-span-3 border-2 border-gray-500 dark:border-gray-300 p-4 rounded-lg shadow-md">
-        <h3 className={`${task.completed ? 'bg-green-400 dark:text-gray-600' : isTaskOverdue(task) ? 'bg-red-600' : ''}`}>{task.title}</h3>
+        <h3 className={`${task.completed ? 'bg-green-400 dark:text-gray-600' : isTaskOverdue(task) ? 'bg-red-600' : ''} rounded-md`}>{task.title}</h3>
         <p>{task.description}</p>
         <p>Due: {task.finishBy ? new Date(task.finishBy).toLocaleDateString() : "No due date set"}</p>
       </div>

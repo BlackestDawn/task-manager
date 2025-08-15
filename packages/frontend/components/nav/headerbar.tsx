@@ -22,7 +22,7 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
   }
 
   return (
-    <nav className="border-b-2 border-gray-900 dark:border-gray-200">
+    <nav className="">
       {/* Desktop */}
       <ul className="hidden md:flex items-center justify-center text-lg font-semibold">
         {data["menu"].map((link) => (
