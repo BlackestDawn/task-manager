@@ -13,7 +13,13 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+
+    return pathname.startsWith(href);
+  }
 
   return (
     <nav className="border-b-2 border-gray-900 dark:border-gray-200">

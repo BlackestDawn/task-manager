@@ -160,9 +160,25 @@ export const testTask3: TaskItem = {
   ],
 };
 
+export const testTask4: TaskItem = {
+  __typename: "Task",
+  id: "d3e4f5g6-7h8i-9j0k-l1m2-n3o4p5q6r7s8",
+  createdAt: new Date(baseTime.getTime() - 10 * hours),
+  updatedAt: new Date(baseTime.getTime() - 9 * hours),
+  title: "Task Without Time Limit",
+  description: "This task does not have a finish date.",
+  finishBy: null, // No time limit
+  userId: viewerUser.id,
+  completed: false,
+  completedAt: null,
+  groups: [
+    { id: testGroup2.id },
+  ],
+};
+
 export const testGroups = [testGroup1, testGroup2];
 export const testUsers = [adminUser, managerUser, editoruser, normalUser, viewerUser, noneUser];
-export const testTasks = [testTask1, testTask2, testTask3];
+export const testTasks = [testTask1, testTask2, testTask3, testTask4];
 const mockData = {
   users: testUsers,
   groups: testGroups,

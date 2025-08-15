@@ -14,3 +14,17 @@ export async function fetchTasks(): Promise<TaskItem[]> {
     }, 1000); // Simulate network delay
   });
 }
+
+export async function fetchTaskById(id: string): Promise<TaskItem | null> {
+  // const response = await fetch(`${API_TASKS_ENDPOINT}/${id}`);
+  // if (!response.ok) {
+  //   return null;
+  // }
+  // return response.json();
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const task = testTasks.find(task => task.id === id);
+      resolve(task || null);
+    }, 1000); // Simulate network delay
+  });
+}

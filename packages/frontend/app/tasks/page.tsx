@@ -1,6 +1,7 @@
 import ShowNextTaskToFinish from "@/components/pages/tasks/nextToFinish";
 import TasksForThisWeek from "@/components/pages/tasks/tasksForThisWeek";
 import TasksForThisMonth from "@/components/pages/tasks/tasksForThisMonth";
+import TasksWithoutTimeLimit from "@/components/pages/tasks/tasksWithoutTimeLimit";
 import type { Metadata } from "next";
 import { fetchTasks } from "@/lib/api/task";
 import { Suspense } from "react";
@@ -25,7 +26,10 @@ export default async function TasksPageWrapper() {
 function TasksPage({ tasks }: { tasks: TaskItem[] }) {
   const tasksForThisWeek = tasks.filter(task => isThisWeek(task.finishBy || '')).sort(sortTasksByFinishDate);
   const tasksForThisMonth = tasks.filter(task => isThisMonth(task.finishBy || '')).sort(sortTasksByFinishDate);
-  const nextTask: TaskItem | undefined = tasks.filter(t => !t.completed && t.finishBy ).sort(sortTasksByFinishDate)[0];
+  const nonTimeboundTasks = tasks.filter(task => !task.finishBy);
+  const nextTask: TaskItem | undefined =
+    tasks.filter(t => !t.completed && t.finishBy ).sort(sortTasksByFinishDate)[0]
+    || nonTimeboundTasks[0] || undefined;
 
   return (
     <div>
@@ -35,6 +39,7 @@ function TasksPage({ tasks }: { tasks: TaskItem[] }) {
       <ShowNextTaskToFinish task={nextTask} />
       <TasksForThisWeek tasks={tasksForThisWeek} />
       <TasksForThisMonth tasks={tasksForThisMonth} />
+      <TasksWithoutTimeLimit tasks={nonTimeboundTasks} />
     </div>
   );
 }
