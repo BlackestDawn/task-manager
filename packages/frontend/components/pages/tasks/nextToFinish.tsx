@@ -1,7 +1,7 @@
-import type { TaskItem } from "@task-manager/common";
 import TaskCard from "./taskCard";
+import type { TaskProp } from "@/lib/data/interfaces/task";
 
-export default function ShowNextTaskToFinish({ task }: { task?: TaskItem }) {
+export default function ShowNextTaskToFinish({ task }: TaskProp) {
   return (
     <div className="p-1">
       <h2>Recommended task to work on next:</h2>

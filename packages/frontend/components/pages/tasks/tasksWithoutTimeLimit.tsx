@@ -1,7 +1,7 @@
 import TaskGrid from "./taskGrid";
-import type { TaskItem } from "@task-manager/common";
+import type { TaskArrayProp } from "@/lib/data/interfaces/task";
 
-export default function TasksWithoutTimeLimit({ tasks }: { tasks: TaskItem[] }) {
+export default function TasksWithoutTimeLimit({ tasks }: TaskArrayProp) {
   return (
     <div className="p-1">
       <h2>Tasks Without Time Limit</h2>

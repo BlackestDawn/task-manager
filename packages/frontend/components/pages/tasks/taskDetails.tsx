@@ -1,7 +1,7 @@
-import type { TaskItem } from "@task-manager/common";
 import { isTaskOverdue } from "@task-manager/common";
+import type { TaskCardProp } from "@/lib/data/interfaces/task";
 
-export default function TaskDetails({ task }: { task: TaskItem }) {
+export default function TaskDetails({ task }: TaskCardProp) {
   return (
     <div className="">
       <h3 className={`${task.completed ? 'bg-green-400 dark:text-gray-600' : isTaskOverdue(task) ? 'bg-red-600' : ''}`}>{task.title}</h3>

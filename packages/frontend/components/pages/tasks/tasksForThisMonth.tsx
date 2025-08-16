@@ -1,7 +1,7 @@
-import type { TaskItem } from "@task-manager/common";
 import TaskGrid from "./taskGrid";
+import type { TaskArrayProp } from "@/lib/data/interfaces/task";
 
-export default function TasksForThisMonth({ tasks }: { tasks: TaskItem[] }) {
+export default function TasksForThisMonth({ tasks }: TaskArrayProp) {
   return (
     <div className="p-1">
       <h2>Tasks for This Month</h2>

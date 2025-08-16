@@ -2,11 +2,7 @@
 import Link from "next/link"
 import data from "@/lib/data/menuOptions.json";
 import { usePathname } from "next/navigation";
-
-interface HeaderNavbarProps {
-  isMenuOpen: boolean;
-  setIsMenuOpen: (isOpen: boolean) => void;
-}
+import type { HeaderNavbarProps } from "@/lib/data/interfaces/navigation";
 
 export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbarProps) {
   const pathname = usePathname();

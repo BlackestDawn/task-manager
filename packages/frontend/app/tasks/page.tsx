@@ -7,6 +7,7 @@ import { fetchTasks } from "@/lib/api/task";
 import { Suspense } from "react";
 import type { TaskItem } from "@task-manager/common";
 import { isThisMonth, isThisWeek, sortTasksByFinishDate } from "@task-manager/common";
+import type { TaskArrayProp } from "@/lib/data/interfaces/task";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Tasks',
@@ -23,7 +24,7 @@ export default async function TasksPageWrapper() {
   );
 }
 
-function TasksPage({ tasks }: { tasks: TaskItem[] }) {
+function TasksPage({ tasks }: TaskArrayProp) {
   const tasksForThisWeek = tasks.filter(task => isThisWeek(task.finishBy || '')).sort(sortTasksByFinishDate);
   const tasksForThisMonth = tasks.filter(task => isThisMonth(task.finishBy || '')).sort(sortTasksByFinishDate);
   const nonTimeboundTasks = tasks.filter(task => !task.finishBy);

@@ -3,13 +3,14 @@ import type { Metadata } from "next";
 import { fetchTaskById } from "@/lib/api/task";
 import { Suspense } from "react";
 import type { TaskItem } from "@task-manager/common";
+import type { IDParamProp } from "@/lib/data/interfaces/general";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Task Details',
   description: 'Viewing details of a specific task.',
 };
 
-export default async function TaskPageWrapper({ params }: { params: { id: string } }) {
+export default async function TaskPageWrapper({ params }: IDParamProp) {
   const task: TaskItem | null = await fetchTaskById(params.id);
 
   return (

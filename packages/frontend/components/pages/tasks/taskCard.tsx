@@ -1,8 +1,8 @@
 import { isTaskOverdue } from "@task-manager/common";
-import type { TaskItem } from "@task-manager/common";
 import Link from "next/link";
+import type { TaskCardProp } from "@/lib/data/interfaces/task";
 
-export default function TaskCard({ task }: { task: TaskItem }) {
+export default function TaskCard({ task }: TaskCardProp) {
   return (
     <Link href={`/tasks/${task.id}`} className="block hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
       <div className="grid grid-rows-subgrid row-span-3 border-2 border-gray-500 dark:border-gray-300 p-4 rounded-lg shadow-md">

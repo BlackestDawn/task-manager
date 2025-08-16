@@ -1,8 +1,4 @@
-interface HamburgerButtonProps {
-  isOpen: boolean;
-  onClick: () => void;
-  className?: string;
-}
+import type { HamburgerButtonProps } from "@/lib/data/interfaces/navigation";
 
 export default function HamburgerButton({ isOpen, onClick, className = "" }: HamburgerButtonProps) {
   const baseSpanClasses = "block w-6 h-0.5 bg-gray-900 dark:bg-gray-200 transition-all duration-300";
