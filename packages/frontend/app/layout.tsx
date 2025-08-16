@@ -37,7 +37,7 @@ export default function RootLayout({
           <header className="pt-5 bg-gray-300 dark:bg-gray-800">
             <SiteHeader />
           </header>
-          <main className="py-5 border-y-2 border-gray-900 dark:border-gray-200">
+          <main className="pt-5 border-y-2 border-gray-900 dark:border-gray-200">
             {children}
           </main>
           <footer className="pb-5 bg-gray-300 dark:bg-gray-800">
