@@ -21,7 +21,7 @@ It's written in Typescript and is structured as separate packages.
 ## Usage
 
 * Run: `bun run dev`
-* Go to <http://localhost:5173/> for its web interface.
+* Go to <http://localhost:3020/> for its web interface.
 
 ## Technologies and packages used
 
