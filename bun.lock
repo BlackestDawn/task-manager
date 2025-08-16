@@ -54,24 +54,25 @@
       "dependencies": {
         "@casl/ability": "^6.7.3",
         "@casl/react": "^5.0.0",
+        "@tailwindcss/postcss": "^4.1.11",
         "@tanstack/react-form": "^1.19.0",
         "@tanstack/react-query": "^5.84.2",
         "@task-manager/common": "workspace:*",
+        "autoprefixer": "^10.4.21",
         "axios": "^1.11.0",
+        "lucide-react": "^0.539.0",
         "next": "^15.4.6",
+        "postcss": "^8.5.6",
         "react": "^19.1.1",
         "react-dom": "^19.1.1",
+        "tailwindcss": "^4.1.11",
       },
       "devDependencies": {
-        "@tailwindcss/postcss": "^4.1.11",
         "@types/bun": "latest",
         "@types/react": "^19.1.9",
         "@types/react-dom": "^19.1.7",
-        "autoprefixer": "^10.4.21",
         "eslint": "^9.33.0",
         "eslint-config-next": "^15.4.6",
-        "postcss": "^8.5.6",
-        "tailwindcss": "^4.1.11",
       },
       "peerDependencies": {
         "typescript": "^5",
@@ -894,6 +895,8 @@
     "loose-envify": ["loose-envify@1.4.0", "", { "dependencies": { "js-tokens": "^3.0.0 || ^4.0.0" }, "bin": { "loose-envify": "cli.js" } }, "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q=="],
 
     "loupe": ["loupe@3.1.4", "", {}, "sha512-wJzkKwJrheKtknCOKNEtDK4iqg/MxmZheEMtSTYvnzRdEYaZzmgH976nenp8WdJRdx5Vc1X/9MO0Oszl6ezeXg=="],
+
+    "lucide-react": ["lucide-react@0.539.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-VVISr+VF2krO91FeuCrm1rSOLACQUYVy7NQkzrOty52Y8TlTPcXcMdQFj9bYzBgXbWCiywlwSZ3Z8u6a+6bMlg=="],
 
     "magic-string": ["magic-string@0.30.17", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0" } }, "sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA=="],
 
