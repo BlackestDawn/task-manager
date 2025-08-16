@@ -4,6 +4,7 @@ import { fetchTaskById } from "@/lib/api/task";
 import { Suspense } from "react";
 import type { TaskItem } from "@task-manager/common";
 import type { IDParamProp } from "@/lib/data/interfaces/general";
+import type { TaskProp } from "@/lib/data/interfaces/task";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Task Details',
@@ -20,7 +21,7 @@ export default async function TaskPageWrapper({ params }: IDParamProp) {
   );
 }
 
-function TaskPage({ task }: { task: TaskItem | null }) {
+function TaskPage({ task }: TaskProp) {
   if (!task) {
     return <div>Task not found.</div>;
   }

@@ -5,7 +5,7 @@ export interface TaskArrayProp {
 }
 
 export interface TaskProp {
-  task: TaskItem | undefined;
+  task: TaskItem | undefined | null;
 }
 
 export interface TaskCardProp {
