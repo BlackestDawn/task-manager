@@ -21,7 +21,8 @@ export async function generateMetadata({ params }: IDParamProp) {
 }
 
 export default async function GroupDetailsPageWrapper({ params }: IDParamProp) {
-  const group = await fetchGroupById(params.id);
+  const { id } = await params;
+  const group = await fetchGroupById(id);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

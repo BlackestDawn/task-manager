@@ -21,7 +21,8 @@ export async function generateMetadata({ params }: IDParamProp) {
 }
 
 export default async function UserDetailsPageWrapper({ params }: IDParamProp) {
-  const user = await fetchUserById(params.id);
+  const { id } = await params;
+  const user = await fetchUserById(id);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>

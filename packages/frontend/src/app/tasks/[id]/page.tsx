@@ -12,7 +12,8 @@ export const metadata: Metadata = {
 };
 
 export default async function TaskPageWrapper({ params }: IDParamProp) {
-  const task: TaskItem | null = await fetchTaskById(params.id);
+  const { id } = await params;
+  const task: TaskItem | null = await fetchTaskById(id);
 
   return (
     <Suspense fallback={<div>Fetching task details...</div>}>
