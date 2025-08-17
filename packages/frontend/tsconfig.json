@@ -32,9 +32,7 @@
   },
   "include": [
     ".next/types/**/*.ts",
-    "src/app/**/*",
-    "src/components/**/*",
-    "src/lib/**/*"
+    "src/**/*",
   ],
   "references": [
     {
