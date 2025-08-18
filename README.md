@@ -21,13 +21,15 @@ It's written in Typescript and is structured as separate packages.
 ## Usage
 
 * Run: `bun run dev`
-* Go to <http://localhost:5173/> for its web interface.
+* Go to <http://localhost:3020/> for its web interface.
 
 ## Technologies and packages used
 
 * [Bun](https://bun.sh/) For backend handling and general runtime.
-* [PostgreSQL](https://www.postgresql.org) As database
+* [PostgreSQL](https://www.postgresql.org/) As database
 * [Drizzle-ORM](https://orm.drizzle.team/) For database connection and management
-* [Vite](https://vite.dev/) For frontend handling
-* [Zod](https://zod.dev) For type validation and type enforcement
-* [CASL](https://casl.js.org) For authorization and permission handling
+* [Zod](https://zod.dev/) For type validation and type enforcement
+* [CASL](https://casl.js.org/) For authorization and permission handling
+* [Next.js](https://nextjs.org/) Frontend framework
+* [TanStack](https://tanstack.com/) Utility packages for state management, forms, querying, etc
+* [Axios](https://axios-http.com/) Better HTTP client

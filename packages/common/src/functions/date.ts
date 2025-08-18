@@ -1,4 +1,50 @@
+import { type TaskItem } from '@task-manager/common';
+
 export const getTZNormalizedDate = (offset?: number) => {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000 + (offset || 0) * 1000);
+}
+
+export function justDate(date: Date | string): string {
+  if (!date) return '';
+  if (typeof date === 'string') return date.split('T')[0] || '';
+  if (date instanceof Date) return date.toISOString().split('T')[0] || '';
+  return new Date(date).toLocaleDateString();
+}
+
+export function isTaskOverdue(task: TaskItem): boolean {
+  if (!task.finishBy) return false;
+  const today = new Date();
+  return task.finishBy < today && !task.completed;
+}
+
+export function isThisWeek(date: string | Date): boolean {
+  if (!date) return false;
+  if (typeof date === 'string') date = new Date(date);
+  const today = new Date();
+  const firstOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 1);
+  const lastOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 7);
+  return date >= firstOfWeek && date <= lastOfWeek;
+}
+
+export function isThisMonth(date: string | Date): boolean {
+  if (!date) return false;
+  if (typeof date === 'string') date = new Date(date);
+  const today = new Date();
+  return date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+}
+
+export function isFutureTask(task: TaskItem): boolean {
+  if (!task.finishBy) return true;
+  const today = new Date();
+  const future = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  return task.finishBy >= future;
+}
+
+export function sortTasksByFinishDate(a: TaskItem, b: TaskItem): number {
+  if (!a.finishBy) return 1;
+  if (!b.finishBy) return -1;
+  const dateA = new Date(a.finishBy);
+  const dateB = new Date(b.finishBy);
+  return dateA.getTime() - dateB.getTime();
 }

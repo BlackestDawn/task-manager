@@ -8,6 +8,7 @@ const taskItemSchema = z.object({
   title: z.string(),
   description: z.string().nullish().default(null),
   finishBy: z.coerce.date().nullish().default(null),
+  userId: z.uuid(),
   completed: z.boolean(),
   completedAt: z.coerce.date().nullish().default(null),
   groups: z.array(z.object({
