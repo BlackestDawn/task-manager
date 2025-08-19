@@ -10,15 +10,16 @@ import { canUserAccessTask, canUserCreateTask } from "@task-manager/common";
 export async function handlerGetTasksByUserId(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as DoByUUIDRequest;
   const tasks = await getTasksByUserId(cfg.db, validateDoByUUIDRequest(reqParam));
-  const result = tasks.filter(t => canUserAccessTask(user.capabilities, t));
+  // const result = tasks.filter(t => canUserAccessTask(user.capabilities, t));
+  const result = tasks;
   return respondWithJSON(200, validateTaskArray(result) as Task[]);
 }
 
 export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as CreateTaskRequest;
-  if (!canUserCreateTask(user.capabilities)) {
+  /* if (!canUserCreateTask(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
   const params: CreateTaskRequest = validateCreateTaskRequest({
     ...jsonBody,
     userId: user.userInfo.id,

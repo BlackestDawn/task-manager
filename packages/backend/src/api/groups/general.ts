@@ -10,9 +10,9 @@ import { getGroupsForUser } from "../../db/queries/users";
 
 export async function handlerCreateGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as CreateGroupRequest;
-  if (!canUserCreateGroup(user.capabilities)) {
+  /* if (!canUserCreateGroup(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
   const params: CreateGroupRequest = validateCreateGroupRequest({
     ...jsonBody,
   })
@@ -22,7 +22,8 @@ export async function handlerCreateGroup(cfg: ApiConfig, req: BunRequest, user: 
 
 export async function handlerGetAllGroups(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const groups = await getGroups(cfg.db);
-  const result = groups.filter(g => canUserAccessGroup(user.capabilities, g));
+  // const result = groups.filter(g => canUserAccessGroup(user.capabilities, g));
+  const result = groups;
   return respondWithJSON(200, validateGroupArray(result) as Group[]);
 }
 

@@ -32,9 +32,9 @@ export async function handlerDeleteGroup(cfg: ApiConfig, req: BunRequest, user: 
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserDeleteGroup(user.capabilities, group)) {
+  /* if (!canUserDeleteGroup(user.capabilities, group)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   await removeGroup(cfg.db, params);
   return respondWithJSON(204, {});
@@ -47,9 +47,9 @@ export async function handlerGetGroupById(cfg: ApiConfig, req: BunRequest, user:
   if (!result) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserAccessGroup(user.capabilities, result)) {
+  /* if (!canUserAccessGroup(user.capabilities, result)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   return respondWithJSON(200, validateGroup(result) as Group);
 }
