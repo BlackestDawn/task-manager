@@ -2,7 +2,7 @@ import TaskDetails from "@/components/pages/tasks/taskDetails";
 import type { Metadata } from "next";
 import { fetchTaskById } from "@/lib/api/task";
 import { Suspense } from "react";
-import type { TaskItem } from "@task-manager/common";
+import type { Task } from "@task-manager/common";
 import type { IDParamProp } from "@/lib/data/interfaces/general";
 import type { TaskProp } from "@/lib/data/interfaces/task";
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default async function TaskPageWrapper({ params }: IDParamProp) {
   const { id } = await params;
-  const task: TaskItem | null = await fetchTaskById(id);
+  const task: Task | null = await fetchTaskById(id);
 
   return (
     <Suspense fallback={<div>Fetching task details...</div>}>

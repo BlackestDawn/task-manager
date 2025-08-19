@@ -1,9 +1,9 @@
 import { type ApiConfig } from "../../config";
 import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
-import type { TaskItem, UpdateTaskRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
+import type { Task, UpdateTaskRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
-import { validateUpdateTaskRequest, validateDoByUUIDRequest, validateTaskItem } from "@task-manager/common";
+import { validateUpdateTaskRequest, validateDoByUUIDRequest, validateTask } from "@task-manager/common";
 import { updateTask, deleteTask, getTaskById } from "../../db/queries/tasks";
 import { canUserAccessTask, canUserModifyTask, canUserDeleteTask } from "@task-manager/common";
 
@@ -22,7 +22,7 @@ export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest, user: l
     finishBy: jsonBody.finishBy || existingTask.finishBy,
   });
   const result = await updateTask(cfg.db, params);
-  return respondWithJSON(200, validateTaskItem(result) as TaskItem);
+  return respondWithJSON(200, validateTask(result) as Task);
 }
 
 export async function handlerDeleteTask(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
@@ -44,5 +44,5 @@ export async function handlerGetTaskById(cfg: ApiConfig, req: BunRequest, user: 
   if (!canUserAccessTask(user.capabilities, task)) {
     throw new UserForbiddenError("User not authorized");
   }
-  return respondWithJSON(200, validateTaskItem(task) as TaskItem);
+  return respondWithJSON(200, validateTask(task) as Task);
 }

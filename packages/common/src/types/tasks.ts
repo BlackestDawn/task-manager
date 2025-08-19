@@ -16,9 +16,9 @@ const taskItemSchema = z.object({
   })).default([]),
 });
 
-export type TaskItem = z.infer<typeof taskItemSchema>;
+export type Task = z.infer<typeof taskItemSchema>;
 
-export function validateTaskItem(item: unknown): TaskItem {
+export function validateTask(item: unknown): Task {
   const result = taskItemSchema.safeParse(item);
   if (!result.success) {
     console.error('Invalid task item:', result.error);
@@ -27,7 +27,7 @@ export function validateTaskItem(item: unknown): TaskItem {
   return result.data;
 }
 
-export function validateTaskItemArray(items: unknown[]): TaskItem[] {
+export function validateTaskArray(items: unknown[]): Task[] {
   const result = taskItemSchema.array().safeParse(items);
   if (!result.success) {
     console.error('Invalid task item:', result.error);

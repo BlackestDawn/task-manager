@@ -3,7 +3,7 @@ import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import type { AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
-import { validateDoByUUIDRequest, validateUserArray, validateTaskItemArray,
+import { validateDoByUUIDRequest, validateUserArray, validateTaskArray,
   validateAddUserToGroupRequest, validateRemoveUserFromGroupRequest, validateAssignTaskToGroupRequest, validateRemoveTaskFromGroupRequest } from "@task-manager/common";
 import { getGroupById, getGroupMembers, getGroupTasks, assignTaskToGroup, removeTaskFromGroup, addUserToGroup, removeUserFromGroup } from "../../db/queries/groups";
 import { canUserAssignToGroup, canUserRemoveFromGroup } from "@task-manager/common";
@@ -28,7 +28,7 @@ export async function handlerGetGroupTasks(cfg: ApiConfig, req: BunRequest, user
   }
 
   const tasks = await getGroupTasks(cfg.db, params);
-  return respondWithJSON(200, validateTaskItemArray(tasks));
+  return respondWithJSON(200, validateTaskArray(tasks));
 }
 
 export async function handlerAddUserToGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {

@@ -1,13 +1,13 @@
-import type { TaskItem } from "@task-manager/common";
+import type { Task } from "@task-manager/common";
 
 export interface TaskArrayProp {
-  tasks: TaskItem[];
+  tasks: Task[];
 }
 
 export interface TaskProp {
-  task: TaskItem | undefined | null;
+  task: Task | undefined | null;
 }
 
 export interface TaskCardProp {
-  task: TaskItem;
+  task: Task;
 }

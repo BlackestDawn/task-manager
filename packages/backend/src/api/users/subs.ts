@@ -3,7 +3,7 @@ import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
 import type { User, UpdatePasswordRequest, disabledUserRequest, DoByUUIDRequest, loggedinUser } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
-import { validateUpdatePasswordRequest, validateDoByUUIDRequest, validateUser, validateTaskItemArray, validateDisabledUserRequest } from "@task-manager/common";
+import { validateUpdatePasswordRequest, validateDoByUUIDRequest, validateUser, validateTaskArray, validateDisabledUserRequest } from "@task-manager/common";
 import { getUserById, updatePassword, getGroupsForUser, disabledUser } from "../../db/queries/users";
 import { getAllTasksForUser } from "../../db/queries/tasks";
 import { hashPassword } from "../../lib/auth/authentication";
@@ -38,7 +38,7 @@ export async function handlerGetTasksForUser(cfg: ApiConfig, req: BunRequest, us
     throw new UserForbiddenError("User not authorized");
   }
   const tasks = await getAllTasksForUser(cfg.db, params);
-  return respondWithJSON(200, validateTaskItemArray(tasks));
+  return respondWithJSON(200, validateTaskArray(tasks));
 }
 
 export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
@@ -52,7 +52,7 @@ export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest, u
     throw new UserForbiddenError("User not authorized");
   }
   const tasks = await getGroupsForUser(cfg.db, params);
-  return respondWithJSON(200, validateTaskItemArray(tasks));
+  return respondWithJSON(200, validateTaskArray(tasks));
 }
 
 export async function handlerDisabledUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {

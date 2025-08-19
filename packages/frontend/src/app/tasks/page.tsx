@@ -5,7 +5,7 @@ import TasksWithoutTimeLimit from "@/components/pages/tasks/tasksWithoutTimeLimi
 import type { Metadata } from "next";
 import { fetchTasks } from "@/lib/api/task";
 import { Suspense } from "react";
-import type { TaskItem } from "@task-manager/common";
+import type { Task } from "@task-manager/common";
 import { isThisMonth, isThisWeek, sortTasksByFinishDate } from "@task-manager/common";
 import type { TaskArrayProp } from "@/lib/data/interfaces/task";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TasksPageWrapper() {
-  const tasks: TaskItem[] = await fetchTasks();
+  const tasks: Task[] = await fetchTasks();
 
   return (
     <Suspense fallback={<div>Fetching tasks...</div>}>
@@ -28,7 +28,7 @@ function TasksPage({ tasks }: TaskArrayProp) {
   const tasksForThisWeek = tasks.filter(task => isThisWeek(task.finishBy || '')).sort(sortTasksByFinishDate);
   const tasksForThisMonth = tasks.filter(task => isThisMonth(task.finishBy || '')).sort(sortTasksByFinishDate);
   const nonTimeboundTasks = tasks.filter(task => !task.finishBy);
-  const nextTask: TaskItem | undefined =
+  const nextTask: Task | undefined =
     tasks.filter(t => !t.completed && t.finishBy ).sort(sortTasksByFinishDate)[0]
     || nonTimeboundTasks[0] || undefined;
 
