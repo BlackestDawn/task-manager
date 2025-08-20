@@ -46,7 +46,7 @@ export function validateCreateGroupRequest(item: unknown): CreateGroupRequest {
   return result.data;
 }
 
-export const updateGroupRequestSchema = z.object({
+const updateGroupRequestSchema = z.object({
   id: z.uuid(),
   name: z.string(),
   description: z.string().nullish().default(null),
@@ -63,7 +63,7 @@ export function validateUpdateGroupRequest(item: unknown): UpdateGroupRequest {
   return result.data;
 }
 
-export const addUserToGroupRequestSchema = z.object({
+const addUserToGroupRequestSchema = z.object({
   userId: z.uuid(),
   groupId: z.uuid(),
   role: z.enum(groupRoleList).default("user"),
@@ -80,7 +80,7 @@ export function validateAddUserToGroupRequest(item: unknown): AddUserToGroupRequ
   return result.data;
 }
 
-export const RemoveUserFromGroupRequestSchema = z.object({
+const RemoveUserFromGroupRequestSchema = z.object({
   userId: z.uuid(),
   groupId: z.uuid(),
 });
@@ -96,7 +96,7 @@ export function validateRemoveUserFromGroupRequest(item: unknown): RemoveUserFro
   return result.data;
 }
 
-export const assignTaskToGroupRequestSchema = z.object({
+const assignTaskToGroupRequestSchema = z.object({
   taskId: z.uuid(),
   groupId: z.uuid(),
   assignedBy: z.uuid(),
@@ -113,7 +113,7 @@ export function validateAssignTaskToGroupRequest(item: unknown): AssignTaskToGro
   return result.data;
 }
 
-export const RemoveTaskFromGroupRequestSchema = z.object({
+const RemoveTaskFromGroupRequestSchema = z.object({
   taskId: z.uuid(),
   groupId: z.uuid(),
 });
