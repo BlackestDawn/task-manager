@@ -1,30 +1,27 @@
 import type { ApiConfig } from "../../config";
 import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
-import type { LoginRequest, LoginResponse } from "@task-manager/common";
-import { validateLoginRequest, validateLoginResponse } from "@task-manager/common";
+import type { LoginRequest, LoginResponse, loggedinUser, User, UpdateUserRequest } from "@task-manager/common";
+import { validateLoginRequest, validateLoginResponse, validateUpdateUserRequest } from "@task-manager/common";
 import { UserNotAuthenticatedError, BadRequestError } from "@task-manager/common";
-import { getUserByLogin } from "../../db/queries/users";
+import { getUserByLogin, updateUser } from "../../db/queries/users";
 import { checkPasswordHash, makeJWT, makeRefreshToken, getAuthTokenFromHeaders } from "../../lib/auth/authentication";
-import { getRefreshTokenByToken, revokeRefreshToken, getValidRefreshTokenByUserId } from "../../db/queries/auth";
+import { getRefreshTokenByToken, revokeRefreshToken } from "../../db/queries/auth";
 
 export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
   const params: LoginRequest = validateLoginRequest(await req.json() as LoginRequest);
   if (!params.login || !params.password) throw new UserNotAuthenticatedError("invalid username or password");
 
   const user = await getUserByLogin(cfg.db, params.login);
-  if (!user) throw new UserNotAuthenticatedError("invalid username or password");
-  if (user.disabled) throw new UserNotAuthenticatedError("invalid username or password");
-  if (!checkPasswordHash(params.password, user.password)) throw new UserNotAuthenticatedError("invalid username or password");
-
-  let refreshToken = await getValidRefreshTokenByUserId(cfg.db, { id: user.id });
-  if (!refreshToken) {
-    refreshToken = await makeRefreshToken(user.id);
+  if (!user || user.disabled || !checkPasswordHash(params.password, user.password)) {
+    throw new UserNotAuthenticatedError("invalid username or password");
   }
 
+  const token = await makeJWT(user.id);
+  const refreshToken = await makeRefreshToken(user.id);
   const response: LoginResponse = validateLoginResponse({
     ...user,
-    token: await makeJWT(user.id),
+    token: token,
     refreshToken: refreshToken.token,
   });
 
@@ -32,8 +29,8 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
 }
 
 export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest) {
-  const bearerToken = await getAuthTokenFromHeaders(req.headers);
-  const refreshToken = await getRefreshTokenByToken(cfg.db, { token: bearerToken });
+  const jsonBody = await req.json() as { token: string };
+  const refreshToken = await getRefreshTokenByToken(cfg.db, jsonBody);
 
   if (!refreshToken) {
     throw new UserNotAuthenticatedError("Invalid refresh token");
@@ -60,4 +57,16 @@ export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest)
   }
 
   return respondWithJSON(204, {});
+}
+
+export async function handlerGetSelf(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
+  return respondWithJSON(200, user.userInfo);
+}
+
+export async function handlerUpdateSelf(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
+  const jsonBody = await req.json() as UpdateUserRequest;
+  jsonBody.id = user.userInfo.id;
+
+  const result = await updateUser(cfg.db, validateUpdateUserRequest(jsonBody))
+  return respondWithJSON(200, result);
 }
