@@ -18,8 +18,10 @@ export type Actions = "create" | "read" | "update" | "delete" | "manage" | "assi
 
 export type AppAbility = PureAbility<[Actions, Subjects]>;
 
-export function defineAbilityFor(user: UserContext): AppAbility {
+export function defineAbilityFor(user: UserContext | null): AppAbility {
   const { can: allow, cannot: forbid, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
+
+  if (!user) return build();
 
   user.groups.forEach(({ id: groupId, role }) =>{
     switch (role) {
