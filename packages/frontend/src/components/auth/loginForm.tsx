@@ -1,7 +1,7 @@
 'use client';
 import { useForm } from "@tanstack/react-form";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useLogin } from "@/lib/auth/queries";
+import { useLogin } from "@/lib/api/auth/queries";
 import { validateLoginRequest } from "@task-manager/common";
 import { useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";

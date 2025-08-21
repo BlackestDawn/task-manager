@@ -2,8 +2,8 @@
 import type { Metadata } from 'next';
 import { Roboto_Flex, Roboto_Mono, Roboto_Serif } from "next/font/google";
 import './globals.css';
-import SiteHeader from '@/components/header/site';
-import SiteFooter from '@/components/footer/site';
+import SiteHeader from '@/components/general/siteHeader';
+import SiteFooter from '@/components/general/siteFooter';
 import Providers from './providers';
 
 const robotoFlex = Roboto_Flex({

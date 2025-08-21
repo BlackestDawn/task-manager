@@ -1,4 +1,4 @@
-import GroupDetailsPage from "@/components/pages/groups/groupDetails";
+import GroupDetailsPage from "@/components/groups/groupDetails";
 import type { IDParamProp } from "@/lib/data/interfaces/general";
 import type { GroupProp } from "@/lib/data/interfaces/group";
 import { fetchGroupById } from "@/lib/api/group";

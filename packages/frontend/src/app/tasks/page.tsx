@@ -1,7 +1,7 @@
-import ShowNextTaskToFinish from "@/components/pages/tasks/nextToFinish";
-import TasksForThisWeek from "@/components/pages/tasks/tasksForThisWeek";
-import TasksForThisMonth from "@/components/pages/tasks/tasksForThisMonth";
-import TasksWithoutTimeLimit from "@/components/pages/tasks/tasksWithoutTimeLimit";
+import ShowNextTaskToFinish from "@/components/tasks/nextToFinish";
+import TasksForThisWeek from "@/components/tasks/tasksForThisWeek";
+import TasksForThisMonth from "@/components/tasks/tasksForThisMonth";
+import TasksWithoutTimeLimit from "@/components/tasks/tasksWithoutTimeLimit";
 import type { Metadata } from "next";
 import { fetchTasks } from "@/lib/api/task";
 import { Suspense } from "react";

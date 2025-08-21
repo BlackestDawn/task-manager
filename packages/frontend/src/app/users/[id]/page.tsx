@@ -1,4 +1,4 @@
-import UserDetailsPage from "@/components/pages/users/userDetails";
+import UserDetailsPage from "@/components/users/userDetails";
 import type { IDParamProp } from "@/lib/data/interfaces/general";
 import type { UserProp } from "@/lib/data/interfaces/user";
 import { fetchUserById } from "@/lib/api/user";

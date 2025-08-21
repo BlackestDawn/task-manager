@@ -1,4 +1,4 @@
-import { apiClient } from "../api";
+import { apiClient } from "..";
 import type { LoginRequest, LoginResponse, User, UpdateUserRequest } from "@task-manager/common";
 
 export const authApi = {

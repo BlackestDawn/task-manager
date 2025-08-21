@@ -1,4 +1,4 @@
-import { useProfile } from "@/lib/auth/queries";
+import { useProfile } from "@/lib/api/auth/queries";
 import { defineAbilityFor } from "@task-manager/common";
 import { useMemo } from "react";
 

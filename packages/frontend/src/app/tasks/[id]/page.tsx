@@ -1,4 +1,4 @@
-import TaskDetails from "@/components/pages/tasks/taskDetails";
+import TaskDetails from "@/components/tasks/taskDetails";
 import type { Metadata } from "next";
 import { fetchTaskById } from "@/lib/api/task";
 import { Suspense } from "react";

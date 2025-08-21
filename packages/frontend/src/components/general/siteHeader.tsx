@@ -1,7 +1,7 @@
 'use client'
 import { useState } from "react"
-import HeaderNavbar from "@/components/nav/headerbar"
-import HamburgerButton from "@/components/nav/hamburgermenu";
+import HeaderNavbar from "./headerbar"
+import HamburgerButton from "./hamburgermenu";
 
 export default function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);

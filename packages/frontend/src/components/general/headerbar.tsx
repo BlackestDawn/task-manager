@@ -4,7 +4,7 @@ import data from "@/lib/data/menuOptions.json";
 import { usePathname, useRouter } from "next/navigation";
 import type { HeaderNavbarProps, MenuItem } from "@/lib/data/interfaces/navigation";
 import { useAuthContext } from "../auth/authProvider";
-import { useLogout } from "@/lib/auth/queries";
+import { useLogout } from "@/lib/api/auth/queries";
 
 export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbarProps) {
   const pathname = usePathname();
