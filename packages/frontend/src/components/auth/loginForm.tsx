@@ -39,10 +39,10 @@ export default function LoginForm() {
     <>
       <RedirectNotification />
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-extrabold">
               Sign in to your account
             </h2>
           </div>
@@ -58,7 +58,7 @@ export default function LoginForm() {
               <form.Field name="login">
                 {(field) => (
                   <div>
-                    <label htmlFor="login" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="login" className="block text-sm font-medium">
                       Login
                     </label>
                     <input
@@ -69,7 +69,7 @@ export default function LoginForm() {
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                       placeholder="Enter your login"
                     />
                     {field.state.meta.errors.length > 0 && (
@@ -84,7 +84,7 @@ export default function LoginForm() {
               <form.Field name="password">
                 {(field) => (
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="password" className="block text-sm font-medium">
                       Password
                     </label>
                     <div className="mt-1 relative">
@@ -96,7 +96,7 @@ export default function LoginForm() {
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        className="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        className="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                         placeholder="Enter your password"
                       />
                       <button
@@ -105,9 +105,9 @@ export default function LoginForm() {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
+                          <EyeOff className="h-4 w-4" />
                         ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
+                          <Eye className="h-4 w-4" />
                         )}
                       </button>
                     </div>
