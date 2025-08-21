@@ -87,15 +87,15 @@ export function validateUpdatePasswordRequest(item: unknown): UpdatePasswordRequ
   return result.data;
 }
 
-const disabledUserRequestSchema = z.object({
+const DisabledUserRequestSchema = z.object({
   id: z.uuid(),
   disabled: z.boolean().default(false),
 });
 
-export type disabledUserRequest = z.infer<typeof disabledUserRequestSchema>;
+export type DisabledUserRequest = z.infer<typeof DisabledUserRequestSchema>;
 
-export function validateDisabledUserRequest(item: unknown): disabledUserRequest {
-  const result = disabledUserRequestSchema.safeParse(item);
+export function validateDisabledUserRequest(item: unknown): DisabledUserRequest {
+  const result = DisabledUserRequestSchema.safeParse(item);
   if (!result.success) {
     console.error('Invalid disabled user request:', result.error);
     throw new Error('Invalid disabled user request');

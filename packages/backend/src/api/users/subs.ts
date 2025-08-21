@@ -1,7 +1,7 @@
 import { type ApiConfig } from "../../config";
 import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
-import type { User, UpdatePasswordRequest, disabledUserRequest, DoByUUIDRequest, loggedinUser } from "@task-manager/common";
+import type { User, UpdatePasswordRequest, DisabledUserRequest, DoByUUIDRequest, loggedinUser } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import { validateUpdatePasswordRequest, validateDoByUUIDRequest, validateUser, validateTaskArray, validateDisabledUserRequest } from "@task-manager/common";
 import { getUserById, updatePassword, getGroupsForUser, disabledUser } from "../../db/queries/users";
@@ -58,7 +58,7 @@ export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest, u
 export async function handlerDisabledUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as { disabled: boolean };
   const reqParam = req.params as { userId: string };
-  const params: disabledUserRequest = validateDisabledUserRequest({
+  const params: DisabledUserRequest = validateDisabledUserRequest({
     id: reqParam.userId,
     disabled: jsonBody.disabled,
   });
