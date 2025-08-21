@@ -10,7 +10,7 @@ export const authRoutes = {
     POST: withConfig(cfg, handlerRefreshAccessToken),
   },
   "/api/auth/logout": {
-    POST: withConfig(cfg, handlerRevokeRefreshToken),
+    POST: restrictedEndpoint(cfg, handlerRevokeRefreshToken),
   },
   "/api/auth/profile": {
     GET: restrictedEndpoint(cfg, handlerGetSelf),

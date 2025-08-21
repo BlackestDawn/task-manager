@@ -1,0 +1,57 @@
+'use client';
+import { useEffect, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthContext } from "./authProvider";
+import type { Actions, Subjects } from "@task-manager/common";
+
+interface ProtectedRouteProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+  requireAuth?: boolean;
+  action?: Actions;
+  subject?: Subjects;
+  redirectTo?: string;
+}
+
+export default function ProtectedRoute({
+  children,
+  fallback,
+  requireAuth = true,
+  action,
+  subject,
+  redirectTo = "/login",
+}: ProtectedRouteProps ) {
+  const { isAuthenticated, isLoading, ability } = useAuthContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && requireAuth && !isAuthenticated) router.push(redirectTo);
+  }, [isLoading, requireAuth, isAuthenticated, router, redirectTo]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (requireAuth && !isAuthenticated) return null;
+
+  if (action && subject && !ability.can(action, subject)) {
+    return (
+      fallback || (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">Access Denied</h2>
+            <p className="mt-2 text-gray-600">
+              You don&apos;t have permission to access this resource.
+            </p>
+          </div>
+        </div>
+      )
+    );
+  }
+
+  return <>{children}</>;
+}

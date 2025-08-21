@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { fetchGroups } from "@/lib/api/group";
 import type { GroupArrayProp } from "@/lib/data/interfaces/group";
 import Link from "next/link";
+import ProtectedRoute from "@/components/auth/protectedRoute";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Groups',
@@ -12,9 +13,11 @@ export const metadata: Metadata = {
 export default async function GroupsPageWrapper() {
   const groups = await fetchGroups();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <GroupsPage groups={groups} />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense fallback={<div>Loading...</div>}>
+        <GroupsPage groups={groups} />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
 

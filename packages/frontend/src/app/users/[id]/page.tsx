@@ -3,6 +3,7 @@ import type { IDParamProp } from "@/lib/data/interfaces/general";
 import type { UserProp } from "@/lib/data/interfaces/user";
 import { fetchUserById } from "@/lib/api/user";
 import { Suspense } from "react";
+import ProtectedRoute from "@/components/auth/protectedRoute";
 
 export async function generateMetadata({ params }: IDParamProp) {
   const user = await fetchUserById(params.id);
@@ -25,9 +26,11 @@ export default async function UserDetailsPageWrapper({ params }: IDParamProp) {
   const user = await fetchUserById(id);
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <UserPage user={user} />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense fallback={<div>Loading...</div>}>
+        <UserPage user={user} />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
 

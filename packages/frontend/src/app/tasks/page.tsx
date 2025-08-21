@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import type { Task } from "@task-manager/common";
 import { isThisMonth, isThisWeek, sortTasksByFinishDate } from "@task-manager/common";
 import type { TaskArrayProp } from "@/lib/data/interfaces/task";
+import ProtectedRoute from "@/components/auth/protectedRoute";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Tasks',
@@ -18,9 +19,11 @@ export default async function TasksPageWrapper() {
   const tasks: Task[] = await fetchTasks();
 
   return (
-    <Suspense fallback={<div>Fetching tasks...</div>}>
-      <TasksPage tasks={tasks} />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense fallback={<div>Fetching tasks...</div>}>
+        <TasksPage tasks={tasks} />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
 

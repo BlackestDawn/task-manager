@@ -3,6 +3,7 @@ import type { IDParamProp } from "@/lib/data/interfaces/general";
 import type { GroupProp } from "@/lib/data/interfaces/group";
 import { fetchGroupById } from "@/lib/api/group";
 import { Suspense } from "react";
+import ProtectedRoute from "@/components/auth/protectedRoute";
 
 export async function generateMetadata({ params }: IDParamProp) {
   const group = await fetchGroupById(params.id);
@@ -25,9 +26,11 @@ export default async function GroupDetailsPageWrapper({ params }: IDParamProp) {
   const group = await fetchGroupById(id);
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <GroupPage group={group} />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense fallback={<div>Loading...</div>}>
+        <GroupPage group={group} />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
 

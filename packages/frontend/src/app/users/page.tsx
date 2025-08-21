@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { fetchUsers } from "@/lib/api/user";
 import type { UserArrayProp } from "@/lib/data/interfaces/user";
 import Link from "next/link";
+import ProtectedRoute from "@/components/auth/protectedRoute";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Users',
@@ -13,9 +14,11 @@ export default async function UsersPageWrapper() {
   const users = await fetchUsers();
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <UsersPage users={users} />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense fallback={<div>Loading...</div>}>
+        <UsersPage users={users} />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
 
