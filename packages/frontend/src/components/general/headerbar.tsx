@@ -91,7 +91,7 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
                 <button
                   onClick={handleLogout}
                   disabled={logoutMutation.isPending}
-                  className={`block w-full text-left px-4 py-3 text-lg font-semibold transition-colors duration-200 disabled:opacity-50
+                  className={`block w-full text-center px-4 py-3 text-lg font-semibold transition-colors duration-200 disabled:opacity-50
                     ${isActive(link.href)
                       ? 'bg-gray-900 text-white dark:bg-gray-200 dark:text-gray-900'
                       : 'hover:bg-gray-300 dark:hover:bg-gray-700'}
