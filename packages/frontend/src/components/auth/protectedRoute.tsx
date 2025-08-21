@@ -25,7 +25,11 @@ export default function ProtectedRoute({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && requireAuth && !isAuthenticated) router.push(redirectTo);
+    if (!isLoading && requireAuth && !isAuthenticated) {
+      const currentPath = window.location.pathname + window.location.search;
+      const redirectUrl = `${redirectTo}?redirected=true&from=${encodeURIComponent(currentPath)}`;
+      router.push(redirectUrl);
+    }
   }, [isLoading, requireAuth, isAuthenticated, router, redirectTo]);
 
   if (isLoading) {
