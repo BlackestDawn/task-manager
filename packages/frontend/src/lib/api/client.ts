@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { LoginResponse } from '@task-manager/common';
 
 export interface ApiClientConfig {
   baseURL: string;
@@ -79,8 +80,8 @@ export class ApiClient {
   }
 
   private async refreshToken(refreshToken: string) {
-    const response = await axios.post(`${this.client.defaults.baseURL}/auth/refresh`, { refreshToken });
-    return response.data;
+    const response = await axios.post(`${this.client.defaults.baseURL}/auth/refresh`, { token: refreshToken });
+    return response.data as LoginResponse;
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
