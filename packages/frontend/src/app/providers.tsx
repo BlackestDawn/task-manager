@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { AuthProvider } from "@/components/auth/authProvider";
+import RedirectNotification from "@/components/auth/RedirectNotification";
 
 interface ProviderProps {
   children: ReactNode;
@@ -25,7 +26,10 @@ export default function Providers({ children }: ProviderProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        {children}
+        <RedirectNotification />
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, X } from "lucide-react";
 
@@ -7,6 +8,11 @@ export default function RedirectNotification() {
   const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [redirectedFrom, setRedirectedFrom] = useState<string | null>(null);
+  const [mounted, setMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const wasRedirected = searchParams.get("redirected") === "true";
@@ -41,21 +47,23 @@ export default function RedirectNotification() {
         .replace(/-/g, ' ')
         .replace(/\b\w/g, l => l.toUpperCase());
     } catch (error) {
-      console.warn("Failed to parse page name from path:", path);
+      console.warn("Failed to parse page name from path:", path, "Error:", error);
       return "restricted page";
     }
   };
 
-  return (
+  if (!mounted || !isVisible) return null;
+
+  const modalContent = (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
+        className="fixed inset-0 bg-black bg-opacity-50 z-[9998] transition-opacity duration-300"
         onClick={() => setIsVisible(false)}
       />
 
       {/* Modal */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4">
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-md mx-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 relative animate-in fade-in slide-in-from-top-4 duration-300">
           {/* Close button */}
           <button
@@ -121,4 +129,6 @@ export default function RedirectNotification() {
       `}</style>
     </>
   );
+
+  return createPortal(modalContent, document.body);
 }
