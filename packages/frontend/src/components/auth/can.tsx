@@ -20,3 +20,13 @@ export function Can({ I, a, children/* , fallback */ }: CanProps) {
     </CaslCan>
   );
 }
+
+export function Cannot({ I, a, children/* , fallback */ }: CanProps) {
+  const { ability } = useAuthContext();
+
+  return (
+    <CaslCan not I={I} a={a} ability={ability} >
+      {children}
+    </CaslCan>
+  );
+}
