@@ -1,38 +1,45 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { fetchUsers } from "@/lib/api/user";
-import type { UserArrayProp } from "@/lib/data/interfaces/user";
-import Link from "next/link";
+'use client';
+// import type { Metadata } from "next";
+import UsersList from "@/components/users/usersList";
+import CreateUserForm from "@/components/users/createUserForm";
 import ProtectedRoute from "@/components/auth/protectedRoute";
+import { Can } from "@/components/auth/can";
+import { useState } from "react";
 
-export const metadata: Metadata = {
+/* export const metadata: Metadata = {
   title: 'Task Manager - Users',
   description: 'Display and manage users',
-};
+}; */
 
-export default async function UsersPageWrapper() {
-  const users = await fetchUsers();
+export default function UsersPage() {
+  const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
 
   return (
-    <ProtectedRoute>
-      <Suspense fallback={<div>Loading...</div>}>
-        <UsersPage users={users} />
-      </Suspense>
+    <ProtectedRoute action="read" subject="User">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Users</h1>
+          <Can I="create" a="User">
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+            >
+              Add User
+            </button>
+          </Can>
+        </div>
+
+        {showCreateForm && (
+          <div className="mb-6">
+            <CreateUserForm
+              onSuccess={() => setShowCreateForm(false)}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          </div>
+        )}
+
+        <UsersList />
+      </div>
     </ProtectedRoute>
-  );
-}
-
-function UsersPage(users: UserArrayProp) {
-  return (
-    <div>
-      <h2>Users:</h2>
-      <ul>
-        {users.users.map(user => (
-          <li key={user.id}>
-            <Link href={`/users/${user.id}`}>{user.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
   )
 }
