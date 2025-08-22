@@ -13,5 +13,5 @@ export function useAuth() {
     isAuthenticated,
     isLoading,
     error,
-  }
+  };
 }
