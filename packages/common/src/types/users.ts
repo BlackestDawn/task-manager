@@ -58,6 +58,8 @@ const UpdateUserRequestSchema = z.object({
   login: z.string().nullish().default(null),
   name: z.string().nullish().default(null),
   email: z.string().nullish().default(null),
+  password: z.string().nullish().default(null),
+  disabled: z.boolean().nullish().default(null),
 });
 
 export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;
@@ -67,38 +69,6 @@ export function validateUpdateUserRequest(item: unknown): UpdateUserRequest {
   if (!result.success) {
     console.error('Invalid update user request:', result.error);
     throw new Error('Invalid update user request');
-  }
-  return result.data;
-}
-
-const updatePasswordRequestSchema = z.object({
-  id: z.uuid(),
-  password: z.string(),
-});
-
-export type UpdatePasswordRequest = z.infer<typeof updatePasswordRequestSchema>;
-
-export function validateUpdatePasswordRequest(item: unknown): UpdatePasswordRequest {
-  const result = updatePasswordRequestSchema.safeParse(item);
-  if (!result.success) {
-    console.error('Invalid update password request:', result.error);
-    throw new Error('Invalid update password request');
-  }
-  return result.data;
-}
-
-const DisabledUserRequestSchema = z.object({
-  id: z.uuid(),
-  disabled: z.boolean().default(false),
-});
-
-export type DisabledUserRequest = z.infer<typeof DisabledUserRequestSchema>;
-
-export function validateDisabledUserRequest(item: unknown): DisabledUserRequest {
-  const result = DisabledUserRequestSchema.safeParse(item);
-  if (!result.success) {
-    console.error('Invalid disabled user request:', result.error);
-    throw new Error('Invalid disabled user request');
   }
   return result.data;
 }

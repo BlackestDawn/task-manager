@@ -6,15 +6,16 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import { validateUpdateUserRequest, validateDoByUUIDRequest, validateUser } from "@task-manager/common";
 import { updateUser, deleteUser, getUserById } from "../../db/queries/users";
 import { canUserAccessUser, canUserDeleteUser, canUserModifyUser } from "@task-manager/common";
+import { hashPassword } from "@backend/src/lib/auth/authentication";
 
 export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
+  const reqParam: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
   const jsonBody = await req.json() as UpdateUserRequest;
-  const reqParam = req.params as { userId: string };
   const params: UpdateUserRequest = validateUpdateUserRequest({
     ...jsonBody,
-    id: reqParam.userId,
+    id: reqParam.id,
   });
-  const existingUser = await getUserById(cfg.db, params) as User;
+  const existingUser = await getUserById(cfg.db, params);
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
@@ -26,14 +27,15 @@ export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: l
     name: params.name || existingUser.name,
     email: params.email || existingUser.email,
     login: params.login || existingUser.login,
-  });
+    password: params.password ? hashPassword(params.password) : existingUser.password,
+    disabled: params.disabled !== null ? params.disabled : existingUser.disabled,
+  }) as UpdateUserRequest;
   const result = await updateUser(cfg.db, updateParams) as User;
   return respondWithJSON(200, validateUser(result));
 }
 
 export async function handlerDeleteUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as { userId: string };
-  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam);
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (existingUser) {
     /* if (!canUserDeleteUser(user.capabilities, existingUser)) {
@@ -45,8 +47,7 @@ export async function handlerDeleteUser(cfg: ApiConfig, req: BunRequest, user: l
 }
 
 export async function handlerGetUserById(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as { userId: string };
-  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam);
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");

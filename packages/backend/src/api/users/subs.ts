@@ -1,35 +1,15 @@
 import { type ApiConfig } from "../../config";
 import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
-import type { User, UpdatePasswordRequest, DisabledUserRequest, DoByUUIDRequest, loggedinUser } from "@task-manager/common";
+import type { User, DoByUUIDRequest, loggedinUser } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
-import { validateUpdatePasswordRequest, validateDoByUUIDRequest, validateUser, validateTaskArray, validateDisabledUserRequest } from "@task-manager/common";
-import { getUserById, updatePassword, getGroupsForUser, disabledUser } from "../../db/queries/users";
+import { validateDoByUUIDRequest, validateUser, validateTaskArray } from "@task-manager/common";
+import { getUserById, getGroupsForUser, disabledUser } from "../../db/queries/users";
 import { getAllTasksForUser } from "../../db/queries/tasks";
-import { hashPassword } from "../../lib/auth/authentication";
 import { canUserAccessUser, canUserModifyPassword, canUserModifyDisabled } from "@task-manager/common";
 
-export async function handlerUpdateUserPassword(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const jsonBody = await req.json() as { password: string };
-  const reqParam = req.params as { userId: string };
-  const params: UpdatePasswordRequest = validateUpdatePasswordRequest({
-    id: reqParam.userId,
-    password: await hashPassword(jsonBody.password),
-  });
-  const existingUser = await getUserById(cfg.db, params) as User;
-  if (!existingUser) {
-    throw new NotFoundError("User not found");
-  }
-  /* if (!canUserModifyPassword(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
-  const result = await updatePassword(cfg.db, params);
-  return respondWithJSON(200, validateUser(result));
-}
-
 export async function handlerGetTasksForUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as { userId: string };
-  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.userId);
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");
@@ -42,8 +22,7 @@ export async function handlerGetTasksForUser(cfg: ApiConfig, req: BunRequest, us
 }
 
 export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as { userId: string };
-  const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.userId);
+  const params: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
   const existingUser = await getUserById(cfg.db, params) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");
@@ -53,22 +32,4 @@ export async function handlerGetGroupsForUser(cfg: ApiConfig, req: BunRequest, u
   } */
   const tasks = await getGroupsForUser(cfg.db, params);
   return respondWithJSON(200, validateTaskArray(tasks));
-}
-
-export async function handlerDisabledUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const jsonBody = await req.json() as { disabled: boolean };
-  const reqParam = req.params as { userId: string };
-  const params: DisabledUserRequest = validateDisabledUserRequest({
-    id: reqParam.userId,
-    disabled: jsonBody.disabled,
-  });
-  const existingUser = await getUserById(cfg.db, params) as User;
-  if (!existingUser) {
-    throw new NotFoundError("User not found");
-  }
-  /* if (!canUserModifyDisabled(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
-  const result = await disabledUser(cfg.db, validateDisabledUserRequest(params));
-  return respondWithJSON(200, validateUser(result));
 }
