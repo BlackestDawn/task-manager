@@ -4,6 +4,7 @@ import { useUsers, useDeleteUser, useUpdateUserDisabledStatus } from "@/lib/api/
 import { Can } from "@/components/auth/can";
 import { User, Edit, Trash2, UserCheck, UserX } from "lucide-react";
 import { useAuthContext } from "../auth/authProvider";
+import Link from "next/link";
 
 export default function UsersList() {
   const { data: users = [], isLoading, error } = useUsers();
@@ -108,12 +109,14 @@ export default function UsersList() {
                 </Can>
 
                 <Can I="update" a="User">
-                  <button
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-full"
-                    title="Edit user"
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
+                  <Link href={`/users/${user.id}`}>
+                    <button
+                      className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-full"
+                      title="Edit user"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                  </Link>
                 </Can>
 
                 <Can I="delete" a="User">

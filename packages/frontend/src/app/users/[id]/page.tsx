@@ -1,21 +1,17 @@
-import type { IDParamProp } from "@/lib/data/interfaces/general";
+'use client';
+import { useParams } from "next/navigation";
+import ProtectedRoute from "@/components/auth/protectedRoute";
+import UserDetailsPage from "@/components/users/userDetailsPage";
 
-/* export async function generateMetadata({ params }: IDParamProp) {
-  const user = await fetchUserById(params.id);
+export default function UserPage() {
+  const params = useParams();
+  const userId = params.id as string;
 
-  if (!user) {
-    return {
-      title: 'User Not Found',
-      description: 'The requested user does not exist.',
-    };
-  }
+  if (!userId) return <div>Invalid user ID</div>;
 
-  return {
-    title: `Task Manager - User ${user.name}`,
-    description: `Details for user ${user.name}`,
-  };
-} */
-
-export default async function UserDetailsPage({ params }: IDParamProp) {
-  return null;
+  return (
+    <ProtectedRoute action="read" subject="User">
+      <UserDetailsPage userId={userId} />
+    </ProtectedRoute>
+  )
 }
