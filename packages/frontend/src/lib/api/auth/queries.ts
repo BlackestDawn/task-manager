@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { authApi } from "./api";
 import { apiClient } from "@/lib/api";
 
@@ -44,14 +45,46 @@ export function useLogout() {
 
       return authApi.logout(refreshToken);
     },
+    onMutate: async () => {
+      queryClient.setQueryData(AUTH_KEYS.profile(), null);
+    },
     onSettled: () => {
       apiClient.clearTokens();
+      queryClient.invalidateQueries({ queryKey: AUTH_KEYS.profile() });
+      queryClient.removeQueries({ queryKey: AUTH_KEYS.profile() });
       queryClient.clear();
+    },
+    onError: (error) => {
+      console.warn("logout API call failed, but clearing local state:", error);
     },
   });
 }
 
 export function useProfile() {
+  const [hasToken, setHasToken] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return Boolean(localStorage.getItem("auth_token"));
+  });
+
+  useEffect(() => {
+    const checkToken = () => {
+      const token = typeof window !== "undefined"
+        ? localStorage.getItem("auth_token")
+        : null;
+      setHasToken(Boolean(token));
+    };
+
+    checkToken();
+
+    window.addEventListener("storage", checkToken);
+    window.addEventListener("auth-token-changed", checkToken);
+
+    return () => {
+      window.removeEventListener("storage", checkToken);
+      window.removeEventListener("auth-token-changed", checkToken);
+    };
+  }, []);
+
   return useQuery({
     queryKey: AUTH_KEYS.profile(),
     queryFn: authApi.getProfile,

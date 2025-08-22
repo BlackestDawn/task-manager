@@ -107,9 +107,13 @@ export class ApiClient {
   setTokens(token: string, refreshToken: string) {
     this.tokenStorage.setToken(token);
     this.tokenStorage.setRefreshToken(refreshToken);
+
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("auth-token-changed"));
   }
 
   clearTokens() {
     this.tokenStorage.clearTokens();
+
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("auth-token-changed"));
   }
 }
