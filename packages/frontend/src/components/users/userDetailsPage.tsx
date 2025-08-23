@@ -14,9 +14,9 @@ interface UserDetailsPageProps {
 export default function UserDetailsPage({ userId }: UserDetailsPageProps) {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { data: user, isLoading, error } = useUser(userId);
-  const { canUpdateUser } = useUserPermissions();
+  const { canEditUser } = useUserPermissions();
 
-  const canEdit = user ? canUpdateUser(user) : false;
+  const canEdit = user ? canEditUser(user) : false;
 
   if (isLoading) {
     return (

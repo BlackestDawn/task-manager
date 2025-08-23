@@ -17,14 +17,15 @@ export default function UserEditForm({ user, onCancel, onSuccess }: UserEditForm
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showPasswordSection, setShowPasswordSection] = useState<boolean>(false);
   const { user: currentUser } = useAuthContext();
-  const { canManageUserStatus } = useUserPermissions();
+  const { canEditUserField } = useUserPermissions();
 
   const updateUserMutation = useUpdateUser();
   const updatePasswordMutation = useUpdateUserPassword();
   const updateStatusMutation = useUpdateUserDisabledStatus();
 
   const isCurrentUser = currentUser?.id === user.id;
-  const canChangeStatus = canManageUserStatus(user);
+  const canChangeStatus = canEditUserField(user, 'disabled');
+  const canChangePassword = canEditUserField(user, 'password');
 
   const form = useForm({
     defaultValues: {
