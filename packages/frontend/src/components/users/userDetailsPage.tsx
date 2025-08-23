@@ -16,7 +16,7 @@ export default function UserDetailsPage({ userId }: UserDetailsPageProps) {
   const { data: user, isLoading, error } = useUser(userId);
   const { canEditUser } = useUserPermissions();
 
-  const canEdit = user ? canEditUser(user) : false;
+  const canEdit = canEditUser(user);
 
   if (isLoading) {
     return (

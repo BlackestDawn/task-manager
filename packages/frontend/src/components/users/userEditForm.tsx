@@ -4,7 +4,7 @@ import { useForm } from "@tanstack/react-form";
 import { useUpdateUser, useUpdateUserPassword, useUpdateUserDisabledStatus } from "@/lib/api/users/queries";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useAuthContext } from "@/components/auth/authProvider";
-import { type User, validateUpdateUserRequest } from "@task-manager/common";
+import { type User } from "@task-manager/common";
 import { Save, X, Eye, EyeOff, Shield, ShieldOff, Lock, User as UserIcon, Mail } from "lucide-react";
 
 interface UserEditFormProps {
@@ -25,7 +25,6 @@ export default function UserEditForm({ user, onCancel, onSuccess }: UserEditForm
 
   const isCurrentUser = currentUser?.id === user.id;
   const canChangeStatus = canEditUserField(user, 'disabled');
-  const canChangePassword = canEditUserField(user, 'password');
 
   const form = useForm({
     defaultValues: {

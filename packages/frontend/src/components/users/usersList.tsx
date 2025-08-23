@@ -1,6 +1,6 @@
 'use client';
 import { useState } from "react";
-import { useUsers, useDeleteUser, useUpdateUserDisabledStatus } from "@/lib/api/users/queries";
+import { useUsers, useDeleteUser } from "@/lib/api/users/queries";
 import { Can } from "@/components/auth/can";
 import { User, Edit, Trash2, UserCheck, UserX } from "lucide-react";
 import { useAuthContext } from "../auth/authProvider";
@@ -10,7 +10,6 @@ export default function UsersList() {
   const { data: users = [], isLoading, error } = useUsers();
   const { user: currentUser } = useAuthContext();
   const deleteUserMutation = useDeleteUser();
-  const updateUserStatusMutation = useUpdateUserDisabledStatus();
 
   const [ deletingId, setDeletingId] = useState<string | null>(null);
 

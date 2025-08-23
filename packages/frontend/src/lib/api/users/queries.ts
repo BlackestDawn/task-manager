@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "./api";
-import type { User, CreateUserRequest, UpdateUserRequest } from "@task-manager/common";
+import type { User, UpdateUserRequest } from "@task-manager/common";
 import { getTZNormalizedDate } from "@task-manager/common";
 
 export const USER_KEYS = {

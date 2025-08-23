@@ -1,30 +1,20 @@
 import { useAuthContext } from "@/components/auth/authProvider";
 import type { User } from "@task-manager/common";
+import { AbilityChecker } from "@task-manager/common";
 
 export function useUserPermissions() {
   const { ability } = useAuthContext();
+  const abilities = new AbilityChecker(ability);
 
-  const canViewUser = () => ability.can('read', 'User');
+  const canViewUser = (user?: User) => abilities.canViewObject(user);
 
-  const canCreateUser = () => ability.can('create', 'User');
+  const canCreateUser = () => abilities.canCreateObject('User');
 
-  const canEditUser = (user?: User) => {
-    if (!user) return false;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ability.can('update', user as any);
-  };
+  const canEditUser = (user?: User) => abilities.canEditObject(user);
 
-  const canEditUserField = (user?: User, field?: string) => {
-    if (!user) return false;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ability.can("update", user as any, field);
-  }
+  const canEditUserField = (user?: User, field?: string) => abilities.canEditObjectField(user, field);
 
-  const canDeleteUser = (user?: User) => {
-    if (!user) return false;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ability.can('delete', user as any);
-  };
+  const canDeleteUser = (user?: User) => abilities.canRemoveObject(user);
 
   return {
     canViewUser,
