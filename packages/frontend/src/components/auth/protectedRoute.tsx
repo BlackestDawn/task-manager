@@ -3,6 +3,7 @@ import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "./authProvider";
 import type { Actions, Subjects } from "@task-manager/common";
+import LoadingSpinner from "@/components/general/loadingSpinner";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -32,13 +33,7 @@ export default function ProtectedRoute({
     }
   }, [isLoading, requireAuth, isAuthenticated, router, redirectTo]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingSpinner />;
 
   if (requireAuth && !isAuthenticated) return null;
 

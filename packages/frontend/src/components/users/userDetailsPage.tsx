@@ -6,6 +6,7 @@ import { useUserPermissions } from "@/hooks/useUserPermissions";
 import UserDetailsView from "./userDetailsView";
 import UserEditForm from "./userEditForm";
 import { ArrowLeft, Edit, User as UserIcon } from "lucide-react";
+import LoadingSpinner from "@/components/general/loadingSpinner";
 
 interface UserDetailsPageProps {
   userId: string;
@@ -18,15 +19,7 @@ export default function UserDetailsPage({ userId }: UserDetailsPageProps) {
 
   const canEdit = canEditUser(user);
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingSpinner />;
 
   if (error || !user) {
     return (

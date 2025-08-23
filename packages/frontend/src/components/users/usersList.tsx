@@ -5,6 +5,7 @@ import { Can } from "@/components/auth/can";
 import { User, Edit, Trash2, UserCheck, UserX } from "lucide-react";
 import { useAuthContext } from "../auth/authProvider";
 import Link from "next/link";
+import LoadingSpinner from "@/components/general/loadingSpinner";
 
 export default function UsersList() {
   const { data: users = [], isLoading, error } = useUsers();
@@ -26,13 +27,7 @@ export default function UsersList() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingSpinner />;
 
   if (error) {
     return (

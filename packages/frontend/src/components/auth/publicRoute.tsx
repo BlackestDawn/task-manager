@@ -1,6 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
 import { useAuthContext } from "./authProvider";
+import LoadingSpinner from "@/components/general/loadingSpinner";
 
 interface PublicRouteProps {
   children: ReactNode;
@@ -13,13 +14,7 @@ export default function PublicRoute({
 }: PublicRouteProps) {
   const { isAuthenticated, isLoading } = useAuthContext();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingSpinner />;
 
   if (isAuthenticated && !showWhenAuthenticated) return null;
 
