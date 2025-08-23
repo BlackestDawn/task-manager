@@ -5,7 +5,6 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import type { Group, CreateGroupRequest, loggedinUser } from "@task-manager/common";
 import { validateGroup, validateGroupArray, validateCreateGroupRequest, validateDoByUUIDRequest } from "@task-manager/common";
 import { createGroup, getGroups } from "../../db/queries/groups";
-import { canUserAccessGroup, canUserCreateGroup } from "@task-manager/common";
 import { getGroupsForUser } from "../../db/queries/users";
 
 export async function handlerCreateGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {

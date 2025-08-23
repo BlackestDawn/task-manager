@@ -5,7 +5,6 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import type { Group, UpdateGroupRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
 import { validateDoByUUIDRequest, validateGroup, validateUpdateGroupRequest } from "@task-manager/common";
 import { updateGroup, removeGroup, getGroupById } from "../../db/queries/groups";
-import { canUserAccessGroup, canUserDeleteGroup } from "@task-manager/common";
 
 export async function handlerUpdateGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { groupId: string };

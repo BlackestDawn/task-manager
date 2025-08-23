@@ -6,7 +6,6 @@ import type { AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGro
 import { validateDoByUUIDRequest, validateUserArray, validateTaskArray,
   validateAddUserToGroupRequest, validateRemoveUserFromGroupRequest, validateAssignTaskToGroupRequest, validateRemoveTaskFromGroupRequest } from "@task-manager/common";
 import { getGroupById, getGroupMembers, getGroupTasks, assignTaskToGroup, removeTaskFromGroup, addUserToGroup, removeUserFromGroup } from "../../db/queries/groups";
-import { canUserAssignToGroup, canUserRemoveFromGroup } from "@task-manager/common";
 
 export async function handlerGetGroupMembers(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { groupId: string };

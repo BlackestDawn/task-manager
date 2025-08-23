@@ -5,7 +5,6 @@ import type { Task, UpdateTaskRequest, loggedinUser, DoByUUIDRequest } from "@ta
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
 import { validateUpdateTaskRequest, validateDoByUUIDRequest, validateTask } from "@task-manager/common";
 import { updateTask, deleteTask, getTaskById } from "../../db/queries/tasks";
-import { canUserAccessTask, canUserModifyTask, canUserDeleteTask } from "@task-manager/common";
 
 export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { taskId: string };

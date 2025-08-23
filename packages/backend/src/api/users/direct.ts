@@ -5,7 +5,6 @@ import type { User, UpdateUserRequest, DoByUUIDRequest, loggedinUser } from "@ta
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import { validateUpdateUserRequest, validateDoByUUIDRequest, validateUser } from "@task-manager/common";
 import { updateUser, deleteUser, getUserById } from "../../db/queries/users";
-import { canUserAccessUser, canUserDeleteUser, canUserModifyUser } from "@task-manager/common";
 import { hashPassword } from "@backend/src/lib/auth/authentication";
 
 export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {

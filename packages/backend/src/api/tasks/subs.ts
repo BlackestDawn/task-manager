@@ -5,7 +5,6 @@ import type { loggedinUser, DoByUUIDRequest } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
 import { validateDoByUUIDRequest } from "@task-manager/common";
 import { getTaskById, markDone } from "../../db/queries/tasks";
-import { canUserCompleteTask } from "@task-manager/common";
 
 export async function handlerMarkDone(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { taskId: string };

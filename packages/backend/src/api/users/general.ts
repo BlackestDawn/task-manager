@@ -6,7 +6,6 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import { validateCreateUserRequest, validateUser, validateUserArray } from "@task-manager/common";
 import { createUser, getUsers, getUserByLogin } from "../../db/queries/users";
 import { hashPassword } from "../../lib/auth/authentication";
-import { canUserAccessUser, canUserCreateUser } from "@task-manager/common";
 
 export async function handlerGetUsers(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const users = await getUsers(cfg.db) as User[];

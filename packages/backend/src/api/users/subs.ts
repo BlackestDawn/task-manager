@@ -6,7 +6,6 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import { validateDoByUUIDRequest, validateUser, validateTaskArray } from "@task-manager/common";
 import { getUserById, getGroupsForUser, disabledUser } from "../../db/queries/users";
 import { getAllTasksForUser } from "../../db/queries/tasks";
-import { canUserAccessUser, canUserModifyPassword, canUserModifyDisabled } from "@task-manager/common";
 
 export async function handlerGetTasksForUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const params: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
