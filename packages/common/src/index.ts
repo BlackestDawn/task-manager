@@ -15,5 +15,5 @@ export * from "./classes/errors";
 
 // Permissions
 export * from "./permissions/roles"
-export * from "./permissions/helpers"
+export * from "./permissions/helper"
 export * from "./permissions/types"
