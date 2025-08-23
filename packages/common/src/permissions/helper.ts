@@ -7,36 +7,43 @@ export class AbilityChecker {
     this.abilities = abilities;
   }
 
-  canManageObject(subject: any) {
+  canManageObject(subject?: any) {
+    if (!subject) return false;
     return this.abilities.can("manage", subject);
   }
 
-  canEditObject(subject: any) {
+  canEditObject(subject?: any) {
+    if (!subject) return false;
     return this.abilities.can("update", subject);
   }
 
-  canEditObjectField(subject: any, field?: string) {
-    if (!field) return false;
+  canEditObjectField(subject?: any, field?: string) {
+    if (!subject || !field) return false;
     return this.abilities.can("update", subject, field);
   }
 
-  canCreateObject(subject: Subjects) {
+  canCreateObject(subject?: Subjects) {
+    if (!subject) return false;
     return this.abilities.can("create", subject);
   }
 
-  canRemoveObject(subject: any) {
+  canRemoveObject(subject?: any) {
+    if (!subject) return false;
     return this.abilities.can("delete", subject);
   }
 
-  canViewObject(subject: any) {
+  canViewObject(subject?: any) {
+    if (!subject) return false;
     return this.abilities.can("read", subject);
   }
 
-  canAddtoObject(subject: any) {
+  canAddtoObject(subject?: any) {
+    if (!subject) return false;
     return this.abilities.can("assign", subject);
   }
 
-  canRemoveFromObject(subject: any) {
+  canRemoveFromObject(subject?: any) {
+    if (!subject) return false;
     return this.abilities.can("remove", subject);
   }
 }
