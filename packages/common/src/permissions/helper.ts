@@ -1,6 +1,6 @@
 import type { AppAbility, Subjects } from "./roles";
 
-export default class AbilityChecker {
+export class AbilityChecker {
   private abilities: AppAbility;
 
   constructor(abilities: AppAbility) {
