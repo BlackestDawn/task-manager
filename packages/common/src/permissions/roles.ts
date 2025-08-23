@@ -34,13 +34,14 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
         allow("manage", "all");
         break;
       case "manager":
-        allow(["assign", "remove", "update"], "Group", { id: groupId });
+        allow(["assign", "remove", "update"], "Task", { 'groups.id': groupId });
+        allow(["assign", "remove", "update"], "User", { 'groups.id': groupId });
         allow("read", "Group");
         allow("manage", "Task", { 'groups.id': groupId });
         allow("update", "User", ["disabled", "name", "email"], { 'groups.id': groupId });
         break;
       case "editor":
-        allow(["create", "update", "delete", "read"], "Task", { 'groups.id': groupId });
+        allow(["create", "update", "delete", "read", "assign"], "Task", { 'groups.id': groupId });
         allow("read", "Group");
         forbid("delete", "Task", { completed: true });
         allow("delete", "Task", { userId: user.id });
