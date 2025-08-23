@@ -27,7 +27,7 @@ export class AbilityChecker {
     return this.abilities.can("create", subject);
   }
 
-  canRemoveObject(subject?: any) {
+  canDeleteObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("delete", subject);
   }
@@ -37,12 +37,12 @@ export class AbilityChecker {
     return this.abilities.can("read", subject);
   }
 
-  canAddtoObject(subject?: any) {
+  canAssignObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("assign", subject);
   }
 
-  canRemoveFromObject(subject?: any) {
+  canRemoveObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("remove", subject);
   }

@@ -14,7 +14,7 @@ export function useUserPermissions() {
 
   const canEditUserField = (user?: User, field?: string) => abilities.canEditObjectField(user, field);
 
-  const canDeleteUser = (user?: User) => abilities.canRemoveObject(user);
+  const canDeleteUser = (user?: User) => abilities.canDeleteObject(user);
 
   return {
     canViewUser,
