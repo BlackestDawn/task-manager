@@ -37,13 +37,23 @@ export class AbilityChecker {
     return this.abilities.can("read", subject);
   }
 
-  canAssignObject(subject?: any) {
+  canAssignTask(subject?: any) {
     if (!subject) return false;
-    return this.abilities.can("assign", subject);
+    return this.abilities.can("assignTask", subject);
   }
 
-  canRemoveObject(subject?: any) {
+  canRemoveTask(subject?: any) {
     if (!subject) return false;
-    return this.abilities.can("remove", subject);
+    return this.abilities.can("removeTask", subject);
+  }
+
+  canAssignUser(subject?: any) {
+    if (!subject) return false;
+    return this.abilities.can("assignUser", subject);
+  }
+
+  canRemoveUser(subject?: any) {
+    if (!subject) return false;
+    return this.abilities.can("removeUser", subject);
   }
 }
