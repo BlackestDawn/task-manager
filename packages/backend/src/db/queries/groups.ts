@@ -15,13 +15,14 @@ export async function getGroupById(db: DBConn, params: DoByUUIDRequest) {
 }
 
 export async function getGroups(db: DBConn) {
-  const result = await db.select().from(groups);
-  return result.map((group) => {
+  const groupRows = await db.select().from(groups);
+  const result = groupRows.map((group) => {
     return {
       __typename: 'Group',
-      ...result,
+      ...group,
     };
   });
+  return result;
 }
 
 export async function createGroup(db: DBConn, params: CreateGroupRequest) {
