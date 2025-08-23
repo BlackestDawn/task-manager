@@ -27,17 +27,6 @@ export default function UsersList() {
     }
   };
 
-  const handleToggleUserStatus = async (id: string, CurrentDisabled: boolean) => {
-    try {
-      await updateUserStatusMutation.mutateAsync({
-        id,
-        disabled: !CurrentDisabled,
-      });
-    } catch (error) {
-      console.error("Failed to update user status:", error);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -93,20 +82,14 @@ export default function UsersList() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <Can I="update" a="User">
-                  <button
-                    onClick={() => handleToggleUserStatus(user.id, user.disabled)}
-                    disabled={updateUserStatusMutation.isPending || user.id === currentUser?.id}
-                    className={`p-2 rounded-full ${
-                      user.disabled
-                        ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900'
-                        : 'text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    title={user.disabled ? 'Enable user' : 'Disable user'}
-                  >
-                    {user.disabled ? <UserCheck className="h-5 w-5" /> : <UserX className="h-5 w-5" />}
-                  </button>
-                </Can>
+                <div className={`p-2 rounded-full ${user.disabled
+                  ? "text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900"
+                  : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900"
+                }`}>
+                  {user.disabled
+                    ? <UserX className="h-5 w-5" />
+                    : <UserCheck className="h-5 w-5" />}
+                </div>
 
                 <Can I="update" a="User">
                   <Link href={`/users/${user.id}`}>
