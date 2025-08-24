@@ -1,15 +1,9 @@
 'use client';
-// import type { Metadata } from "next";
 import UsersList from "@/components/users/usersList";
 import CreateUserForm from "@/components/users/createUserForm";
 import ProtectedRoute from "@/components/auth/protectedRoute";
 import { Can } from "@/components/auth/can";
 import { useState } from "react";
-
-/* export const metadata: Metadata = {
-  title: 'Task Manager - Users',
-  description: 'Display and manage users',
-}; */
 
 export default function UsersPage() {
   const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
