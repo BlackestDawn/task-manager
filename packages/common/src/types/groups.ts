@@ -24,8 +24,33 @@ export function validateGroup(group: unknown): Group {
 export function validateGroupArray(groups: unknown[]): Group[] {
   const result = groupSchema.array().safeParse(groups);
   if (!result.success) {
-    console.error('Invalid groups', result.error);
-    throw new Error('Invalid groups');
+    console.error('Invalid group array', result.error);
+    throw new Error('Invalid group array');
+  }
+  return result.data;
+}
+
+const groupWithStatsSchema = groupSchema.extend({
+  userCount: z.number().default(0),
+  taskCount: z.number().default(0),
+});
+
+export type GroupWithStats = z.infer<typeof groupWithStatsSchema>;
+
+export function validateGroupWithStats(group: unknown): GroupWithStats {
+  const result = groupWithStatsSchema.safeParse(group);
+  if (!result.success) {
+    console.error('Invalid group with stats:', result.error);
+    throw new Error('Invalid group with stats');
+  }
+  return result.data;
+}
+
+export function validateGroupWithStatsArray(groups: unknown[]): GroupWithStats[] {
+  const result = groupWithStatsSchema.array().safeParse(groups);
+  if (!result.success) {
+    console.error('Invalid group with stats array:', result.error);
+    throw new Error('Invalid group with stats array');
   }
   return result.data;
 }
@@ -125,6 +150,66 @@ export function validateRemoveTaskFromGroupRequest(item: unknown): RemoveTaskFro
   if (!result.success) {
     console.error('Invalid remove task from group request:', result.error);
     throw new Error('Invalid remove task from group request');
+  }
+  return result.data;
+}
+
+const groupMemberSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  login: z.string(),
+  email: z.string().nullish().default(null),
+  role: z.enum(groupRoleList),
+  disabled: z.boolean().default(false),
+});
+
+export type GroupMember = z.infer<typeof groupMemberSchema>;
+
+export function validateGroupMember(member: unknown): GroupMember {
+  const result = groupMemberSchema.safeParse(member);
+  if (!result.success) {
+    console.error('Invalid group member:', result.error);
+    throw new Error("Invalid group member");
+  }
+  return result.data;
+}
+
+export function validateGroupMemberArray(members: unknown[]): GroupMember[] {
+  const result = groupMemberSchema.array().safeParse(members);
+  if (!result.success) {
+    console.error('Invalid group member array:', result.error);
+    throw new Error("Invalid group member array");
+  }
+  return result.data;
+}
+
+const groupTaskSchema = z.object({
+  id: z.uuid(),
+  title: z.string(),
+  description: z.string().nullish().default(null),
+  completed: z.boolean(),
+  userId: z.uuid(),
+  userName: z.string(),
+  finishBy: z.coerce.date().nullish().default(null),
+  completedAt: z.coerce.date().nullish().default(null),
+});
+
+export type GroupTask = z.infer<typeof groupTaskSchema>;
+
+export function validateGroupTask(task: unknown): GroupTask {
+  const result = groupTaskSchema.safeParse(task);
+  if (!result.success) {
+    console.error('Invalid group task:', result.error);
+    throw new Error("Invalid group task");
+  }
+  return result.data;
+}
+
+export function validateGroupTaskArray(tasks: unknown[]): GroupTask[] {
+  const result = groupTaskSchema.array().safeParse(tasks);
+  if (!result.success) {
+    console.error('Invalid group task array:', result.error);
+    throw new Error("Invalid group task array");
   }
   return result.data;
 }
