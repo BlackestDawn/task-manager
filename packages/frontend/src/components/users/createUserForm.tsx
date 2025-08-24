@@ -70,7 +70,7 @@ export default function CreateUserForm({ onSuccess, onCancel}: CreateUserFormPro
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                placeholder="Enter login username"
+                placeholder="Enter username"
               />
               {field.state.meta.errors.length > 0 && (
                 <p className="mt-1 text-sm text-red-600">{field.state.meta.errors[0]}</p>
