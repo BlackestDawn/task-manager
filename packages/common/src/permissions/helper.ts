@@ -1,10 +1,27 @@
-import type { AppAbility, Subjects } from "./roles";
+import { defineAbilityFor, type AppAbility, type Subjects } from "./roles";
+import type { User } from "../types/users";
+
+interface StartParams {
+  user?: User;
+  ability?: AppAbility;
+}
+
 
 export class AbilityChecker {
   private abilities: AppAbility;
 
-  constructor(abilities: AppAbility) {
-    this.abilities = abilities;
+  constructor(params: StartParams ) {
+    if (params.ability) {
+      this.abilities = params.ability;
+      return;
+    }
+
+    if (params.user) {
+      this.abilities = defineAbilityFor(params.user);
+      return;
+    }
+
+    this.abilities = defineAbilityFor(null);
   }
 
   canManageObject(subject?: any) {

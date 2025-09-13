@@ -5,9 +5,9 @@ import type { LoginRequest, LoginResponse, loggedinUser, User, UpdateUserRequest
 import { validateLoginRequest, validateLoginResponse, validateUpdateUserRequest } from "@task-manager/common";
 import { UserNotAuthenticatedError, BadRequestError, UserForbiddenError } from "@task-manager/common";
 import { getUserByLogin, updateUser } from "../../db/queries/users";
-import { checkPasswordHash, makeJWT, makeRefreshToken, getAuthTokenFromHeaders } from "../../lib/auth/authentication";
+import { checkPasswordHash, makeJWT, makeRefreshToken } from "../../lib/auth/authentication";
 import { getRefreshTokenByToken, revokeRefreshToken } from "../../db/queries/auth";
-import { ForbiddenError } from "@casl/ability";
+import { clearCookie, getCookie, isWebClient, setCookie } from "@backend/src/lib/utils/cookies";
 
 export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
   const params: LoginRequest = validateLoginRequest(await req.json() as LoginRequest);
@@ -18,20 +18,53 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
     throw new UserNotAuthenticatedError("invalid username or password");
   }
 
-  const token = await makeJWT(user.id);
-  const refreshToken = await makeRefreshToken(user.id);
+  const tokens = {
+    accesstoken: await makeJWT(user.id),
+    refreshToken: (await makeRefreshToken(user.id)).token,
+  };
+  const isWeb = isWebClient(req);
+
   const response: LoginResponse = validateLoginResponse({
-    ...user,
-    token: token,
-    refreshToken: refreshToken.token,
+    user,
+    tokens,
   });
+
+  if (isWeb) {
+    const jsonResponse = new Response(JSON.stringify(response), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    setCookie(jsonResponse, "accessToken", tokens.accesstoken, {
+      "Max-Age": cfg.jwt.defaultExpireTime,
+    });
+
+    setCookie(jsonResponse, "refreshToken", tokens.refreshToken, {
+      "Max-Age": cfg.refreashToken.defaultExpireTime,
+    });
+
+    response.cookieSet = true;
+    response.tokens = null;
+  }
 
   return respondWithJSON(200, response);
 }
 
 export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest) {
+  const isWeb = isWebClient(req);
+  let refreshTokenValue: string | null;
+
+  if (isWeb) {
+    refreshTokenValue = getCookie(req, "refreshToken");
+  } else {
   const jsonBody = await req.json() as { token: string };
-  const refreshToken = await getRefreshTokenByToken(cfg.db, jsonBody);
+  refreshTokenValue = jsonBody.token;
+  }
+  if (!refreshTokenValue) {
+    throw new UserNotAuthenticatedError("Missing refresh token");
+  }
+
+  const refreshToken = await getRefreshTokenByToken(cfg.db, { token: refreshTokenValue });
 
   if (!refreshToken) {
     throw new UserNotAuthenticatedError("Invalid refresh token");
@@ -46,24 +79,53 @@ export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest)
   }
 
   const newToken = await makeJWT(refreshToken.userId);
+
+  if (isWeb){
+    const response = new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    setCookie(response, "accessToken", newToken, {
+      "Max-Age": cfg.jwt.defaultExpireTime,
+    });
+
+    return response;
+  }
   return respondWithJSON(200, { token: newToken });
 }
 
 export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  console.log("incomming request body:", req.body);
+  const isWeb = isWebClient(req);
+  let refreshTokenValue: string | null;
 
+  if (isWeb) {
+    refreshTokenValue = getCookie(req, "refreshToken");
+  } else {
   const jsonBody = await req.json() as { token: string };
-  const refreshToken = await getRefreshTokenByToken(cfg.db, jsonBody);
+  refreshTokenValue = jsonBody.token;
+  }
+  if (!refreshTokenValue) {
+    throw new UserNotAuthenticatedError("Missing refresh token");
+  }
+
+  const refreshToken = await getRefreshTokenByToken(cfg.db, { token: refreshTokenValue });
 
   if (refreshToken?.userId !== user.userInfo.id) {
     throw new UserForbiddenError("Not allowed to revoke token");
   }
-  const result = await revokeRefreshToken(cfg.db, jsonBody);
+  const result = await revokeRefreshToken(cfg.db, { token: refreshTokenValue });
 
   if (!result) {
     throw new BadRequestError("Invalid refresh token");
   }
 
+  if (isWeb) {
+    const response = new Response(null, {status: 204 });
+    clearCookie(response, "accessToken");
+    clearCookie(response, "refreshToken");
+    return response;
+  }
   return respondWithJSON(204, {});
 }
 

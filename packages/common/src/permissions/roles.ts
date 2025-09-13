@@ -36,6 +36,7 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
       case "manager":
         allow(["assignTask", "removeTask", "assignUser", "removeUser", "update"], "Group", { id: groupId });
         allow("read", "Group");
+        allow("read", "User");
         allow("manage", "Task", { 'groups.id': groupId });
         allow("update", "User", ["disabled", "name", "email"], { 'groups.id': groupId });
         break;
@@ -43,6 +44,7 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
         allow(["create", "update", "delete", "read"], "Task", { 'groups.id': groupId });
         allow("assignTask", "Group", { id: groupId})
         allow("read", "Group");
+        allow("read", "User");
         forbid("delete", "Task", { completed: true });
         allow("delete", "Task", { userId: user.id });
         break;
@@ -50,10 +52,12 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
         allow("read", "Task", { 'groups.id': groupId });
         allow("update", "Task", ["completed"], { 'groups.id': groupId });
         allow("read", "Group");
+        allow("read", "User");
         break;
       case "viewer":
         allow("read", "Task", { 'groups.id': groupId });
         allow("read", "Group");
+        allow("read", "User");
         break;
       case "none":
         break;
