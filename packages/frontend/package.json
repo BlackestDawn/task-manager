@@ -10,27 +10,30 @@
   "dependencies": {
     "@casl/ability": "^6.7.3",
     "@casl/react": "^5.0.0",
-    "@tailwindcss/postcss": "^4.1.11",
-    "@tanstack/react-form": "^1.19.0",
-    "@tanstack/react-query": "^5.84.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/joy": "^5.0.0-beta.52",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@tanstack/react-form": "^1.19.3",
+    "@tanstack/react-query": "^5.87.1",
     "@task-manager/common": "workspace:*",
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "lucide-react": "^0.539.0",
-    "next": "^15.4.6",
+    "next": "^15.5.2",
     "postcss": "^8.5.6",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
-    "eslint": "^9.33.0",
-    "eslint-config-next": "^15.4.6"
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "^15.5.2"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "typescript": "^5.8.3"
   }
 }
