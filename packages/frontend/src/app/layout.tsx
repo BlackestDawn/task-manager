@@ -4,7 +4,8 @@ import { Roboto_Flex, Roboto_Mono, Roboto_Serif } from "next/font/google";
 import './globals.css';
 import SiteHeader from '@/components/general/siteHeader';
 import SiteFooter from '@/components/general/siteFooter';
-import Providers from './providers';
+import { ServerAuthProvider, ClientAuthProvider } from '@/lib/auth';
+import { ReactQueryProvider } from '@/lib/providers/reactQueryProvider';
 
 const robotoFlex = Roboto_Flex({
   variable: '--font-roboto-flex',
@@ -33,21 +34,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${robotoMono.variable} ${robotoSerif.variable} ${robotoFlex.variable} antialiased`}>
-        <Providers>
+      <ServerAuthProvider>
+        <ReactQueryProvider>
+          <ClientAuthProvider>
+        <div className={`${robotoMono.variable} ${robotoSerif.variable} ${robotoFlex.variable} antialiased`}>
           <div className="max-w-[1280px] text-center font-sans">
-            <header className="pt-5 bg-gray-300 dark:bg-gray-800">
-              <SiteHeader />
-            </header>
-            <main className="pt-5 border-y-2 border-gray-900 dark:border-gray-200">
-              {children}
-            </main>
-            <footer className="pb-5 bg-gray-300 dark:bg-gray-800">
-              <SiteFooter />
-            </footer>
+            <SiteHeader />
+
+                <main>
+                {children}
+                </main>
+
+            <SiteFooter />
           </div>
-        </Providers>
-      </body>
+        </div>
+          </ClientAuthProvider>
+        </ReactQueryProvider>
+      </ServerAuthProvider>
     </html>
-  )
+  );
 }
