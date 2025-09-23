@@ -25,6 +25,10 @@ export function restrictedEndpoint<T extends any>(cfg: ApiConfig, handler: Handl
       throw new NotFoundError("User not found");
     }
 
+    if (userInfo.disabled) {
+      throw new UserNotAuthenticatedError("User is disabled");
+    }
+
     const capabilities = defineAbilityFor(validateUserContext(userInfo));
 
     return handler(cfg, req, {

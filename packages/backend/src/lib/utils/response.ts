@@ -1,17 +1,17 @@
 import type { BunRequest } from "bun";
-import { corsHeaders } from "../../api/middleware/cors";
+import { getSimpleCORSHeaders } from "../../api/middleware/cors";
 
 export function respondWithJSON(status: number, payload: any, req?: BunRequest) {
-  const response = new Response(JSON.stringify(payload), {
-    status,
-    headers: { "Content-Type": "application/json", },
-  });
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
 
   if (req) {
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      response.headers.set(key, value as string);
-    });
+    Object.assign(headers, getSimpleCORSHeaders(req));
   }
 
-  return response;
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers,
+  });
 }

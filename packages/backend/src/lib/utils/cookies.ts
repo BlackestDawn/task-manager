@@ -30,10 +30,23 @@ export function setCookie(response: Response, name: string, value: string, optio
   };
 
   const cookieOptions = { ...defaults, ...options };
-  const cookieString = `${name}=${encodeURIComponent(value)};
-    ${Object.entries(cookieOptions).map(([key, value]) => value && `${key}=${value}`).join('; ')}`;
+  let cookieString = `${name}=${encodeURIComponent(value)}`;
+  Object.entries(cookieOptions).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
 
-  response.headers.set('Set-Cookie', cookieString);
+    if (typeof value === "boolean" && value) {
+      cookieString += `; ${key}`;
+    } else if (typeof value !== "boolean") {
+      cookieString += `; ${key}=${value}`;
+    }
+  });
+
+  const existingCookies = response.headers.get('Set-Cookie');
+  if (existingCookies) {
+    response.headers.set('Set-Cookie', `${existingCookies}, ${cookieString}`);
+  } else {
+    response.headers.set('Set-Cookie', cookieString);
+  }
 }
 
 export function getCookie(request: BunRequest, name: string) {
@@ -41,9 +54,11 @@ export function getCookie(request: BunRequest, name: string) {
   if (!cookieString) return null;
 
   const cookies = cookieString.split(";").reduce((acc, cookie) => {
-    const [key, value] = cookie.trim().split("=");
-    if (!key || !value) return acc;
-    acc[key] = value;
+    const [key, ...valueParts] = cookie.trim().split("=");
+    if (!key || valueParts.length === 0) return acc;
+
+    const value = valueParts.join("=");
+    acc[key] = decodeURIComponent(value);
     return acc;
   }, {} as Record<string, string>);
 

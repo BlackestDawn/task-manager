@@ -8,6 +8,7 @@ import { getUserByLogin, updateUser } from "../../db/queries/users";
 import { checkPasswordHash, makeJWT, makeRefreshToken } from "../../lib/auth/authentication";
 import { getRefreshTokenByToken, revokeRefreshToken } from "../../db/queries/auth";
 import { clearCookie, getCookie, isWebClient, setCookie } from "@backend/src/lib/utils/cookies";
+import { getSimpleCORSHeaders } from "../middleware/cors";
 
 export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
   const params: LoginRequest = validateLoginRequest(await req.json() as LoginRequest);
@@ -26,13 +27,17 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
 
   const response: LoginResponse = validateLoginResponse({
     user,
-    tokens,
+    tokens: isWeb ? null : tokens,
+    cookieSet: isWeb,
   });
 
   if (isWeb) {
     const jsonResponse = new Response(JSON.stringify(response), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...getSimpleCORSHeaders(req),
+      },
     });
 
     setCookie(jsonResponse, "accessToken", tokens.accesstoken, {
@@ -43,11 +48,10 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
       "Max-Age": cfg.refreashToken.defaultExpireTime,
     });
 
-    response.cookieSet = true;
-    response.tokens = null;
+    return jsonResponse;
+  } else {
+    return respondWithJSON(200, response);
   }
-
-  return respondWithJSON(200, response);
 }
 
 export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest) {
@@ -57,8 +61,8 @@ export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest)
   if (isWeb) {
     refreshTokenValue = getCookie(req, "refreshToken");
   } else {
-  const jsonBody = await req.json() as { token: string };
-  refreshTokenValue = jsonBody.token;
+    const jsonBody = await req.json() as { token: string };
+    refreshTokenValue = jsonBody.token;
   }
   if (!refreshTokenValue) {
     throw new UserNotAuthenticatedError("Missing refresh token");
@@ -80,10 +84,13 @@ export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest)
 
   const newToken = await makeJWT(refreshToken.userId);
 
-  if (isWeb){
+  if (isWeb) {
     const response = new Response(JSON.stringify({ success: true }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...getSimpleCORSHeaders(req),
+      },
     });
 
     setCookie(response, "accessToken", newToken, {
@@ -91,8 +98,9 @@ export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest)
     });
 
     return response;
+  } else {
+    return respondWithJSON(200, { token: newToken });
   }
-  return respondWithJSON(200, { token: newToken });
 }
 
 export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
@@ -102,8 +110,8 @@ export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest,
   if (isWeb) {
     refreshTokenValue = getCookie(req, "refreshToken");
   } else {
-  const jsonBody = await req.json() as { token: string };
-  refreshTokenValue = jsonBody.token;
+    const jsonBody = await req.json() as { token: string };
+    refreshTokenValue = jsonBody.token;
   }
   if (!refreshTokenValue) {
     throw new UserNotAuthenticatedError("Missing refresh token");
@@ -121,12 +129,16 @@ export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest,
   }
 
   if (isWeb) {
-    const response = new Response(null, {status: 204 });
+    const response = new Response(null, {
+      status: 204,
+      headers: getSimpleCORSHeaders(req),
+    });
     clearCookie(response, "accessToken");
     clearCookie(response, "refreshToken");
     return response;
+  } else {
+    return respondWithJSON(204, {});
   }
-  return respondWithJSON(204, {});
 }
 
 export async function handlerGetSelf(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
