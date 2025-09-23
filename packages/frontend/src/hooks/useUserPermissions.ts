@@ -1,10 +1,10 @@
-import { useAuthContext } from "@/components/auth/authProvider";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import type { User } from "@task-manager/common";
 import { AbilityChecker } from "@task-manager/common";
 
 export function useUserPermissions() {
   const { ability } = useAuthContext();
-  const abilities = new AbilityChecker(ability);
+  const abilities = new AbilityChecker({ability});
 
   const canViewUser = (user?: User) => abilities.canViewObject(user);
 

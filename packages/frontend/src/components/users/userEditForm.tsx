@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useUpdateUser, useUpdateUserPassword, useUpdateUserDisabledStatus } from "@/lib/api/users/queries";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
-import { useAuthContext } from "@/components/auth/authProvider";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import { type User } from "@task-manager/common";
 import { Save, X, Eye, EyeOff, Shield, ShieldOff, Lock, User as UserIcon, Mail } from "lucide-react";
 

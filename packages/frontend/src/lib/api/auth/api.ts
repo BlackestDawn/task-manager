@@ -5,11 +5,11 @@ export const authApi = {
   login: (credentials: LoginRequest): Promise<LoginResponse> =>
     apiClient.post("/auth/login", credentials),
 
-  logout: (refreshToken: string): Promise<void> =>
-    apiClient.post("/auth/logout", { token: refreshToken }),
+  logout: (): Promise<void> =>
+    apiClient.post("/auth/logout", {}),
 
-  refresh: (refreshToken: string): Promise<LoginResponse> =>
-    apiClient.post("/auth/refresh", { token: refreshToken }),
+  refresh: (): Promise<{ success: boolean }> =>
+    apiClient.post("/auth/refresh", {}),
 
   getProfile: (): Promise<User> =>
     apiClient.get("/auth/profile"),

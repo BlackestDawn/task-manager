@@ -1,5 +1,5 @@
 "use client";
-import { useAuthContext } from "./authProvider";
+import { useAuthContext } from "./clientAuthProvider";
 
 export default function AuthDebug() {
   const { user, isAuthenticated, isLoading } = useAuthContext();

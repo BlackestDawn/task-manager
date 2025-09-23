@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { groupsApi } from "./api";
-import { useAuthContext } from "@/components/auth/authProvider";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import type { UpdateGroupRequest } from "@task-manager/common";
 import { AbilityChecker } from "@task-manager/common";
 

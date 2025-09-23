@@ -1,6 +1,6 @@
 "use client";
 import type { ReactNode } from "react";
-import { useAuthContext } from "./authProvider";
+import { useAuthContext } from "./clientAuthProvider";
 import LoadingSpinner from "@/components/general/loadingSpinner";
 
 interface PublicRouteProps {
