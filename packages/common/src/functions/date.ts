@@ -1,4 +1,4 @@
-import { type TaskItem } from '@task-manager/common';
+import { type Task } from '@task-manager/common';
 
 export const getTZNormalizedDate = (offset?: number) => {
   const now = new Date();
@@ -12,7 +12,7 @@ export function justDate(date: Date | string): string {
   return new Date(date).toLocaleDateString();
 }
 
-export function isTaskOverdue(task: TaskItem): boolean {
+export function isTaskOverdue(task: Task): boolean {
   if (!task.finishBy) return false;
   const today = new Date();
   return task.finishBy < today && !task.completed;
@@ -34,14 +34,14 @@ export function isThisMonth(date: string | Date): boolean {
   return date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
 }
 
-export function isFutureTask(task: TaskItem): boolean {
+export function isFutureTask(task: Task): boolean {
   if (!task.finishBy) return true;
   const today = new Date();
   const future = new Date(today.getFullYear(), today.getMonth() + 1, 1);
   return task.finishBy >= future;
 }
 
-export function sortTasksByFinishDate(a: TaskItem, b: TaskItem): number {
+export function sortTasksByFinishDate(a: Task, b: Task): number {
   if (!a.finishBy) return 1;
   if (!b.finishBy) return -1;
   const dateA = new Date(a.finishBy);

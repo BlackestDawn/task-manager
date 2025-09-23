@@ -5,7 +5,6 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import type { Group, UpdateGroupRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
 import { validateDoByUUIDRequest, validateGroup, validateUpdateGroupRequest } from "@task-manager/common";
 import { updateGroup, removeGroup, getGroupById } from "../../db/queries/groups";
-import { canUserAccessGroup, canUserDeleteGroup } from "@task-manager/common";
 
 export async function handlerUpdateGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { groupId: string };
@@ -32,9 +31,9 @@ export async function handlerDeleteGroup(cfg: ApiConfig, req: BunRequest, user: 
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserDeleteGroup(user.capabilities, group)) {
+  /* if (!canUserDeleteGroup(user.capabilities, group)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   await removeGroup(cfg.db, params);
   return respondWithJSON(204, {});
@@ -47,9 +46,9 @@ export async function handlerGetGroupById(cfg: ApiConfig, req: BunRequest, user:
   if (!result) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserAccessGroup(user.capabilities, result)) {
+  /* if (!canUserAccessGroup(user.capabilities, result)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   return respondWithJSON(200, validateGroup(result) as Group);
 }

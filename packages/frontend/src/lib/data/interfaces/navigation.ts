@@ -9,3 +9,8 @@ export interface HeaderNavbarProps {
   setIsMenuOpen: (isOpen: boolean) => void;
 }
 
+export interface MenuItem {
+  href: string;
+  label: string;
+  action?: string;
+}

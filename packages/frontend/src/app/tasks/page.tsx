@@ -1,13 +1,14 @@
-import ShowNextTaskToFinish from "@/components/pages/tasks/nextToFinish";
-import TasksForThisWeek from "@/components/pages/tasks/tasksForThisWeek";
-import TasksForThisMonth from "@/components/pages/tasks/tasksForThisMonth";
-import TasksWithoutTimeLimit from "@/components/pages/tasks/tasksWithoutTimeLimit";
+import ShowNextTaskToFinish from "@/components/tasks/nextToFinish";
+import TasksForThisWeek from "@/components/tasks/tasksForThisWeek";
+import TasksForThisMonth from "@/components/tasks/tasksForThisMonth";
+import TasksWithoutTimeLimit from "@/components/tasks/tasksWithoutTimeLimit";
 import type { Metadata } from "next";
 import { fetchTasks } from "@/lib/api/task";
 import { Suspense } from "react";
-import type { TaskItem } from "@task-manager/common";
+import type { Task } from "@task-manager/common";
 import { isThisMonth, isThisWeek, sortTasksByFinishDate } from "@task-manager/common";
 import type { TaskArrayProp } from "@/lib/data/interfaces/task";
+import ProtectedRoute from "@/components/auth/protectedRoute";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Tasks',
@@ -15,12 +16,14 @@ export const metadata: Metadata = {
 };
 
 export default async function TasksPageWrapper() {
-  const tasks: TaskItem[] = await fetchTasks();
+  const tasks: Task[] = await fetchTasks();
 
   return (
-    <Suspense fallback={<div>Fetching tasks...</div>}>
-      <TasksPage tasks={tasks} />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense fallback={<div>Fetching tasks...</div>}>
+        <TasksPage tasks={tasks} />
+      </Suspense>
+    </ProtectedRoute>
   );
 }
 
@@ -28,7 +31,7 @@ function TasksPage({ tasks }: TaskArrayProp) {
   const tasksForThisWeek = tasks.filter(task => isThisWeek(task.finishBy || '')).sort(sortTasksByFinishDate);
   const tasksForThisMonth = tasks.filter(task => isThisMonth(task.finishBy || '')).sort(sortTasksByFinishDate);
   const nonTimeboundTasks = tasks.filter(task => !task.finishBy);
-  const nextTask: TaskItem | undefined =
+  const nextTask: Task | undefined =
     tasks.filter(t => !t.completed && t.finishBy ).sort(sortTasksByFinishDate)[0]
     || nonTimeboundTasks[0] || undefined;
 

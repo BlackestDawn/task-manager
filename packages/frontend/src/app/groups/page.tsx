@@ -1,34 +1,39 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { fetchGroups } from "@/lib/api/group";
-import type { GroupArrayProp } from "@/lib/data/interfaces/group";
-import Link from "next/link";
+'use client';
+import ProtectedRoute from "@/components/auth/protectedRoute";
+import GroupsList from "@/components/groups/groupsList";
+import CreateGroupForm from "@/components/groups/createGroupForm";
+import { Can } from "@/components/auth/can";
+import { useState } from "react";
 
-export const metadata: Metadata = {
-  title: 'Task Manager - Groups',
-  description: 'Display and manage user groups',
-};
+export default function GroupsPage() {
+  const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
 
-export default async function GroupsPageWrapper() {
-  const groups = await fetchGroups();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <GroupsPage groups={groups} />
-    </Suspense>
-  );
-}
+    <ProtectedRoute action="read" subject="Group" >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Groups</h1>
+          <Can I="create" a="Group">
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Create Group
+            </button>
+          </Can>
+        </div>
 
-function GroupsPage({ groups }: GroupArrayProp) {
-  return (
-    <div>
-      <h2>Available groups:</h2>
-      <ul>
-        {groups.map(group => (
-          <li key={group.id}>
-            <Link href={`/groups/${group.id}`}>{group.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+        {showCreateForm && (
+          <div className="mb-6">
+            <CreateGroupForm
+              onSuccess={() => setShowCreateForm(false)}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          </div>
+        )}
+
+        <GroupsList />
+      </div>
+    </ProtectedRoute>
+  )
 }

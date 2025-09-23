@@ -1,19 +1,18 @@
 import { type ApiConfig } from "../../config";
 import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
-import type { TaskItem, UpdateTaskRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
+import type { Task, UpdateTaskRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
-import { validateUpdateTaskRequest, validateDoByUUIDRequest, validateTaskItem } from "@task-manager/common";
+import { validateUpdateTaskRequest, validateDoByUUIDRequest, validateTask } from "@task-manager/common";
 import { updateTask, deleteTask, getTaskById } from "../../db/queries/tasks";
-import { canUserAccessTask, canUserModifyTask, canUserDeleteTask } from "@task-manager/common";
 
 export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { taskId: string };
   const jsonBody = await req.json() as UpdateTaskRequest;
   const existingTask = await getTaskById(cfg.db, validateDoByUUIDRequest(reqParam.taskId));
-  if (!canUserModifyTask(user.capabilities, existingTask)) {
+  /* if (!canUserModifyTask(user.capabilities, existingTask)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   const params: UpdateTaskRequest = validateUpdateTaskRequest({
     id: reqParam.taskId,
@@ -22,16 +21,16 @@ export async function handlerUpdateTask(cfg: ApiConfig, req: BunRequest, user: l
     finishBy: jsonBody.finishBy || existingTask.finishBy,
   });
   const result = await updateTask(cfg.db, params);
-  return respondWithJSON(200, validateTaskItem(result) as TaskItem);
+  return respondWithJSON(200, validateTask(result) as Task);
 }
 
 export async function handlerDeleteTask(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { taskId: string };
   const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.taskId);
   const existingTask = await getTaskById(cfg.db, params);
-  if (!canUserDeleteTask(user.capabilities, existingTask)) {
+  /* if (!canUserDeleteTask(user.capabilities, existingTask)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   await deleteTask(cfg.db, params);
   return respondWithJSON(204, {});
@@ -41,8 +40,8 @@ export async function handlerGetTaskById(cfg: ApiConfig, req: BunRequest, user: 
   const reqParam = req.params as { taskId: string };
   const params: DoByUUIDRequest = validateDoByUUIDRequest(reqParam.taskId);
   const task = await getTaskById(cfg.db, params);
-  if (!canUserAccessTask(user.capabilities, task)) {
+  /* if (!canUserAccessTask(user.capabilities, task)) {
     throw new UserForbiddenError("User not authorized");
-  }
-  return respondWithJSON(200, validateTaskItem(task) as TaskItem);
+  } */
+  return respondWithJSON(200, validateTask(task) as Task);
 }

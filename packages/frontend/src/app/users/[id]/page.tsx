@@ -1,45 +1,16 @@
-import UserDetailsPage from "@/components/pages/users/userDetails";
-import type { IDParamProp } from "@/lib/data/interfaces/general";
-import type { UserProp } from "@/lib/data/interfaces/user";
-import { fetchUserById } from "@/lib/api/user";
-import { Suspense } from "react";
+'use client';
+import { useParams } from "next/navigation";
+import ProtectedRoute from "@/components/auth/protectedRoute";
+import UserDetailsPage from "@/components/users/userDetailsPage";
 
-export async function generateMetadata({ params }: IDParamProp) {
-  const user = await fetchUserById(params.id);
+export default function UserPage() {
+  const { id } = useParams();
 
-  if (!user) {
-    return {
-      title: 'User Not Found',
-      description: 'The requested user does not exist.',
-    };
-  }
-
-  return {
-    title: `Task Manager - User ${user.name}`,
-    description: `Details for user ${user.name}`,
-  };
-}
-
-export default async function UserDetailsPageWrapper({ params }: IDParamProp) {
-  const { id } = await params;
-  const user = await fetchUserById(id);
+  if (!id) return <div>Invalid user ID</div>;
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <UserPage user={user} />
-    </Suspense>
-  );
-}
-
-function UserPage({ user }: UserProp) {
-  if (!user) {
-    return <div>User not found.</div>;
-  }
-
-  return (
-    <div>
-      <h2>User Details:</h2>
-      <UserDetailsPage user={user} />
-    </div>
-  );
+    <ProtectedRoute action="read" subject="User">
+      <UserDetailsPage userId={id as string} />
+    </ProtectedRoute>
+  )
 }

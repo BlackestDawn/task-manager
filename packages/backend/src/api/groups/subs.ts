@@ -3,10 +3,9 @@ import { respondWithJSON } from "../../lib/utils/response";
 import type { BunRequest } from "bun";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import type { AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
-import { validateDoByUUIDRequest, validateUserArray, validateTaskItemArray,
+import { validateDoByUUIDRequest, validateUserArray, validateTaskArray,
   validateAddUserToGroupRequest, validateRemoveUserFromGroupRequest, validateAssignTaskToGroupRequest, validateRemoveTaskFromGroupRequest } from "@task-manager/common";
 import { getGroupById, getGroupMembers, getGroupTasks, assignTaskToGroup, removeTaskFromGroup, addUserToGroup, removeUserFromGroup } from "../../db/queries/groups";
-import { canUserAssignToGroup, canUserRemoveFromGroup } from "@task-manager/common";
 
 export async function handlerGetGroupMembers(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const reqParam = req.params as { groupId: string };
@@ -28,7 +27,7 @@ export async function handlerGetGroupTasks(cfg: ApiConfig, req: BunRequest, user
   }
 
   const tasks = await getGroupTasks(cfg.db, params);
-  return respondWithJSON(200, validateTaskItemArray(tasks));
+  return respondWithJSON(200, validateTaskArray(tasks));
 }
 
 export async function handlerAddUserToGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
@@ -39,9 +38,9 @@ export async function handlerAddUserToGroup(cfg: ApiConfig, req: BunRequest, use
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserAssignToGroup(user.capabilities, group)) {
+  /* if (!canUserAssignToGroup(user.capabilities, group)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   const params: AddUserToGroupRequest = validateAddUserToGroupRequest({
     ...jsonBody,
@@ -59,9 +58,9 @@ export async function handlerRemoveUserFromGroup(cfg: ApiConfig, req: BunRequest
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserRemoveFromGroup(user.capabilities, group)) {
+  /* if (!canUserRemoveFromGroup(user.capabilities, group)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   const params: RemoveUserFromGroupRequest = validateRemoveUserFromGroupRequest({
     ...jsonBody,
@@ -79,9 +78,9 @@ export async function handlerAssignTaskToGroup(cfg: ApiConfig, req: BunRequest, 
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserAssignToGroup(user.capabilities, group)) {
+  /* if (!canUserAssignToGroup(user.capabilities, group)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   const params: AssignTaskToGroupRequest = validateAssignTaskToGroupRequest({
     ...jsonBody,
@@ -100,9 +99,9 @@ export async function handlerRemoveTaskFromGroup(cfg: ApiConfig, req: BunRequest
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-  if (!canUserRemoveFromGroup(user.capabilities, group)) {
+  /* if (!canUserRemoveFromGroup(user.capabilities, group)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
 
   const params: RemoveTaskFromGroupRequest = validateRemoveTaskFromGroupRequest({
     ...jsonBody,

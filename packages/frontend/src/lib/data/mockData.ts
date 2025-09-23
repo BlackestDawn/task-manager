@@ -1,4 +1,4 @@
-import type { User, Group, TaskItem } from "@task-manager/common";
+import type { User, Group, Task } from "@task-manager/common";
 
 const baseTime = new Date();
 const days = 24 * 60 * 60 * 1000; // milliseconds in a day
@@ -112,7 +112,7 @@ export const noneUser: User = {
   ],
 };
 
-export const testTask1: TaskItem = {
+export const testTask1: Task = {
   __typename: "Task",
   id: "53522744-bfd1-44eb-b6b8-25a9b3d36cff",
   createdAt: new Date(baseTime.getTime() - 4 * hours),
@@ -128,7 +128,7 @@ export const testTask1: TaskItem = {
   ],
 };
 
-export const testTask2: TaskItem = {
+export const testTask2: Task = {
   __typename: "Task",
   id: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6",
   createdAt: new Date(baseTime.getTime() - 6 * hours),
@@ -144,7 +144,7 @@ export const testTask2: TaskItem = {
   ],
 };
 
-export const testTask3: TaskItem = {
+export const testTask3: Task = {
   __typename: "Task",
   id: "c7d8e9f0-1a2b-3c4d-5e6f-7g8h9i0j1k2",
   createdAt: new Date(baseTime.getTime() - 8 * hours),
@@ -160,7 +160,7 @@ export const testTask3: TaskItem = {
   ],
 };
 
-export const testTask4: TaskItem = {
+export const testTask4: Task = {
   __typename: "Task",
   id: "d3e4f5g6-7h8i-9j0k-l1m2-n3o4p5q6r7s8",
   createdAt: new Date(baseTime.getTime() - 10 * hours),

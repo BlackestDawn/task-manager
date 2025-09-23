@@ -6,21 +6,18 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import { validateCreateUserRequest, validateUser, validateUserArray } from "@task-manager/common";
 import { createUser, getUsers, getUserByLogin } from "../../db/queries/users";
 import { hashPassword } from "../../lib/auth/authentication";
-import { canUserAccessUser, canUserCreateUser } from "@task-manager/common";
 
 export async function handlerGetUsers(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const users = await getUsers(cfg.db) as User[];
-  const result = users.filter(u => {
-    const canAccess = canUserAccessUser(user.capabilities, u)
-    return canAccess;
-  });
+  // const result = users.filter(u => canUserAccessUser(user.capabilities, u));
+  const result = users;
   return respondWithJSON(200, validateUserArray(result));
 }
 
 export async function handlerCreateUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  if (!canUserCreateUser(user.capabilities)) {
+  /* if (!canUserCreateUser(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
   const jsonBody = await req.json() as CreateUserRequest;
   const params: CreateUserRequest = validateCreateUserRequest({
     login: jsonBody.login,

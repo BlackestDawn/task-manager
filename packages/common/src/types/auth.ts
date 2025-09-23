@@ -1,4 +1,5 @@
 import z from 'zod';
+import { UserSchema } from './users';
 import { UserNotAuthenticatedError } from '../classes/errors';
 
 const LoginRequestSchema = z.object({
@@ -20,13 +21,12 @@ export function validateLoginRequest(item: unknown): LoginRequest {
 }
 
 const LoginResponseSchema = z.object({
-  id: z.uuid(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  login: z.string(),
-  name: z.string(),
-  token: z.string(),
-  refreshToken: z.string(),
+  user: UserSchema,
+  tokens: z.object({
+    accessToken: z.string(),
+    refreshToken: z.string(),
+  }).nullish().default(null),
+  cookieSet: z.boolean().default(false),
 });
 
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;

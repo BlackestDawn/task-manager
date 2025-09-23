@@ -1,15 +1,19 @@
 import { cfg } from "../../config";
-import { withConfig } from "../middleware/config";
-import { handlerLoginUser, handlerRefreshAccessToken, handlerRevokeRefreshToken } from "./auth";
+import { withConfig, restrictedEndpoint } from "../middleware/config";
+import { handlerLoginUser, handlerRefreshAccessToken, handlerRevokeRefreshToken, handlerGetSelf, handlerUpdateSelf } from "./general";
 
 export const authRoutes = {
-  "/api/login": {
+  "/api/auth/login": {
     POST: withConfig(cfg, handlerLoginUser),
   },
-  "/api/refresh": {
+  "/api/auth/refresh": {
     POST: withConfig(cfg, handlerRefreshAccessToken),
   },
-  "/api/revoke": {
-    POST: withConfig(cfg, handlerRevokeRefreshToken),
+  "/api/auth/logout": {
+    POST: restrictedEndpoint(cfg, handlerRevokeRefreshToken),
   },
+  "/api/auth/profile": {
+    GET: restrictedEndpoint(cfg, handlerGetSelf),
+    PUT: restrictedEndpoint(cfg, handlerUpdateSelf),
+  }
 }

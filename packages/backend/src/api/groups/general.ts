@@ -5,14 +5,13 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import type { Group, CreateGroupRequest, loggedinUser } from "@task-manager/common";
 import { validateGroup, validateGroupArray, validateCreateGroupRequest, validateDoByUUIDRequest } from "@task-manager/common";
 import { createGroup, getGroups } from "../../db/queries/groups";
-import { canUserAccessGroup, canUserCreateGroup } from "@task-manager/common";
 import { getGroupsForUser } from "../../db/queries/users";
 
 export async function handlerCreateGroup(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const jsonBody = await req.json() as CreateGroupRequest;
-  if (!canUserCreateGroup(user.capabilities)) {
+  /* if (!canUserCreateGroup(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
-  }
+  } */
   const params: CreateGroupRequest = validateCreateGroupRequest({
     ...jsonBody,
   })
@@ -22,7 +21,8 @@ export async function handlerCreateGroup(cfg: ApiConfig, req: BunRequest, user: 
 
 export async function handlerGetAllGroups(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
   const groups = await getGroups(cfg.db);
-  const result = groups.filter(g => canUserAccessGroup(user.capabilities, g));
+  // const result = groups.filter(g => canUserAccessGroup(user.capabilities, g));
+  const result = groups;
   return respondWithJSON(200, validateGroupArray(result) as Group[]);
 }
 

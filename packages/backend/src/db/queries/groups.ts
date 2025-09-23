@@ -1,7 +1,7 @@
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, sql, exists } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { groups, users, userGroups, tasks, taskGroups } from "../schema";
-import type { DoByUUIDRequest, CreateGroupRequest, UpdateGroupRequest, AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest } from "@task-manager/common";
+import type { Group, GroupWithStats, DoByUUIDRequest, CreateGroupRequest, UpdateGroupRequest, AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest } from "@task-manager/common";
 import { getGroupRolesForUser } from "./users";
 import { getGroupsForTask } from "./tasks";
 import { AlreadyExistsConflictError } from "@task-manager/common";
@@ -14,14 +14,35 @@ export async function getGroupById(db: DBConn, params: DoByUUIDRequest) {
   };
 }
 
-export async function getGroups(db: DBConn) {
-  const result = await db.select().from(groups);
-  return result.map((group) => {
-    return {
-      __typename: 'Group',
-      ...result,
-    };
-  });
+export async function getGroups(db: DBConn, params?: DoByUUIDRequest)  {
+  let query = db.select({
+    id: groups.id,
+    name: groups.name,
+    description: groups.description,
+    createdAt: groups.createdAt,
+    updatedAt: groups.updatedAt,
+    userCount: sql<number>`(select count(*) from ${userGroups} where ${userGroups.groupId} = ${groups.id})`.as('userCount'),
+    taskCount: sql<number>`(select count(*) from ${taskGroups} where ${taskGroups.groupId} = ${groups.id})`.as('taskCount'),
+  }).from(groups);
+
+/*   if (params?.id) {
+    query = query.where(
+      exists(
+        db.select({ one: sql`1` })
+          .from(userGroups)
+          .where(and(
+            eq(userGroups.userId, params.id),
+            eq(userGroups.groupId, groups.id)
+          ))
+      )
+    );
+  } */
+
+  const result = await query;
+  return result.map(group => ({
+    __typename: 'Group',
+    ...group,
+  }));
 }
 
 export async function createGroup(db: DBConn, params: CreateGroupRequest) {
