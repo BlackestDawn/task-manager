@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { authApi } from "./api";
 import { apiClient } from "@/lib/api";
+import type { AuthState } from "@/lib/data/interfaces/auth";
 
 export const AUTH_KEYS = {
   all: ['auth'] as const,
@@ -14,19 +15,11 @@ export function useLogin() {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      apiClient.setTokens(data.token, data.refreshToken);
-      queryClient.setQueryData(AUTH_KEYS.profile(), {
-        id: data.id,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        login: data.login,
-        name: data.name,
-        email: null,
-        disabled: false,
-        groups: [],
-        __typename: 'User' as const,
-      });
+      if (data.user) {
+        queryClient.setQueryData(AUTH_KEYS.profile(), data.user);
+      }
 
+      apiClient.emitAuthChange();
       queryClient.invalidateQueries({ queryKey: AUTH_KEYS.profile() });
     },
   });
@@ -36,20 +29,12 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => {
-      const refreshToken = typeof window !== undefined
-        ? localStorage.getItem('refresh_token')
-        : null;
-
-      if (!refreshToken) return Promise.resolve();
-
-      return authApi.logout(refreshToken);
-    },
+    mutationFn: authApi.logout,
     onMutate: async () => {
       queryClient.setQueryData(AUTH_KEYS.profile(), null);
     },
     onSettled: () => {
-      apiClient.clearTokens();
+      apiClient.emitAuthChange();
       queryClient.invalidateQueries({ queryKey: AUTH_KEYS.profile() });
       queryClient.removeQueries({ queryKey: AUTH_KEYS.profile() });
       queryClient.clear();
@@ -60,35 +45,25 @@ export function useLogout() {
   });
 }
 
-export function useProfile() {
-  const [hasToken, setHasToken] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return Boolean(localStorage.getItem("auth_token"));
-  });
+export function useProfile(initialState?: AuthState | null) {
+  const [hasHydrated, setHashydrated] = useState<boolean>(false);
 
   useEffect(() => {
-    const checkToken = () => {
-      const token = typeof window !== "undefined"
-        ? localStorage.getItem("auth_token")
-        : null;
-      setHasToken(Boolean(token));
-    };
+    const checkAuth = () => setHashydrated(true);
 
-    checkToken();
-
-    window.addEventListener("storage", checkToken);
-    window.addEventListener("auth-token-changed", checkToken);
+    checkAuth();
+    window.addEventListener("auth-token-changed", checkAuth);
 
     return () => {
-      window.removeEventListener("storage", checkToken);
-      window.removeEventListener("auth-token-changed", checkToken);
+      window.removeEventListener("auth-token-changed", checkAuth);
     };
   }, []);
 
   return useQuery({
     queryKey: AUTH_KEYS.profile(),
     queryFn: authApi.getProfile,
-    enabled: typeof window !== "undefined" && Boolean(localStorage.getItem("auth_token")),
+    enabled: hasHydrated,
+    initialData: initialState?.user,
     staleTime: 1000 * 60 * 5,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     retry: (failureCount, error: any) => {

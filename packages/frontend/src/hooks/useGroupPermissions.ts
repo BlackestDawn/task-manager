@@ -1,4 +1,4 @@
-import { useAuthContext } from "@/components/auth/authProvider";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import type { Group } from "@task-manager/common";
 import { AbilityChecker } from "@task-manager/common";
 

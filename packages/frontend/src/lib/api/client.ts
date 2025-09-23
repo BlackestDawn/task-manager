@@ -1,30 +1,19 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import type { LoginResponse } from '@task-manager/common';
 
 export interface ApiClientConfig {
   baseURL: string;
   timeout?: number;
+  isServer?: boolean;
 }
 
 export class ApiClient {
   private client: AxiosInstance;
-  private tokenStorage = {
-    getToken: () => typeof window !== "undefined" ? localStorage.getItem("auth_token") : null,
-    setToken: (token: string) => {
-      if (typeof window !== "undefined") localStorage.setItem("auth_token", token);
-    },
-    getRefreshToken: () => typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null,
-    setRefreshToken: (token: string) => {
-      if (typeof window !== "undefined") localStorage.setItem("refresh_token", token);
-    },
-    clearTokens: () => {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
-    },
-  };
+  private isServer: boolean;
 
   constructor(config: ApiClientConfig) {
+    this.isServer = config.isServer || false;
+
     this.client = axios.create({
       baseURL: config.baseURL,
       timeout: config.timeout || 10000,
@@ -39,11 +28,7 @@ export class ApiClient {
   private setupInterceptors() {
     // Add auth token
     this.client.interceptors.request.use(
-      (config) => {
-        const token = this.tokenStorage.getToken();
-        if (token) config.headers.Authorization = `Bearer ${token}`;
-        return config;
-      },
+      (config) => config,
       (error) => Promise.reject(error)
     );
 
@@ -56,32 +41,18 @@ export class ApiClient {
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
-          const refreshToken = this.tokenStorage.getRefreshToken();
-          if (refreshToken) {
-            try {
-              const response = await this.refreshToken(refreshToken);
-              this.tokenStorage.setToken(response.token);
-              this.tokenStorage.setRefreshToken(response.refreshToken)
-
-              originalRequest.headers.Authorization = `Bearer ${response.token}`;
-              return this.client(originalRequest);
-            } catch (refreshError) {
-              this.tokenStorage.clearTokens();
-              return Promise.reject(refreshError)
-            }
-          } else {
-            this.tokenStorage.clearTokens();
+          try {
+            await this.client.post("/auth/refresh", {});
+            return this.client(originalRequest);
+          } catch (refreshError) {
+            this.emitAuthChange();
+            return Promise.reject(refreshError);
           }
         }
 
         return Promise.reject(error);
       }
     );
-  }
-
-  private async refreshToken(refreshToken: string) {
-    const response = await axios.post(`${this.client.defaults.baseURL}/auth/refresh`, { token: refreshToken });
-    return response.data as LoginResponse;
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
@@ -104,16 +75,9 @@ export class ApiClient {
     return response.data;
   }
 
-  setTokens(token: string, refreshToken: string) {
-    this.tokenStorage.setToken(token);
-    this.tokenStorage.setRefreshToken(refreshToken);
-
-    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("auth-token-changed"));
-  }
-
-  clearTokens() {
-    this.tokenStorage.clearTokens();
-
-    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("auth-token-changed"));
+  emitAuthChange() {
+    if (!this.isServer && typeof window !== undefined) {
+      window.dispatchEvent(new CustomEvent("auth-token-changed"));
+    }
   }
 }

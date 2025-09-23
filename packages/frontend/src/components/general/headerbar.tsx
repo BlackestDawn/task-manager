@@ -3,7 +3,7 @@ import Link from "next/link"
 import data from "@/lib/data/menuOptions.json";
 import { usePathname, useRouter } from "next/navigation";
 import type { HeaderNavbarProps, MenuItem } from "@/lib/data/interfaces/navigation";
-import { useAuthContext } from "../auth/authProvider";
+import { useAuthContext } from "../auth/clientAuthProvider";
 import { useLogout } from "@/lib/api/auth/queries";
 
 export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbarProps) {

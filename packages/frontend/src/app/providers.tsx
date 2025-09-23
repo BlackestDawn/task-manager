@@ -1,7 +1,7 @@
 'use client';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { AuthProvider } from "@/components/auth/authProvider";
+import { AuthProvider } from "@/components/auth/clientAuthProvider";
 import RedirectNotification from "@/components/auth/RedirectNotification";
 
 interface ProviderProps {

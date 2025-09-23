@@ -1,7 +1,7 @@
 'use client';
 import { type ReactNode } from "react";
 import { Can as CaslCan } from "@casl/react"
-import { useAuthContext } from "./authProvider";
+import { useAuthContext } from "./clientAuthProvider";
 import type { Actions, Subjects } from "@task-manager/common";
 
 interface CanProps {

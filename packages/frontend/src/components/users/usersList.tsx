@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useUsers, useDeleteUser } from "@/lib/api/users/queries";
 import { Can } from "@/components/auth/can";
 import { User, Edit, Trash2, UserCheck, UserX } from "lucide-react";
-import { useAuthContext } from "../auth/authProvider";
+import { useAuthContext } from "../auth/clientAuthProvider";
 import Link from "next/link";
 import LoadingSpinner from "@/components/general/loadingSpinner";
 

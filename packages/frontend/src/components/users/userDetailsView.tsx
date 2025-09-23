@@ -1,6 +1,6 @@
 'use client';
 import type { User } from "@task-manager/common";
-import { useAuthContext } from "@/components/auth/authProvider";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import { User as UserIcon, Mail, Calendar, Shield, ShieldOff, Crown } from "lucide-react";
 
 interface UserDetailsViewProps {
