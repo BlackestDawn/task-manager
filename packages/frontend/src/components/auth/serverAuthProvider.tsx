@@ -3,17 +3,17 @@ import { getServerAuthState } from "@/lib/auth/serverAuth";
 import { defineAbilityFor } from "@task-manager/common";
 import type { User } from "@task-manager/common";
 
-interface ServerAUthProviderProps {
+interface ServerAuthProviderProps {
   children: ReactNode;
   initialUser?: User | null;
   initialIsAuthenticated?: boolean;
 }
 
-export async function ServerAUthProvider({
+export async function ServerAuthProvider({
   children,
   initialUser = null,
   initialIsAuthenticated = false,
-}: ServerAUthProviderProps) {
+}: ServerAuthProviderProps) {
   const autheState = initialUser !== undefined ?
     { user: initialUser, isAuthenticated: initialIsAuthenticated, } :
     await getServerAuthState();
