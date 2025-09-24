@@ -5,6 +5,8 @@ import './globals.css';
 import SiteHeader from '@/components/general/siteHeader';
 import SiteFooter from '@/components/general/siteFooter';
 import Providers from './providers';
+import { ServerAuthProvider } from '@/components/auth/serverAuthProvider';
+import { getServerAuthState } from '@/lib/auth/serverAuth';
 
 const robotoFlex = Roboto_Flex({
   variable: '--font-roboto-flex',
@@ -26,27 +28,34 @@ export const metadata: Metadata = {
   description: 'A simple task management application',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { user, isAuthenticated } = await getServerAuthState();
+
   return (
     <html lang="en">
       <body className={`${robotoMono.variable} ${robotoSerif.variable} ${robotoFlex.variable} antialiased`}>
-        <Providers>
-          <div className="max-w-[1280px] text-center font-sans">
-            <header className="pt-5 bg-gray-300 dark:bg-gray-800">
-              <SiteHeader />
-            </header>
-            <main className="pt-5 border-y-2 border-gray-900 dark:border-gray-200">
-              {children}
-            </main>
-            <footer className="pb-5 bg-gray-300 dark:bg-gray-800">
-              <SiteFooter />
-            </footer>
-          </div>
-        </Providers>
+        <ServerAuthProvider
+          initialUser={user}
+          initialIsAuthenticated={isAuthenticated}
+        >
+          <Providers>
+            <div className="max-w-[1280px] text-center font-sans">
+              <header className="pt-5 bg-gray-300 dark:bg-gray-800">
+                <SiteHeader />
+              </header>
+              <main className="pt-5 border-y-2 border-gray-900 dark:border-gray-200">
+                {children}
+              </main>
+              <footer className="pb-5 bg-gray-300 dark:bg-gray-800">
+                <SiteFooter />
+              </footer>
+            </div>
+          </Providers>
+        </ServerAuthProvider>
       </body>
     </html>
   )

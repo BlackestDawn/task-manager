@@ -1,7 +1,7 @@
 'use client';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { AuthProvider } from "@/components/auth/clientAuthProvider";
+import { ClientAuthProvider } from "@/components/auth/clientAuthProvider";
 import RedirectNotification from "@/components/auth/RedirectNotification";
 
 interface ProviderProps {
@@ -20,16 +20,19 @@ export default function Providers({ children }: ProviderProps) {
             return failureCount <3;
           },
         },
+        mutations: {
+          retry: false,
+        },
       },
     })
   );
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <ClientAuthProvider>
         {children}
         <RedirectNotification />
-      </AuthProvider>
+      </ClientAuthProvider>
     </QueryClientProvider>
   )
 }
