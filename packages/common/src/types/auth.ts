@@ -3,8 +3,8 @@ import { UserSchema } from './users';
 import { UserNotAuthenticatedError } from '../classes/errors';
 
 const LoginRequestSchema = z.object({
-  login: z.string(),
-  password: z.string().min(8),
+  login: z.string().min(1, "Login is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
@@ -88,6 +88,38 @@ export function validateRefreashTokenByToken(item: unknown): DoRefreashTokenByTo
   if (!result.success) {
     console.error('Invalid refresh token by token:', result.error);
     throw new Error('Invalid refresh token by token');
+  }
+  return result.data;
+}
+
+const UpdatePasswordRequestSchema = z.object({
+  id: z.uuid(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export type UpdatePasswordRequest = z.infer<typeof UpdatePasswordRequestSchema>;
+
+export function validateUpdatePasswordRequest(item: unknown): UpdatePasswordRequest {
+  const result = UpdatePasswordRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid update password request:', result.error);
+    throw new Error('Invalid update password request');
+  }
+  return result.data;
+}
+
+const DisabledUserRequestSchema = z.object({
+  id: z.uuid(),
+  disabled: z.boolean(),
+});
+
+export type DisabledUserRequest = z.infer<typeof DisabledUserRequestSchema>;
+
+export function validateDisabledUserRequest(item: unknown): DisabledUserRequest {
+  const result = DisabledUserRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid disabled user request:', result.error);
+    throw new Error('Invalid disabled user request');
   }
   return result.data;
 }
