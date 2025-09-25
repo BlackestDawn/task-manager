@@ -1,8 +1,9 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { API_BASE_URL } from '@/lib/data/consts';
 
 export interface ApiClientConfig {
-  baseURL: string;
+  baseURL?: string;
   timeout?: number;
   isServer?: boolean;
 }
@@ -15,10 +16,11 @@ export class ApiClient {
     this.isServer = config.isServer || false;
 
     this.client = axios.create({
-      baseURL: config.baseURL,
+      baseURL: config.baseURL || API_BASE_URL,
       timeout: config.timeout || 10000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
+        "X-Client-Type": "web",
       },
     });
 
