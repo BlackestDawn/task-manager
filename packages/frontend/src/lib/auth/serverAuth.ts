@@ -1,9 +1,7 @@
 'use server';
 import { cookies } from "next/headers";
 import type { User } from "@task-manager/common";
-import { API_HOST } from "@/lib/data/config";
-
-const API_BASE_URL = API_HOST + "/api";
+import { API_BASE_URL } from "@/lib/data/consts";
 
 export async function getServerAuthState(): Promise<{ user: User | null; isAuthenticated: boolean }> {
   try {

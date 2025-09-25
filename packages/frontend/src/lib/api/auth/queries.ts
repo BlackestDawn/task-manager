@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { authApi } from "./api";
 import { apiClient } from "@/lib/api";
 import type { AuthState } from "@/lib/data/interfaces/auth";
+import { FIVE_MINUTES } from "@/lib/data/consts";
 
 export const AUTH_KEYS = {
   all: ['auth'] as const,
@@ -64,7 +65,7 @@ export function useProfile(initialState?: AuthState | null) {
     queryFn: authApi.getProfile,
     enabled: hasHydrated,
     initialData: initialState?.user,
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) return false;

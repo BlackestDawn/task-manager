@@ -3,6 +3,7 @@ import { groupsApi } from "./api";
 import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import type { UpdateGroupRequest } from "@task-manager/common";
 import { AbilityChecker } from "@task-manager/common";
+import { TWO_MINUTES, FIVE_MINUTES } from "@/lib/data/consts";
 
 export const GROUP_KEYS = {
   all: ["groups"] as const,
@@ -17,13 +18,13 @@ export const GROUP_KEYS = {
 
 export function useGroups() {
   const { ability } = useAuthContext();
-  const abilities = new AbilityChecker(ability);
+  const abilities = new AbilityChecker({ability});
   const canViewAll = abilities.canManageObject("all");
 
   return useQuery({
     queryKey: canViewAll ? GROUP_KEYS.allGroups() : GROUP_KEYS.userGroups(),
     queryFn: canViewAll ? groupsApi.getAllGroups : groupsApi.getUserGroups,
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
   });
 }
 
@@ -32,7 +33,7 @@ export function useGroup(id: string) {
     queryKey: GROUP_KEYS.detail(id),
     queryFn: () => groupsApi.getGroupById(id),
     enabled: Boolean(id),
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
   });
 }
 
@@ -41,7 +42,7 @@ export function useGroupMembers(groupId: string) {
     queryKey: GROUP_KEYS.members(groupId),
     queryFn: () => groupsApi.getGroupMembers(groupId),
     enabled: Boolean(groupId),
-    staleTime: 1000 * 60 * 2,
+    staleTime: TWO_MINUTES,
   });
 }
 
@@ -50,7 +51,7 @@ export function useGroupTasks(groupId: string) {
     queryKey: GROUP_KEYS.tasks(groupId),
     queryFn: () => groupsApi.getGroupTasks(groupId),
     enabled: Boolean(groupId),
-    staleTime: 1000 * 60 * 2,
+    staleTime: TWO_MINUTES,
   });
 }
 

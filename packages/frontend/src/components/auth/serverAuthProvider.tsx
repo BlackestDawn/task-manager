@@ -14,16 +14,16 @@ export async function ServerAuthProvider({
   initialUser = null,
   initialIsAuthenticated = false,
 }: ServerAuthProviderProps) {
-  const autheState = initialUser !== undefined ?
+  const authState = initialUser !== undefined ?
     { user: initialUser, isAuthenticated: initialIsAuthenticated, } :
     await getServerAuthState();
 
-  const ability = defineAbilityFor(autheState.user);
+  const ability = defineAbilityFor(authState.user);
 
   const authScript = `
-    windows.__INITIAL_AUTH_STATE__ = ${JSON.stringify({
-    user: autheState.user,
-    isAuthenticated: autheState.isAuthenticated,
+    window.__INITIAL_AUTH_STATE__ = ${JSON.stringify({
+    user: authState.user,
+    isAuthenticated: authState.isAuthenticated,
   })};
   `;
 

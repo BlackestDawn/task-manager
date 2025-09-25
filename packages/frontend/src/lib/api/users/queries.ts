@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "./api";
 import type { User, UpdateUserRequest } from "@task-manager/common";
 import { getTZNormalizedDate } from "@task-manager/common";
+import { TWO_MINUTES, FIVE_MINUTES } from "@/lib/data/consts";
 
 export const USER_KEYS = {
   all: ['users'] as const,
@@ -18,7 +19,7 @@ export function useUsers() {
   return useQuery({
     queryKey: USER_KEYS.list(),
     queryFn: usersApi.getUsers,
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
   });
 }
 
@@ -27,7 +28,7 @@ export function useUser(id: string, enabled: boolean = true) {
     queryKey: USER_KEYS.detail(id),
     queryFn: () => usersApi.getUserById(id),
     enabled: enabled && Boolean(id),
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
   });
 }
 
@@ -36,7 +37,7 @@ export function useUserTasks(id: string) {
     queryKey: USER_KEYS.tasks(id),
     queryFn: () => usersApi.getUserTasks(id),
     enabled: Boolean(id),
-    staleTime: 1000 * 60 * 2,
+    staleTime: TWO_MINUTES,
   });
 }
 
@@ -45,7 +46,7 @@ export function useUserGroups(id: string) {
     queryKey: USER_KEYS.groups(id),
     queryFn: () => usersApi.getUserGroups(id),
     enabled: Boolean(id),
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
   });
 }
 
