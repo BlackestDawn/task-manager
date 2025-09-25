@@ -21,7 +21,7 @@ export function useGroupPermissions() {
   const canManageGroupUsers = (group?: Group) =>
     canAddUserToGroup(group) && canRemoveUserFromGroup(group);
 
-  const canAssignTaskToGroup = (group?: Group) => abilities.canAssignUser(group);
+  const canAssignTaskToGroup = (group?: Group) => abilities.canAssignTask(group);
 
   const canRemoveTaskFromGroup = (group?: Group) => abilities.canRemoveTask(group);
 
