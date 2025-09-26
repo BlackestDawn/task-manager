@@ -18,7 +18,7 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
   }
 
   const tokens = {
-    accesstoken: await makeJWT(user.id),
+    accessToken: await makeJWT(user.id),
     refreshToken: (await makeRefreshToken(user.id)).token,
   };
 
