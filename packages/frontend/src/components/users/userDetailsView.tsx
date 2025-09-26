@@ -1,7 +1,7 @@
 'use client';
 import type { User } from "@task-manager/common";
 import { useAuthContext } from "@/components/auth/clientAuthProvider";
-import { User as UserIcon, Mail, Calendar, Shield, ShieldOff, Crown } from "lucide-react";
+import { User as UserIcon, Mail, Calendar, Shield, ShieldOff, Crown, Settings } from "lucide-react";
 
 interface UserDetailsViewProps {
   user: User;
@@ -10,6 +10,22 @@ interface UserDetailsViewProps {
 export default function UserDetailsView({ user }: UserDetailsViewProps) {
   const { user: currectUser } = useAuthContext();
   const isCurrentUser = currectUser?.id === user.id;
+
+  const getAccessLevelColor = (level: string) => {
+    switch (level) {
+      case "admin": return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+      case "manager": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+    };
+  }
+
+  const getAccessLevelIcon = (level: string) => {
+    switch (level) {
+      case "admin": return <Crown className="h-3 w-3 mr-1" />;
+      case "manager": return <Settings className="h-3 w-3 mr-1" />;
+      default: return <UserIcon className="h-3 w-3 mr-1" />
+    };
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
@@ -68,8 +84,26 @@ export default function UserDetailsView({ user }: UserDetailsViewProps) {
             </dd>
           </div>
 
-          {/* Account Status */}
+          {/* Access Level */}
           <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Access Level
+            </dt>
+            <dd className="mt-1 text-sm sm:mt-0 sm:col-span-2">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getAccessLevelColor(user.accessLevel)}`}>
+                {getAccessLevelIcon(user.accessLevel)}
+                {user.accessLevel}
+              </span>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {user.accessLevel === 'admin' && 'Full system access - can manage all users, groups, and tasks'}
+                {user.accessLevel === 'manager' && 'Can create groups and manage users, but limited system access'}
+                {user.accessLevel === 'user' && 'Standard user access - can only manage own tasks and participate in groups'}
+              </p>
+            </dd>
+          </div>
+
+          {/* Account Status */}
+          <div className="bg-gray-50 dark:bg-gray-700 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
               {user.disabled ? (
                 <ShieldOff className="h-4 w-4 mr-1" />
@@ -90,6 +124,24 @@ export default function UserDetailsView({ user }: UserDetailsViewProps) {
               )}
             </dd>
           </div>
+
+          {/* Group Memberships */}
+          {user.groups.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Group Memberships
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
+                <div className="flex flex-wrap gap-2">
+                  {user.groups.map((group) => (
+                    <span key={group.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                      {group.role}
+                    </span>
+                  ))}
+                </div>
+              </dd>
+            </div>
+          )}
 
           {/* Created Date */}
           <div className="bg-gray-50 dark:bg-gray-700 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

@@ -2,18 +2,22 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useCreateUser } from "@/lib/api/users/queries";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import type { CreateUserRequest } from "@task-manager/common";
-import { validateCreateUserRequest } from "@task-manager/common";
-import { Eye, EyeOff, UserPlus, X } from "lucide-react";
+import { validateCreateUserRequest, userRoleList } from "@task-manager/common";
+import { Eye, EyeOff, UserPlus, X, Shield } from "lucide-react";
 
 interface CreateUserFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export default function CreateUserForm({ onSuccess, onCancel}: CreateUserFormProps) {
+export default function CreateUserForm({ onSuccess, onCancel }: CreateUserFormProps) {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const { user: currentUser } = useAuthContext();
   const createUserMutation = useCreateUser();
+
+  const canSetAccessLevel = currentUser?.accessLevel === 'admin' || currentUser?.accessLevel === 'manager';
 
   const form = useForm({
     defaultValues: {
@@ -21,6 +25,7 @@ export default function CreateUserForm({ onSuccess, onCancel}: CreateUserFormPro
       password: '',
       name: '',
       email: '',
+      accessLevel: 'user' as typeof userRoleList[number],
     },
     onSubmit: async ({ value }) => {
       try {
@@ -159,6 +164,40 @@ export default function CreateUserForm({ onSuccess, onCancel}: CreateUserFormPro
             </div>
           )}
         </form.Field>
+
+        {canSetAccessLevel && (
+          <form.Field name="accessLevel">
+            {(field) => (
+              <div>
+                <label htmlFor="accessLevel" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Shield className="h-4 w-4 inline mr-1" />
+                  Access Level
+                </label>
+                <select
+                  id="accessLevel"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value as typeof userRoleList[number])}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm capitalize"
+                >
+                  {userRoleList.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+                {field.state.meta.errors.length > 0 && (
+                  <p className="mt-1 text-sm text-red-600">{field.state.meta.errors[0]}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {field.state.value === 'admin' && 'Full system access - can manage all users, groups, and tasks'}
+                  {field.state.value === 'manager' && 'Can create groups and manage users, but limited system access'}
+                  {field.state.value === 'user' && 'Standard user access - can only manage own tasks and participate in groups'}
+                </p>
+              </div>
+            )}
+          </form.Field>
+        )}
 
         {createUserMutation.error && (
           <div className="rounded-md bg-red-50 dark:bg-red-900 p-4">

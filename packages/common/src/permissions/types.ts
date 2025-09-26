@@ -1,13 +1,13 @@
 import z from "zod";
 import { type AppAbility } from "./roles";
 import { type User } from "../types/users";
-import { userRoleList } from "./roles";
+import { userRoleList, groupRoleList } from "./roles";
 
 const UserContextSchema = z.object({
   id: z.uuid(),
   groups: z.array(z.object({
     id: z.uuid(),
-    role: z.string(),
+    role: z.enum(groupRoleList),
   })).default([]),
   accessLevel: z.enum(userRoleList).default("user"),
 });

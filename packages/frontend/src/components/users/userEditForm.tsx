@@ -5,7 +5,8 @@ import { useUpdateUser, useUpdateUserPassword, useUpdateUserDisabledStatus } fro
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import { type User } from "@task-manager/common";
-import { Save, X, Eye, EyeOff, Shield, ShieldOff, Lock, User as UserIcon, Mail } from "lucide-react";
+import { userRoleList } from "@task-manager/common";
+import { Save, X, Eye, EyeOff, Shield, ShieldOff, Lock, User as UserIcon, Mail, Crown } from "lucide-react";
 
 interface UserEditFormProps {
   user: User;
@@ -25,12 +26,14 @@ export default function UserEditForm({ user, onCancel, onSuccess }: UserEditForm
 
   const isCurrentUser = currentUser?.id === user.id;
   const canChangeStatus = canEditUserField(user, 'disabled');
+  const canChangeAccessLevel = (currentUser?.accessLevel === "admin" || currentUser?.accessLevel === "manager") && !isCurrentUser;
 
   const form = useForm({
     defaultValues: {
       login: user.login,
       name: user.name,
       email: user.email || '',
+      accessLevel: user.accessLevel,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -39,6 +42,7 @@ export default function UserEditForm({ user, onCancel, onSuccess }: UserEditForm
           login: value.login !== user.login ? value.login : undefined,
           name: value.name !== user.name ? value.name : undefined,
           email: value.email !== (user.email || '') ? (value.email || null) : undefined,
+          accessLevel: canChangeAccessLevel && value.accessLevel !== user.accessLevel ? value.accessLevel : undefined,
         };
 
         // Remove undefined values
@@ -108,6 +112,12 @@ export default function UserEditForm({ user, onCancel, onSuccess }: UserEditForm
               <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 Edit User Information
               </h3>
+              {isCurrentUser && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  <Crown className="h-3 w-3 mr-1" />
+                  You
+                </span>
+              )}
             </div>
             <div className="flex space-x-3">
               <button
@@ -200,6 +210,41 @@ export default function UserEditForm({ user, onCancel, onSuccess }: UserEditForm
                 </div>
               )}
             </form.Field>
+
+            {/* Access Level */}
+            {canChangeAccessLevel && (
+              <form.Field name="accessLevel">
+                {(field) => (
+                  <div>
+                    <label htmlFor="accessLevel" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <Shield className="h-4 w-4 inline mr-1" />
+                      Access Level
+                    </label>
+                    <select
+                      id="accessLevel"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value as typeof userRoleList[number])}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm capitalize"
+                    >
+                      {userRoleList.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                    {field.state.meta.errors.length > 0 && (
+                      <p className="mt-1 text-sm text-red-600">{field.state.meta.errors[0]}</p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      {field.state.value === 'admin' && 'Full system access - can manage all users, groups, and tasks'}
+                      {field.state.value === 'manager' && 'Can create groups and manage users, but limited system access'}
+                      {field.state.value === 'user' && 'Standard user access - can only manage own tasks and participate in groups'}
+                    </p>
+                  </div>
+                )}
+              </form.Field>
+            )}
           </form>
 
           {updateUserMutation.error && (
@@ -363,11 +408,10 @@ export default function UserEditForm({ user, onCancel, onSuccess }: UserEditForm
               <button
                 onClick={handleStatusToggle}
                 disabled={updateStatusMutation.isPending}
-                className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
-                  user.disabled
+                className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed ${user.disabled
                     ? 'text-white bg-green-600 hover:bg-green-700'
                     : 'text-white bg-red-600 hover:bg-red-700'
-                }`}
+                  }`}
               >
                 {updateStatusMutation.isPending ? 'Updating...' : (
                   user.disabled ? 'Enable Account' : 'Disable Account'

@@ -1,5 +1,5 @@
 import z from 'zod';
-import { userRoleList } from '../permissions/roles';
+import { userRoleList, groupRoleList } from '../permissions/roles';
 
 export const UserSchema = z.object({
   __typename: z.literal('User').default('User'),
@@ -13,7 +13,7 @@ export const UserSchema = z.object({
   accessLevel: z.enum(userRoleList).default("user"),
   groups: z.array(z.object({
     id: z.uuid(),
-    role: z.string(),
+    role: z.enum(groupRoleList).default("user"),
   })).default([]),
 });
 

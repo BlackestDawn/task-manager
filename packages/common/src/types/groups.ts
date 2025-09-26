@@ -1,5 +1,5 @@
 import z from 'zod';
-import { groupRoleList } from "@task-manager/common";
+import { groupRoleList } from "../permissions/roles";
 
 const groupSchema = z.object({
   __typename: z.literal('Group').default('Group'),

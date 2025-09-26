@@ -1,7 +1,7 @@
 'use client';
 import { useState } from "react";
 import { useGroupMembers, useRemoveUserFromGroup } from "@/lib/api/groups/queries";
-import { User, Shield, UserMinus, UserPlus, Crown, Edit, Settings, Eye } from "lucide-react";
+import { User, Shield, UserMinus, UserPlus, Edit, Settings, Eye } from "lucide-react";
 import LoadingSpinner from "@/components/general/loadingSpinner";
 
 interface GroupMembersSectionProps {
@@ -31,7 +31,6 @@ export default function GroupMembersSection({ groupId, canManageUsers }: GroupMe
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case "admin": return <Crown className="h-4 w-4" />;
       case "manager": return <Settings className="h-4 w-4" />;
       case "editor": return <Edit className="h-4 w-4" />;
       case "viewer": return <Eye className="h-4 w-4" />;
@@ -41,7 +40,6 @@ export default function GroupMembersSection({ groupId, canManageUsers }: GroupMe
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'manager': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'editor': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'viewer': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';

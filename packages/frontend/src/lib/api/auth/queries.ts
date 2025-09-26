@@ -52,9 +52,13 @@ export function useLogout() {
 
 export function useProfile(initialState?: AuthState | null) {
   const [hasHydrated, setHashydrated] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    const checkAuth = () => setHashydrated(true);
+    const checkAuth = () => {
+      setHashydrated(true)
+      queryClient.invalidateQueries({ queryKey: AUTH_KEYS.profile() });
+    };
 
     checkAuth();
     window.addEventListener("auth-token-changed", checkAuth);
@@ -62,7 +66,7 @@ export function useProfile(initialState?: AuthState | null) {
     return () => {
       window.removeEventListener("auth-token-changed", checkAuth);
     };
-  }, []);
+  }, [queryClient]);
 
   return useQuery({
     queryKey: AUTH_KEYS.profile(),
@@ -70,6 +74,7 @@ export function useProfile(initialState?: AuthState | null) {
     enabled: hasHydrated && (!!apiClient.getAccessToken() || !!initialState?.user),
     initialData: initialState?.user || undefined,
     staleTime: FIVE_MINUTES,
+    refetchOnWindowFocus: true,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) {

@@ -18,7 +18,7 @@ export const userRoleList = [
 ] as const satisfies readonly UserRole[];
 
 export type Subjects = "Task" | "Group" | "User" | "all";
-export type Actions = "create" | "read" | "update" | "delete" | "manage" | "assignTask" | "removeTask" | "assignUser" | "removeUser";
+export type Actions = "create" | "read" | "update" | "delete" | "manage" | "assignTask" | "removeTask" | "assignUser" | "removeUser" | "markDone";
 
 export type AppAbility = PureAbility<[Actions, Subjects]>;
 
@@ -45,7 +45,9 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
 
   if (user.accessLevel === "manager") {
     allow("manage", "Group");
+    allow("create", "User");
     allow("update", "User", ["disabled", "name", "email", "password"]);
+    allow("delete", "User");
   }
 
   user.groups.forEach(({ id: groupId, role }) => {
@@ -55,14 +57,14 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
         allow("manage", "Task", { 'groups.id': groupId });
         break;
       case "editor":
-        allow(["create", "update", "delete", "read"], "Task", { 'groups.id': groupId });
+        allow(["create", "update", "delete", "read", "markDone"], "Task", { 'groups.id': groupId });
         allow("assignTask", "Group", { id: groupId })
         forbid("delete", "Task", { completed: true });
         allow("delete", "Task", { userId: user.id });
         break;
       case "user":
         allow("read", "Task", { 'groups.id': groupId });
-        allow("update", "Task", ["completed"], { 'groups.id': groupId });
+        allow(["markDone"], "Task", { 'groups.id': groupId });
         break;
       case "viewer":
         allow("read", "Task", { 'groups.id': groupId });
@@ -70,6 +72,7 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
       case "none":
         forbid("manage", "Group", { id: groupId });
         forbid("manage", "Task", { 'groups.id': groupId });
+        // Making sure they can manage own tasks
         allow("manage", "Task", { userId: user.id });
         break;
     }
