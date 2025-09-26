@@ -1,29 +1,43 @@
-export class BadRequestError extends Error {
+export class HTTPErrors extends Error {
+  statusCode: number;
+
   constructor(message: string) {
     super(message);
+    this.statusCode = 500;
   }
 }
 
-export class UserNotAuthenticatedError extends Error {
+export class BadRequestError extends HTTPErrors {
   constructor(message: string) {
     super(message);
+    this.statusCode = 400;
   }
 }
 
-export class UserForbiddenError extends Error {
+export class UserNotAuthenticatedError extends HTTPErrors {
   constructor(message: string) {
     super(message);
+    this.statusCode = 401;
   }
 }
 
-export class NotFoundError extends Error {
+export class UserForbiddenError extends HTTPErrors {
   constructor(message: string) {
     super(message);
+    this.statusCode = 403;
   }
 }
 
-export class AlreadyExistsConflictError extends Error {
+export class NotFoundError extends HTTPErrors {
   constructor(message: string) {
     super(message);
+    this.statusCode = 404;
+  }
+}
+
+export class AlreadyExistsConflictError extends HTTPErrors {
+  constructor(message: string) {
+    super(message);
+    this.statusCode = 409;
   }
 }
