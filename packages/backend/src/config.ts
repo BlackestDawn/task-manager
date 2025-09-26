@@ -1,7 +1,7 @@
 import { envOrDefault, envOrThrow } from "@task-manager/common";
 import { newDBConn } from "./db";
 
-const portNum = parseInt(envOrDefault("PORT", "3000"));
+const portNum = parseInt(envOrDefault("PORT", "3020"));
 const dbURL = envOrThrow("DB_URL");
 const dbConn = newDBConn(dbURL);
 
@@ -26,7 +26,7 @@ export type ApiConfig = {
 };
 
 export const cfg: ApiConfig = {
-  port: isNaN(portNum) ? 3000 : portNum,
+  port: isNaN(portNum) ? 3020 : portNum,
   platform: envOrThrow("PLATFORM") as Platform,
   db: dbConn,
   jwt: {
