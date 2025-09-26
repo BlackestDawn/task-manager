@@ -10,9 +10,7 @@ const LoginRequestSchema = z.object({
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 
 export function validateLoginRequest(item: unknown): LoginRequest {
-  const result = LoginRequestSchema.safeParse(item, {
-    error: (issue) => "invalid username or password"
-  });
+  const result = LoginRequestSchema.safeParse(item);
   if (!result.success) {
     console.error('Invalid login request:', result.error);
     throw new UserNotAuthenticatedError('invalid username or password');
@@ -26,7 +24,6 @@ const LoginResponseSchema = z.object({
     accessToken: z.string(),
     refreshToken: z.string(),
   }).nullish().default(null),
-  cookieSet: z.boolean().default(false),
 });
 
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
@@ -120,6 +117,21 @@ export function validateDisabledUserRequest(item: unknown): DisabledUserRequest 
   if (!result.success) {
     console.error('Invalid disabled user request:', result.error);
     throw new Error('Invalid disabled user request');
+  }
+  return result.data;
+}
+
+const RefreshAccessTokenResponseSchema = z.object({
+  accessToken: z.string(),
+});
+
+export type RefreshAccessTokenResponse = z.infer<typeof RefreshAccessTokenResponseSchema>;
+
+export function validateRefreshAccessTokenResponse(item: unknown): RefreshAccessTokenResponse {
+  const result = RefreshAccessTokenResponseSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid refresh access token response:', result.error);
+    throw new Error('Invalid refresh access token response');
   }
   return result.data;
 }

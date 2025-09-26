@@ -1,5 +1,5 @@
 import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { prefetchUserDetails } from "@/lib/api/auth/serverPrefetching";
+import { prefetchUserDetails } from "@/lib/auth/prefetching";
 import UserDetailsPage from "@/components/users/userDetailsPage";
 import ProtectedRoute from "@/components/auth/protectedRoute";
 import type { Metadata } from "next";

@@ -2,8 +2,9 @@
 import { cookies } from "next/headers";
 import type { User } from "@task-manager/common";
 import { API_BASE_URL } from "@/lib/data/consts";
+import type { AuthState } from "../data/interfaces/auth";
 
-export async function getServerAuthState(): Promise<{ user: User | null; isAuthenticated: boolean }> {
+export async function getServerAuthState(): Promise<AuthState> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
@@ -12,14 +13,15 @@ export async function getServerAuthState(): Promise<{ user: User | null; isAuthe
 
     const response = await fetch(`${API_BASE_URL}/auth/profile`, {
       headers: {
-        "X-Client-Type": "web",
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
       cache: "no-store",
     });
 
     if (!response.ok) return { user: null, isAuthenticated: false };
 
-    const user = await response.json();
+    const user: User = await response.json();
     return {
       user,
       isAuthenticated: Boolean(user && !user.disabled)
@@ -34,11 +36,14 @@ export async function serverApiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "applicaton/json",
-      "X-Client-Type": "web",
+      ...(accessToken && { "Authorization": `Bearer ${accessToken}` }),
       ...options.headers,
     },
   });

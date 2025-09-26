@@ -1,5 +1,5 @@
 import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { prefetchGroupDetails } from "@/lib/api/auth/serverPrefetching";
+import { prefetchGroupDetails } from "@/lib/auth/prefetching";
 import GroupDetailsPage from "@/components/groups/groupDetailsPage";
 import ProtectedRoute from "@/components/auth/protectedRoute";
 import type { Metadata } from "next";

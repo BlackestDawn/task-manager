@@ -1,7 +1,7 @@
 import { eq, inArray, and, or } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { users, groups, userGroups } from "../schema";
-import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest, disabledUserRequest } from "@task-manager/common";
+import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest, DisabledUserRequest } from "@task-manager/common";
 import { AlreadyExistsConflictError } from "@task-manager/common";
 
 export async function getGroupRolesForUser(db: DBConn, params: DoByUUIDRequest) {
@@ -103,7 +103,7 @@ export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
   return result;
 }
 
-export async function disabledUser(db: DBConn, params: disabledUserRequest) {
+export async function disabledUser(db: DBConn, params: DisabledUserRequest) {
   const [result] = await db.update(users).set({
     disabled: params.disabled,
   }).where(eq(users.id, params.id)).returning();

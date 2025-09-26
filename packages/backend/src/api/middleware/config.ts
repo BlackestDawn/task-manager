@@ -4,7 +4,7 @@ import { UserNotAuthenticatedError, NotFoundError } from "@task-manager/common";
 import { validateDoByUUIDRequest, defineAbilityFor, validateUserContext, validateUser } from "@task-manager/common";
 import { type loggedinUser } from "@task-manager/common";
 import { getUserById } from "../../db/queries/users";
-import { getAuthToken, getAuthTokenFromHeaders, validateJWT } from "../../lib/auth/authentication";
+import { getAuthTokenFromHeaders, validateJWT } from "../../lib/auth/authentication";
 
 type HandlerWithConfig = (cfg: ApiConfig, req: BunRequest, user: loggedinUser) => Promise<Response>;
 
@@ -14,7 +14,7 @@ export function withConfig<T extends any>(cfg: ApiConfig, handler: HandlerWithCo
 
 export function restrictedEndpoint<T extends any>(cfg: ApiConfig, handler: HandlerWithConfig, ...args: T[]) {
   return async (req: BunRequest) => {
-    const bearerToken = await getAuthToken(req);
+    const bearerToken = await getAuthTokenFromHeaders(req.headers);
     if (!bearerToken) {
       throw new UserNotAuthenticatedError('Invalid/malformed auth token');
     }

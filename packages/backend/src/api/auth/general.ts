@@ -7,8 +7,6 @@ import { UserNotAuthenticatedError, BadRequestError, UserForbiddenError } from "
 import { getUserByLogin, updateUser } from "../../db/queries/users";
 import { checkPasswordHash, makeJWT, makeRefreshToken } from "../../lib/auth/authentication";
 import { getRefreshTokenByToken, revokeRefreshToken } from "../../db/queries/auth";
-import { clearCookie, getCookie, isWebClient, setCookie } from "@backend/src/lib/utils/cookies";
-import { getSimpleCORSHeaders } from "../middleware/cors";
 
 export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
   const params: LoginRequest = validateLoginRequest(await req.json() as LoginRequest);
@@ -23,47 +21,19 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
     accesstoken: await makeJWT(user.id),
     refreshToken: (await makeRefreshToken(user.id)).token,
   };
-  const isWeb = isWebClient(req);
 
   const response: LoginResponse = validateLoginResponse({
     user,
-    tokens: isWeb ? null : tokens,
-    cookieSet: isWeb,
+    tokens,
   });
 
-  if (isWeb) {
-    const jsonResponse = new Response(JSON.stringify(response), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        ...getSimpleCORSHeaders(req),
-      },
-    });
-
-    setCookie(jsonResponse, "accessToken", tokens.accesstoken, {
-      "Max-Age": cfg.jwt.defaultExpireTime,
-    });
-
-    setCookie(jsonResponse, "refreshToken", tokens.refreshToken, {
-      "Max-Age": cfg.refreashToken.defaultExpireTime,
-    });
-
-    return jsonResponse;
-  } else {
-    return respondWithJSON(200, response);
-  }
+  return respondWithJSON(200, response, req);
 }
 
 export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest) {
-  const isWeb = isWebClient(req);
-  let refreshTokenValue: string | null;
+  const jsonBody = await req.json() as { token: string };
+  const refreshTokenValue = jsonBody.token;
 
-  if (isWeb) {
-    refreshTokenValue = getCookie(req, "refreshToken");
-  } else {
-    const jsonBody = await req.json() as { token: string };
-    refreshTokenValue = jsonBody.token;
-  }
   if (!refreshTokenValue) {
     throw new UserNotAuthenticatedError("Missing refresh token");
   }
@@ -84,35 +54,13 @@ export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest)
 
   const newToken = await makeJWT(refreshToken.userId);
 
-  if (isWeb) {
-    const response = new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        ...getSimpleCORSHeaders(req),
-      },
-    });
-
-    setCookie(response, "accessToken", newToken, {
-      "Max-Age": cfg.jwt.defaultExpireTime,
-    });
-
-    return response;
-  } else {
-    return respondWithJSON(200, { token: newToken });
-  }
+  return respondWithJSON(200, { accessToken: newToken }, req);
 }
 
 export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const isWeb = isWebClient(req);
-  let refreshTokenValue: string | null;
+  const jsonBody = await req.json() as { token: string };
+  const refreshTokenValue = jsonBody.token;
 
-  if (isWeb) {
-    refreshTokenValue = getCookie(req, "refreshToken");
-  } else {
-    const jsonBody = await req.json() as { token: string };
-    refreshTokenValue = jsonBody.token;
-  }
   if (!refreshTokenValue) {
     throw new UserNotAuthenticatedError("Missing refresh token");
   }
@@ -128,21 +76,11 @@ export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest,
     throw new BadRequestError("Invalid refresh token");
   }
 
-  if (isWeb) {
-    const response = new Response(null, {
-      status: 204,
-      headers: getSimpleCORSHeaders(req),
-    });
-    clearCookie(response, "accessToken");
-    clearCookie(response, "refreshToken");
-    return response;
-  } else {
-    return respondWithJSON(204, {});
-  }
+  return respondWithJSON(204, {}, req);
 }
 
 export async function handlerGetSelf(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  return respondWithJSON(200, user.userInfo);
+  return respondWithJSON(200, user.userInfo, req);
 }
 
 export async function handlerUpdateSelf(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
@@ -150,5 +88,5 @@ export async function handlerUpdateSelf(cfg: ApiConfig, req: BunRequest, user: l
   jsonBody.id = user.userInfo.id;
 
   const result = await updateUser(cfg.db, validateUpdateUserRequest(jsonBody))
-  return respondWithJSON(200, result);
+  return respondWithJSON(200, result, req);
 }

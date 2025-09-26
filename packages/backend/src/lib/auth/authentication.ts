@@ -7,8 +7,6 @@ import { cfg } from "../../config";
 import type { RegisterRefreashToken } from "@task-manager/common";
 import { registerRefreashToken } from "../../db/queries/auth";
 import { getTZNormalizedDate } from "@task-manager/common";
-import { getCookie } from "../utils/cookies";
-import type { BunRequest } from "bun";
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
@@ -21,6 +19,7 @@ export async function checkPasswordHash(password: string, hash: string) {
     const match = await bcrypt.compare(password, hash);
     return match;
   } catch (err) {
+    console.log("Error comparing passwords", err);
     return false;
   }
 }
@@ -72,18 +71,4 @@ export async function makeRefreshToken(userId: string) {
     throw new Error("failed to create refresh token");
   }
   return result;
-}
-
-export async function getAuthToken(req: BunRequest) {
-  const cookieToken = getCookie(req, "accessToken");
-  if (cookieToken) return cookieToken;
-
-  return await getAuthTokenFromHeaders(req.headers);
-}
-
-export function getRefreshToken(req: BunRequest) {
-  const cookieToken = getCookie(req, "refreshToken");
-  if (cookieToken) return cookieToken;
-
-  return null;
 }

@@ -23,6 +23,10 @@ export function useLogin() {
       apiClient.emitAuthChange();
       queryClient.invalidateQueries({ queryKey: AUTH_KEYS.profile() });
     },
+    onError: (error) => {
+      console.log("login API call failed:", error);
+      apiClient.clearAuthTokens();
+    }
   });
 }
 
@@ -63,12 +67,15 @@ export function useProfile(initialState?: AuthState | null) {
   return useQuery({
     queryKey: AUTH_KEYS.profile(),
     queryFn: authApi.getProfile,
-    enabled: hasHydrated,
-    initialData: initialState?.user,
+    enabled: hasHydrated && (!!apiClient.getAccessToken() || !!initialState?.user),
+    initialData: initialState?.user || undefined,
     staleTime: FIVE_MINUTES,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     retry: (failureCount, error: any) => {
-      if (error?.response?.status === 401) return false;
+      if (error?.response?.status === 401) {
+        apiClient.clearAuthTokens();
+        return false
+      };
       return failureCount < 3;
     },
   });

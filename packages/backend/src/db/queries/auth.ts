@@ -1,7 +1,8 @@
 import { eq, and, isNull, gt, sql } from "drizzle-orm";
 import { type DBConn } from "../../config";
-import { refresh_tokens, userGroups } from "../schema";
+import { refresh_tokens } from "../schema";
 import type { RegisterRefreashToken, DoRefreashTokenByToken, DoByUUIDRequest } from "@task-manager/common";
+import { getTZNormalizedDate } from "@task-manager/common";
 
 export async function registerRefreashToken(db: DBConn, params: RegisterRefreashToken) {
   const [result] = await db.insert(refresh_tokens).values(params).returning();
@@ -15,7 +16,7 @@ export async function getRefreshTokenByToken(db: DBConn, params: DoRefreashToken
 
 export async function revokeRefreshToken(db: DBConn, params: DoRefreashTokenByToken) {
   const [result] = await db.update(refresh_tokens).set({
-    revokedAt: new Date()
+    revokedAt: getTZNormalizedDate(),
   }).where(eq(refresh_tokens.token, params.token)).returning();
   return result;
 }
@@ -32,7 +33,7 @@ export async function getValidRefreshTokenByUserId(db: DBConn, params: DoByUUIDR
 
 export async function revokeAllRefreshTokensForUser(db: DBConn, params: DoByUUIDRequest) {
   const [result] = await db.update(refresh_tokens).set({
-    revokedAt: new Date()
+    revokedAt: getTZNormalizedDate(),
   }).where(and(
     eq(refresh_tokens.userId, params.id),
     isNull(refresh_tokens.revokedAt)
