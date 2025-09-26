@@ -1,6 +1,7 @@
 import z from "zod";
 import { type AppAbility } from "./roles";
 import { type User } from "../types/users";
+import { userRoleList } from "./roles";
 
 const UserContextSchema = z.object({
   id: z.uuid(),
@@ -8,6 +9,7 @@ const UserContextSchema = z.object({
     id: z.uuid(),
     role: z.string(),
   })).default([]),
+  accessLevel: z.enum(userRoleList).default("user"),
 });
 
 export type UserContext = z.infer<typeof UserContextSchema>;

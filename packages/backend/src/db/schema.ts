@@ -1,7 +1,8 @@
 import { pgTable, timestamp, varchar, uuid, boolean, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { groupRoleList, getTZNormalizedDate } from "@task-manager/common";
+import { userRoleList, groupRoleList, getTZNormalizedDate } from "@task-manager/common";
 
+export const userRoleEnum = pgEnum("user_role", userRoleList);
 export const groupRoleEnum = pgEnum("group_role", groupRoleList);
 
 export const tasks = pgTable("tasks", {
@@ -25,6 +26,7 @@ export const users = pgTable("users", {
   password: varchar("password", { length: 256 }).notNull(),
   email: varchar("email", { length: 256 }),
   disabled: boolean("disabled").default(false),
+  accessLevel: userRoleEnum("access_level").notNull().default("user"),
 });
 
 export const refresh_tokens = pgTable("refresh_tokens", {
