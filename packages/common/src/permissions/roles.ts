@@ -34,45 +34,46 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
   allow("read", "User", { id: user.id });
   allow("update", "User", { id: user.id });
   allow("manage", "Task", { userId: user.id });
+  allow("read", "Group");
+  allow("read", "User");
   forbid("update", "User", ["login"]);
 
   if (user.accessLevel === "admin") {
     allow("manage", "all");
-    return build({ detectSubjectType: typeDetection});
+    return build({ detectSubjectType: typeDetection });
   }
 
-  user.groups.forEach(({ id: groupId, role }) =>{
+  if (user.accessLevel === "manager") {
+    allow("manage", "Group");
+    allow("update", "User", ["disabled", "name", "email", "password"]);
+  }
+
+  user.groups.forEach(({ id: groupId, role }) => {
     switch (role) {
       case "manager":
         allow(["assignTask", "removeTask", "assignUser", "removeUser", "update"], "Group", { id: groupId });
-        allow("read", "Group");
-        allow("read", "User");
         allow("manage", "Task", { 'groups.id': groupId });
-        allow("update", "User", ["disabled", "name", "email"], { 'groups.id': groupId });
         break;
       case "editor":
         allow(["create", "update", "delete", "read"], "Task", { 'groups.id': groupId });
-        allow("assignTask", "Group", { id: groupId})
-        allow("read", "Group");
-        allow("read", "User");
+        allow("assignTask", "Group", { id: groupId })
         forbid("delete", "Task", { completed: true });
         allow("delete", "Task", { userId: user.id });
         break;
       case "user":
         allow("read", "Task", { 'groups.id': groupId });
         allow("update", "Task", ["completed"], { 'groups.id': groupId });
-        allow("read", "Group");
-        allow("read", "User");
         break;
       case "viewer":
         allow("read", "Task", { 'groups.id': groupId });
-        allow("read", "Group");
-        allow("read", "User");
         break;
       case "none":
+        forbid("manage", "Group", { id: groupId });
+        forbid("manage", "Task", { 'groups.id': groupId });
+        allow("manage", "Task", { userId: user.id });
         break;
     }
   });
 
-  return build({ detectSubjectType: typeDetection});
+  return build({ detectSubjectType: typeDetection });
 }
