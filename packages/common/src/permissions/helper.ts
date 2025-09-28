@@ -1,11 +1,11 @@
 import { defineAbilityFor, type AppAbility, type Subjects } from "./roles";
+import type { UserContext } from "./types";
 import type { User } from "../types/users";
 
 interface StartParams {
-  user?: User;
+  user?: User | UserContext;
   ability?: AppAbility;
 }
-
 
 export class AbilityChecker {
   private abilities: AppAbility;
@@ -24,17 +24,17 @@ export class AbilityChecker {
     this.abilities = defineAbilityFor(null);
   }
 
-  canManageObject(subject?: any) {
+  canManageObject(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("manage", subject);
   }
 
-  canEditObject(subject?: any) {
+  canEditObject(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("update", subject);
   }
 
-  canEditObjectField(subject?: any, field?: string) {
+  canEditObjectField(subject?: Subjects, field?: string) {
     if (!subject || !field) return false;
     return this.abilities.can("update", subject, field);
   }
@@ -44,32 +44,32 @@ export class AbilityChecker {
     return this.abilities.can("create", subject);
   }
 
-  canDeleteObject(subject?: any) {
+  canDeleteObject(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("delete", subject);
   }
 
-  canViewObject(subject?: any) {
+  canViewObject(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("read", subject);
   }
 
-  canAssignTask(subject?: any) {
+  canAssignTask(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("assignTask", subject);
   }
 
-  canRemoveTask(subject?: any) {
+  canRemoveTask(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("removeTask", subject);
   }
 
-  canAssignUser(subject?: any) {
+  canAssignUser(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("assignUser", subject);
   }
 
-  canRemoveUser(subject?: any) {
+  canRemoveUser(subject?: Subjects) {
     if (!subject) return false;
     return this.abilities.can("removeUser", subject);
   }
