@@ -24,52 +24,52 @@ export class AbilityChecker {
     this.abilities = defineAbilityFor(null);
   }
 
-  canManageObject(subject?: Subjects) {
+  canManageObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("manage", subject);
   }
 
-  canEditObject(subject?: Subjects) {
+  canEditObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("update", subject);
   }
 
-  canEditObjectField(subject?: Subjects, field?: string) {
+  canEditObjectField(subject?: any, field?: string) {
     if (!subject || !field) return false;
     return this.abilities.can("update", subject, field);
   }
 
-  canCreateObject(subject?: Subjects) {
+  canCreateObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("create", subject);
   }
 
-  canDeleteObject(subject?: Subjects) {
+  canDeleteObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("delete", subject);
   }
 
-  canViewObject(subject?: Subjects) {
+  canViewObject(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("read", subject);
   }
 
-  canAssignTask(subject?: Subjects) {
+  canAssignTask(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("assignTask", subject);
   }
 
-  canRemoveTask(subject?: Subjects) {
+  canRemoveTask(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("removeTask", subject);
   }
 
-  canAssignUser(subject?: Subjects) {
+  canAssignUser(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("assignUser", subject);
   }
 
-  canRemoveUser(subject?: Subjects) {
+  canRemoveUser(subject?: any) {
     if (!subject) return false;
     return this.abilities.can("removeUser", subject);
   }
