@@ -10,7 +10,7 @@ groupRoutes.get("/api/groups", handlerGetGroupsForSelf);
 groupRoutes.post("/api/groups", handlerCreateGroup);
 groupRoutes.get("/api/groups/all", handlerGetAllGroups);
 
-groupRoutes.use("/api/groups/:id", validateID);
+groupRoutes.use("/api/groups/:id/*", validateID);
 
 groupRoutes.get("/api/groups/:id", handlerGetGroupById);
 groupRoutes.put("/api/groups/:id", handlerUpdateGroup);
