@@ -1,39 +1,39 @@
-import TaskDetails from "@/components/tasks/taskDetails";
-import type { Metadata } from "next";
-import { fetchTaskById } from "@/lib/api/task";
-import { Suspense } from "react";
-import type { Task } from "@task-manager/common";
-import type { IDParamProp } from "@/lib/data/interfaces/general";
-import type { TaskProp } from "@/lib/data/interfaces/task";
+import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import { prefetchTaskDetails } from "@/lib/auth/prefetching";
+import TaskDetailsClient from "@/components/tasks/taskDetailsClient";
 import ProtectedRoute from "@/components/auth/protectedRoute";
+import type { Metadata } from "next";
+import type { IDParamProp } from "@/lib/data/interfaces/general";
+import { FIVE_MINUTES } from "@/lib/data/consts";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Task Details',
   description: 'Viewing details of a specific task.',
 };
 
-export default async function TaskPageWrapper({ params }: IDParamProp) {
+export default async function TaskDetailsPage({ params }: IDParamProp) {
   const { id } = await params;
-  const task: Task | null = await fetchTaskById(id);
 
-  return (
-    <ProtectedRoute>
-      <Suspense fallback={<div>Fetching task details...</div>}>
-        <TaskPage task={task} />
-      </Suspense>
-    </ProtectedRoute>
-  );
-}
-
-function TaskPage({ task }: TaskProp) {
-  if (!task) {
-    return <div>Task not found.</div>;
+  if (!id) {
+    return <div>Invalid task ID</div>;
   }
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: FIVE_MINUTES,
+      },
+    },
+  });
+
+  // Prefetch the specific task details
+  await prefetchTaskDetails(queryClient, id);
+
   return (
-    <div>
-      <h2>Task Details</h2>
-      <TaskDetails task={task} />
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ProtectedRoute>
+        <TaskDetailsClient taskId={id} />
+      </ProtectedRoute>
+    </HydrationBoundary>
   );
 }

@@ -1,6 +1,7 @@
 'use server';
 import { QueryClient } from "@tanstack/react-query";
 import { serverApiRequest } from "@/lib/auth/serverAuth";
+import { TASK_KEYS } from "@/lib/api/tasks/queries";
 import type { User, Group, Task } from "@task-manager/common";
 
 export async function prefetchUserData(queryClient: QueryClient) {
@@ -68,5 +69,14 @@ export async function prefetchUserDetails(queryClient: QueryClient, userId: stri
     queryClient.setQueryData(["users", "groups", userId], groups);
   } catch (error) {
     console.warn(`Failed to prefetch user ${userId} details:`, error);
+  }
+}
+
+export async function prefetchTaskDetails(queryClient: QueryClient, taskId: string) {
+  try {
+    const task = await serverApiRequest<Task>(`/tasks/${taskId}`);
+    queryClient.setQueryData(TASK_KEYS.detail(taskId), task);
+  } catch (error) {
+    console.warn(`Failed to prefetch task ${taskId} details:`, error);
   }
 }
