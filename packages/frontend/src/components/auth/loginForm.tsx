@@ -26,7 +26,7 @@ export default function LoginForm() {
         if (redirectedFrom) {
           router.push(decodeURIComponent(redirectedFrom));
         } else {
-          router.push("/");
+          router.push("/dashboard");
         }
       } catch (error) {
         console.error("Login failed:", error);
