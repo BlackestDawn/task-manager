@@ -1,3 +1,4 @@
+import type { Context } from "hono";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
@@ -51,8 +52,8 @@ export async function validateJWT(tokenString: string, secret: string = cfg.jwt.
   return token.sub as string;
 }
 
-export async function getAuthTokenFromHeaders(headers: Headers, tokenType: string = "Bearer") {
-  const authHeader = headers.get("Authorization");
+export async function getAuthTokenFromHeaders(c: Context, tokenType: string = "Bearer") {
+  const authHeader = c.req.header("Authorization");
   if (!authHeader) throw new UserNotAuthenticatedError("Missing Authorization header");
   const split = authHeader.split(" ");
   if (split.length < 2 || split[0] !== tokenType || !split[1]) throw new UserNotAuthenticatedError('Malformed Authorization header');

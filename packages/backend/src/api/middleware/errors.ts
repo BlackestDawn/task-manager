@@ -1,25 +1,14 @@
-import type { ApiConfig } from "../../config";
-import { BadRequestError, NotFoundError, UserForbiddenError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
-import { respondWithJSON } from "../../lib/utils/response";
+import type { ErrorHandler } from "hono";
+import { HTTPErrors } from "@task-manager/common";
+import { cfg } from "@backend/src/config";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-export function errorHandlingMiddleware(cfg: ApiConfig, err: unknown,): Response {
+export const errorHandlingMiddleware: ErrorHandler = (err, c) => {
   let statusCode = 500;
-  let message = "Something went wrong on our end";
+  let message = "something went wrong on our end";
 
-  if (err instanceof BadRequestError) {
-    statusCode = 400;
-    message = err.message;
-  } else if (err instanceof UserNotAuthenticatedError) {
-    statusCode = 401;
-    message = err.message;
-  } else if (err instanceof UserForbiddenError) {
-    statusCode = 403;
-    message = err.message;
-  } else if (err instanceof NotFoundError) {
-    statusCode = 404;
-    message = err.message;
-  } else if (err instanceof AlreadyExistsConflictError) {
-    statusCode = 409;
+  if (err instanceof HTTPErrors) {
+    statusCode = err.statusCode;
     message = err.message;
   }
 
@@ -28,11 +17,31 @@ export function errorHandlingMiddleware(cfg: ApiConfig, err: unknown,): Response
     if (cfg.platform === "dev") {
       message = errStr;
     }
-    console.log(errStr);
+    console.error('🚨 Server Error:', {
+      error: errStr,
+      requestId: c.get('requestId'),
+      path: c.req.path,
+      method: c.req.method,
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    // Log client errors for debugging
+    console.warn('⚠️ Client Error:', {
+      status: statusCode,
+      message,
+      requestId: c.get('requestId'),
+      path: c.req.path,
+      method: c.req.method,
+      timestamp: new Date().toISOString()
+    });
   }
 
-  return respondWithJSON(statusCode, { error: message });
-}
+  return c.json({
+    error: message,
+    requestId: c.get('requestId'),
+    timestamp: new Date().toISOString()
+  }, statusCode as ContentfulStatusCode);
+};
 
 function errStringFromError(err: unknown) {
   if (typeof err === "string") return err;

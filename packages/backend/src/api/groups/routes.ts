@@ -1,30 +1,23 @@
-import { cfg } from "../../config";
-import { restrictedEndpoint } from "../middleware/config";
+import { Hono } from "hono";
+import { validateID } from "../middleware/helpers";
 import { handlerCreateGroup, handlerGetAllGroups, handlerGetGroupsForSelf } from "./general";
 import { handlerUpdateGroup, handlerDeleteGroup, handlerGetGroupById } from "./direct";
 import { handlerGetGroupMembers, handlerGetGroupTasks, handlerAddUserToGroup, handlerRemoveUserFromGroup, handlerAssignTaskToGroup, handlerRemoveTaskFromGroup } from "./subs";
 
-export const groupRoutes = {
-  "/api/groups": {
-    GET: restrictedEndpoint(cfg, handlerGetGroupsForSelf),
-    POST: restrictedEndpoint(cfg, handlerCreateGroup),
-  },
-  "/api/groups/all": {
-    GET: restrictedEndpoint(cfg, handlerGetAllGroups),
-  },
-  "/api/groups/:groupId": {
-    GET: restrictedEndpoint(cfg, handlerGetGroupById),
-    PUT: restrictedEndpoint(cfg, handlerUpdateGroup),
-    DELETE: restrictedEndpoint(cfg, handlerDeleteGroup),
-  },
-  "/api/groups/:groupId/users": {
-    GET: restrictedEndpoint(cfg, handlerGetGroupMembers),
-    POST: restrictedEndpoint(cfg, handlerAddUserToGroup),
-    DELETE: restrictedEndpoint(cfg, handlerRemoveUserFromGroup),
-  },
-  "/api/groups/:groupId/tasks": {
-    GET: restrictedEndpoint(cfg, handlerGetGroupTasks),
-    POST: restrictedEndpoint(cfg, handlerAssignTaskToGroup),
-    DELETE: restrictedEndpoint(cfg, handlerRemoveTaskFromGroup),
-  },
-}
+export const groupRoutes = new Hono();
+
+groupRoutes.get("/api/groups", handlerGetGroupsForSelf);
+groupRoutes.post("/api/groups", handlerCreateGroup);
+groupRoutes.get("/api/groups/all", handlerGetAllGroups);
+
+groupRoutes.use("/api/groups/:id", validateID);
+
+groupRoutes.get("/api/groups/:id", handlerGetGroupById);
+groupRoutes.put("/api/groups/:id", handlerUpdateGroup);
+groupRoutes.delete("/api/groups/:id", handlerDeleteGroup);
+groupRoutes.get("/api/groups/:id/users", handlerGetGroupMembers);
+groupRoutes.post("/api/groups/:id/users", handlerAddUserToGroup);
+groupRoutes.delete("/api/groups/:id/users", handlerRemoveUserFromGroup);
+groupRoutes.get("/api/groups/:id/tasks", handlerGetGroupTasks);
+groupRoutes.post("/api/groups/:id/tasks", handlerAssignTaskToGroup);
+groupRoutes.delete("/api/groups/:id/tasks", handlerRemoveTaskFromGroup);

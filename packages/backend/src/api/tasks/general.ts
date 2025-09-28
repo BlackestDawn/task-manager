@@ -1,28 +1,31 @@
+import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
-import { respondWithJSON } from "../../lib/utils/response";
-import type { BunRequest } from "bun";
-import type { Task, CreateTaskRequest, loggedinUser, DoByUUIDRequest } from "@task-manager/common";
+import type { Task, CreateTaskRequest, DoByUUIDRequest, User } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
 import { validateCreateTaskRequest, validateDoByUUIDRequest, validateTask, validateTaskArray } from "@task-manager/common";
 import { createTask, getTasksByUserId } from "../../db/queries/tasks";
 
-export async function handlerGetTasksByUserId(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam = req.params as DoByUUIDRequest;
-  const tasks = await getTasksByUserId(cfg.db, validateDoByUUIDRequest(reqParam));
+export async function handlerGetTasksByUserId(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const user = c.get("user") as User;
+  const body = await c.req.json() as DoByUUIDRequest;
+  const tasks = await getTasksByUserId(cfg.db, validateDoByUUIDRequest(body.id || user.id));
   // const result = tasks.filter(t => canUserAccessTask(user.capabilities, t));
   const result = tasks;
-  return respondWithJSON(200, validateTaskArray(result) as Task[]);
+  return c.json(validateTaskArray(result) as Task[]);
 }
 
-export async function handlerCreateTask(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const jsonBody = await req.json() as CreateTaskRequest;
+export async function handlerCreateTask(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const user = c.get("user") as User;
+  const jsonBody = await c.req.json() as CreateTaskRequest;
   /* if (!canUserCreateTask(user.capabilities)) {
     throw new UserForbiddenError("User not authorized");
   } */
-  const params: CreateTaskRequest = validateCreateTaskRequest({
+  const createParams: CreateTaskRequest = validateCreateTaskRequest({
     ...jsonBody,
-    userId: user.userInfo.id,
+    userId: user.id,
   });
-  const result = await createTask(cfg.db, validateCreateTaskRequest(jsonBody));
-  return respondWithJSON(201, validateTask(result) as Task);
+  const result = await createTask(cfg.db, createParams);
+  return c.json(validateTask(result) as Task, 201);
 }

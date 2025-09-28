@@ -1,39 +1,35 @@
-import type { BunRequest } from "bun";
+import type { Context, Next, MiddlewareHandler } from "hono";
 import type { ApiConfig } from "../../config";
 import { UserNotAuthenticatedError, NotFoundError } from "@task-manager/common";
-import { validateDoByUUIDRequest, defineAbilityFor, validateUserContext, validateUser } from "@task-manager/common";
-import { type loggedinUser } from "@task-manager/common";
+import { validateDoByUUIDRequest, AbilityChecker, validateUser } from "@task-manager/common";
 import { getUserById } from "../../db/queries/users";
 import { getAuthTokenFromHeaders, validateJWT } from "../../lib/auth/authentication";
 
-type HandlerWithConfig = (cfg: ApiConfig, req: BunRequest, user: loggedinUser) => Promise<Response>;
+export type ApiHandler = (c: Context) => Promise<Response>;
 
-export function withConfig<T extends any>(cfg: ApiConfig, handler: HandlerWithConfig, ...args: T[]) {
-  return (req: BunRequest) => handler(cfg, req, {} as loggedinUser);
+export function withConfig(cfg: ApiConfig): MiddlewareHandler {
+  return async (c: Context, next: Next) => {
+    c.set("config", cfg);
+    await next();
+  };
 }
 
-export function restrictedEndpoint<T extends any>(cfg: ApiConfig, handler: HandlerWithConfig, ...args: T[]) {
-  return async (req: BunRequest) => {
-    const bearerToken = await getAuthTokenFromHeaders(req.headers);
-    if (!bearerToken) {
-      throw new UserNotAuthenticatedError('Invalid/malformed auth token');
-    }
+export async function authMiddleware(c: Context, next: Next) {
+  const cfg = c.get("config") as ApiConfig;
+  const authHeader = await getAuthTokenFromHeaders(c);
 
-    const userId = await validateJWT(bearerToken);
-    const userInfo = await getUserById(cfg.db, validateDoByUUIDRequest(userId));
-    if (!userInfo) {
-      throw new NotFoundError("User not found");
-    }
+  const userId = await validateJWT(authHeader);
+  const userInfo = validateUser(
+    await getUserById(cfg.db, validateDoByUUIDRequest(userId))
+  );
 
-    if (userInfo.disabled) {
-      throw new UserNotAuthenticatedError("User is disabled");
-    }
+  if (!userInfo) throw new NotFoundError("User not found");
+  if (userInfo.disabled) throw new UserNotAuthenticatedError("User is disabled");
 
-    const capabilities = defineAbilityFor(validateUserContext(userInfo));
+  const capabilities = new AbilityChecker({ user: userInfo });
 
-    return handler(cfg, req, {
-      capabilities,
-      userInfo: validateUser(userInfo),
-    });
-  }
+  c.set("user", userInfo);
+  c.set("capabilities", capabilities);
+
+  await next();
 }

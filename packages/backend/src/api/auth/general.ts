@@ -1,15 +1,16 @@
+import type { Context } from "hono";
 import type { ApiConfig } from "../../config";
-import { respondWithJSON } from "../../lib/utils/response";
-import type { BunRequest } from "bun";
-import type { LoginRequest, LoginResponse, loggedinUser, User, UpdateUserRequest } from "@task-manager/common";
+import type { LoginRequest, LoginResponse, UpdateUserRequest, User } from "@task-manager/common";
 import { validateLoginRequest, validateLoginResponse, validateUpdateUserRequest } from "@task-manager/common";
 import { UserNotAuthenticatedError, BadRequestError, UserForbiddenError } from "@task-manager/common";
 import { getUserByLogin, updateUser } from "../../db/queries/users";
 import { checkPasswordHash, makeJWT, makeRefreshToken } from "../../lib/auth/authentication";
 import { getRefreshTokenByToken, revokeRefreshToken } from "../../db/queries/auth";
 
-export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
-  const params: LoginRequest = validateLoginRequest(await req.json() as LoginRequest);
+export async function handlerLoginUser(c: Context) {
+  const cfg = c.get("config");
+
+  const params: LoginRequest = validateLoginRequest(await c.req.json() as LoginRequest);
   if (!params.login || !params.password) throw new UserNotAuthenticatedError("invalid username or password");
 
   const user = await getUserByLogin(cfg.db, params.login);
@@ -27,11 +28,12 @@ export async function handlerLoginUser(cfg: ApiConfig, req: BunRequest) {
     tokens,
   });
 
-  return respondWithJSON(200, response, req);
+  return c.json(response);
 }
 
-export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest) {
-  const jsonBody = await req.json() as { token: string };
+export async function handlerRefreshAccessToken(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const jsonBody = await c.req.json() as { token: string };
   const refreshTokenValue = jsonBody.token;
 
   if (!refreshTokenValue) {
@@ -54,11 +56,13 @@ export async function handlerRefreshAccessToken(cfg: ApiConfig, req: BunRequest)
 
   const newToken = await makeJWT(refreshToken.userId);
 
-  return respondWithJSON(200, { accessToken: newToken }, req);
+  return c.json({ accessToken: newToken });
 }
 
-export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const jsonBody = await req.json() as { token: string };
+export async function handlerRevokeRefreshToken(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const user = c.get("user") as User;
+  const jsonBody = await c.req.json() as { token: string };
   const refreshTokenValue = jsonBody.token;
 
   if (!refreshTokenValue) {
@@ -67,7 +71,7 @@ export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest,
 
   const refreshToken = await getRefreshTokenByToken(cfg.db, { token: refreshTokenValue });
 
-  if (refreshToken?.userId !== user.userInfo.id) {
+  if (refreshToken?.userId !== user.id || user.accessLevel !== "admin") {
     throw new UserForbiddenError("Not allowed to revoke token");
   }
   const result = await revokeRefreshToken(cfg.db, { token: refreshTokenValue });
@@ -76,17 +80,27 @@ export async function handlerRevokeRefreshToken(cfg: ApiConfig, req: BunRequest,
     throw new BadRequestError("Invalid refresh token");
   }
 
-  return respondWithJSON(204, {}, req);
+  return c.body(null, 204);
 }
 
-export async function handlerGetSelf(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  return respondWithJSON(200, user.userInfo, req);
+export async function handlerGetSelf(c: Context) {
+  const user = c.get("user") as User;
+
+  return c.json(user, 200);
 }
 
-export async function handlerUpdateSelf(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const jsonBody = await req.json() as UpdateUserRequest;
-  jsonBody.id = user.userInfo.id;
+export async function handlerUpdateSelf(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const user = c.get("user") as User;
+  const body = await c.req.json();
+  const updateData: UpdateUserRequest = validateUpdateUserRequest({
+    id: user.id,
+    ...body
+  });
 
-  const result = await updateUser(cfg.db, validateUpdateUserRequest(jsonBody))
-  return respondWithJSON(200, result, req);
+  const updatedUser = await updateUser(cfg.db, updateData);
+
+  if (!updatedUser) throw new BadRequestError("Failed to update user");
+
+  return c.json(updatedUser, 200);
 }

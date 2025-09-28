@@ -1,18 +1,18 @@
+import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
-import { respondWithJSON } from "../../lib/utils/response";
-import type { BunRequest } from "bun";
-import type { User, UpdateUserRequest, DoByUUIDRequest, loggedinUser } from "@task-manager/common";
+import type { User, UpdateUserRequest, DoByUUIDRequest } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
-import { validateUpdateUserRequest, validateDoByUUIDRequest, validateUser } from "@task-manager/common";
+import { validateUpdateUserRequest, validateUser } from "@task-manager/common";
 import { updateUser, deleteUser, getUserById } from "../../db/queries/users";
 import { hashPassword } from "@backend/src/lib/auth/authentication";
 
-export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const reqParam: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
-  const jsonBody = await req.json() as UpdateUserRequest;
+export async function handlerUpdateUser(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const idParam = c.get("recID") as DoByUUIDRequest;
+  const jsonBody = await c.req.json() as UpdateUserRequest;
   const params: UpdateUserRequest = validateUpdateUserRequest({
     ...jsonBody,
-    id: reqParam.id,
+    id: idParam.id,
   });
   const existingUser = await getUserById(cfg.db, params);
   if (!existingUser) {
@@ -30,29 +30,31 @@ export async function handlerUpdateUser(cfg: ApiConfig, req: BunRequest, user: l
     disabled: params.disabled !== null ? params.disabled : existingUser.disabled,
   }) as UpdateUserRequest;
   const result = await updateUser(cfg.db, updateParams) as User;
-  return respondWithJSON(200, validateUser(result));
+  return c.json(validateUser(result));
 }
 
-export async function handlerDeleteUser(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const params: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
-  const existingUser = await getUserById(cfg.db, params) as User;
+export async function handlerDeleteUser(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const idParam = c.get("recID") as DoByUUIDRequest;
+  const existingUser = await getUserById(cfg.db, idParam) as User;
   if (existingUser) {
     /* if (!canUserDeleteUser(user.capabilities, existingUser)) {
       throw new UserForbiddenError("User not authorized");
     } */
-    await deleteUser(cfg.db, params);
+    await deleteUser(cfg.db, idParam);
   }
-  return respondWithJSON(204, {});
+  return c.body(null, 204);
 }
 
-export async function handlerGetUserById(cfg: ApiConfig, req: BunRequest, user: loggedinUser) {
-  const params: DoByUUIDRequest = validateDoByUUIDRequest(req.params);
-  const existingUser = await getUserById(cfg.db, params) as User;
+export async function handlerGetUserById(c: Context) {
+  const cfg = c.get("config") as ApiConfig;
+  const idParam = c.get("recID") as DoByUUIDRequest;
+  const existingUser = await getUserById(cfg.db, idParam) as User;
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
   /* if (!canUserAccessUser(user.capabilities, existingUser)) {
     throw new UserForbiddenError("User not authorized");
   } */
-  return respondWithJSON(200, validateUser(existingUser));
+  return c.json(validateUser(existingUser));
 }

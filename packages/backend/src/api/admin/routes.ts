@@ -1,9 +1,6 @@
-import { cfg } from "../../config";
-import { withConfig } from "../middleware/config";
+import { Hono } from "hono";
 import { handlerResetDb } from "./admin";
 
-export const adminRoutes = {
-  "/admin/reset": {
-    POST: withConfig(cfg, handlerResetDb),
-  },
-}
+export const adminRoutes = new Hono();
+
+adminRoutes.post("/admin/reset", handlerResetDb);
