@@ -4,7 +4,7 @@ import { AbilityChecker } from "@task-manager/common";
 
 export function useGroupPermissions() {
   const { user, ability } = useAuthContext();
-  const abilities = new AbilityChecker({ability});
+  const abilities = new AbilityChecker({ ability });
 
   const canViewGroups = () => abilities.canViewObject("Group");
 
@@ -14,7 +14,7 @@ export function useGroupPermissions() {
 
   const canDeleteGroup = (group?: Group) => abilities.canDeleteObject(group);
 
-  const canAddUserToGroup = (group?: Group)=> abilities.canAssignUser(group);
+  const canAddUserToGroup = (group?: Group) => abilities.canAssignUser(group);
 
   const canRemoveUserFromGroup = (group?: Group) => abilities.canRemoveUser(group);
 
