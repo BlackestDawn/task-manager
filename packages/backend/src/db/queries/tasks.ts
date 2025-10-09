@@ -1,11 +1,11 @@
 import { eq, sql, or, inArray } from "drizzle-orm";
 import { type DBConn } from "../../config";
-import type { CreateTaskRequest, UpdateTaskRequest, DoByUUIDRequest } from "@task-manager/common";
+import type { CreateTaskRequest, UpdateTaskRequest, DoByUUIDRequest, Task } from "@task-manager/common";
 import { tasks, taskGroups, groups, userGroups } from "../schema";
 
 export async function getGroupsForTask(db: DBConn, params: DoByUUIDRequest) {
   const result = await db.select({
-    id: taskGroups.groupId,
+    id: groups.id,
   }).from(groups)
     .where(inArray(
       groups.id,
@@ -123,5 +123,5 @@ export async function getAllTasksForUser(db: DBConn, params: DoByUUIDRequest) {
       };
     })
   );
-  return result;
+  return result as Task[];
 }

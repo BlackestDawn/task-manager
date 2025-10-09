@@ -7,7 +7,7 @@ import { handlerGetTasksForUser, handlerGetGroupsForUser } from "./subs";
 
 export const userRoutes = new Hono();
 
-userRoutes.use("(api/users/*", authMiddleware);
+userRoutes.use("/api/users/*", authMiddleware);
 
 userRoutes.get("/api/users", handlerGetUsers);
 userRoutes.post("/api/users", handlerCreateUser);

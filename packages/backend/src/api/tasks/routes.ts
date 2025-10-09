@@ -7,7 +7,7 @@ import { handlerMarkDone } from "./subs";
 
 export const taskRoutes = new Hono();
 
-taskRoutes.use("(api/tasks/*", authMiddleware);
+taskRoutes.use("/api/tasks/*", authMiddleware);
 
 taskRoutes.get("/api/tasks", handlerGetTasksByUserId);
 taskRoutes.post("/api/tasks", handlerCreateTask);
