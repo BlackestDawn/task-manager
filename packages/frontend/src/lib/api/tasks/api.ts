@@ -17,6 +17,6 @@ export const tasksApi = {
   deleteTask: (id: string): Promise<void> =>
     apiClient.delete(`/tasks/${id}`),
 
-  markTaskDone: (id: string): Promise<void> =>
+  markTaskDone: (id: string): Promise<Task> =>
     apiClient.put(`/tasks/${id}/done`),
 };

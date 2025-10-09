@@ -11,6 +11,9 @@ export async function handlerMarkDone(c: Context) {
   /* if (!canUserCompleteTask(user.capabilities, task)) {
     throw new UserForbiddenError("User not authorized");
   } */
-  if (!task.completed) await markDone(cfg.db, idParam);
-  return c.body(null, 204);
+  if (!task.completed) {
+    const res = await markDone(cfg.db, idParam);
+    return c.json(res, 200);
+  }
+  return c.json(task, 200);
 }
