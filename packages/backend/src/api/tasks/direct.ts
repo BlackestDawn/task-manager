@@ -14,12 +14,10 @@ export async function handlerUpdateTask(c: Context) {
     throw new UserForbiddenError("User not authorized");
   } */
 
-  const params: UpdateTaskRequest = validateUpdateTaskRequest({
+  const params = {
     id: idParam.id,
-    title: jsonBody.title || existingTask.title,
-    description: jsonBody.description || existingTask.description,
-    finishBy: jsonBody.finishBy || existingTask.finishBy,
-  });
+    data: validateUpdateTaskRequest(jsonBody) as UpdateTaskRequest,
+  };
   const result = await updateTask(cfg.db, params);
   return c.json(validateTask(result) as Task);
 }

@@ -42,6 +42,7 @@ const CreateUserRequestSchema = z.object({
   password: z.string(),
   name: z.string(),
   email: z.string().nullish().default(null),
+  accessLevel: z.enum(userRoleList).default("user"),
 });
 
 export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
@@ -56,12 +57,10 @@ export function validateCreateUserRequest(item: unknown): CreateUserRequest {
 }
 
 const UpdateUserRequestSchema = z.object({
-  id: z.uuid(),
-  login: z.string().nullish().default(null),
-  name: z.string().nullish().default(null),
+  login: z.string(),
+  name: z.string(),
   email: z.string().nullish().default(null),
-  password: z.string().nullish().default(null),
-  disabled: z.boolean().nullish().default(null),
+  accessLevel: z.enum(userRoleList).default("user"),
 });
 
 export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;
@@ -71,6 +70,36 @@ export function validateUpdateUserRequest(item: unknown): UpdateUserRequest {
   if (!result.success) {
     console.error('Invalid update user request:', result.error);
     throw new Error('Invalid update user request');
+  }
+  return result.data;
+}
+
+const UpdatePasswordRequestSchema = z.object({
+  password: z.string(),
+});
+
+export type UpdatePasswordRequest = z.infer<typeof UpdatePasswordRequestSchema>;
+
+export function validateUpdatePasswordRequest(item: unknown): UpdatePasswordRequest {
+  const result = UpdatePasswordRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid update password request:', result.error);
+    throw new Error('Invalid update password request');
+  }
+  return result.data;
+}
+
+const UpdateUserDisabledRequestSchema = z.object({
+  disabled: z.boolean(),
+});
+
+export type UpdateUserDisabledRequest = z.infer<typeof UpdateUserDisabledRequestSchema>;
+
+export function validateUpdateUserDisabledRequest(item: unknown): UpdateUserDisabledRequest {
+  const result = UpdateUserDisabledRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid update user disabled request:', result.error);
+    throw new Error('Invalid update user disabled request');
   }
   return result.data;
 }

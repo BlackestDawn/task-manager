@@ -72,7 +72,6 @@ export function validateCreateGroupRequest(item: unknown): CreateGroupRequest {
 }
 
 const updateGroupRequestSchema = z.object({
-  id: z.uuid(),
   name: z.string(),
   description: z.string().nullish().default(null),
 });
@@ -90,7 +89,6 @@ export function validateUpdateGroupRequest(item: unknown): UpdateGroupRequest {
 
 const addUserToGroupRequestSchema = z.object({
   userId: z.uuid(),
-  groupId: z.uuid(),
   role: z.enum(groupRoleList).default("user"),
 });
 
@@ -107,7 +105,6 @@ export function validateAddUserToGroupRequest(item: unknown): AddUserToGroupRequ
 
 const RemoveUserFromGroupRequestSchema = z.object({
   userId: z.uuid(),
-  groupId: z.uuid(),
 });
 
 export type RemoveUserFromGroupRequest = z.infer<typeof RemoveUserFromGroupRequestSchema>;
@@ -123,7 +120,6 @@ export function validateRemoveUserFromGroupRequest(item: unknown): RemoveUserFro
 
 const assignTaskToGroupRequestSchema = z.object({
   taskId: z.uuid(),
-  groupId: z.uuid(),
   assignedBy: z.uuid(),
 });
 
@@ -140,7 +136,6 @@ export function validateAssignTaskToGroupRequest(item: unknown): AssignTaskToGro
 
 const RemoveTaskFromGroupRequestSchema = z.object({
   taskId: z.uuid(),
-  groupId: z.uuid(),
 });
 
 export type RemoveTaskFromGroupRequest = z.infer<typeof RemoveTaskFromGroupRequestSchema>;

@@ -44,10 +44,10 @@ export async function handlerAddUserToGroup(c: Context) {
     throw new UserForbiddenError("User not authorized");
   } */
 
-  const params: AddUserToGroupRequest = validateAddUserToGroupRequest({
-    ...jsonBody,
-    groupId: idParam.id,
-  });
+  const params = {
+    id: idParam.id,
+    data: validateAddUserToGroupRequest(jsonBody) as AddUserToGroupRequest,
+  };
   await addUserToGroup(cfg.db, params);
   return c.body(null, 204);
 }
@@ -63,10 +63,10 @@ export async function handlerRemoveUserFromGroup(c: Context) {
     throw new UserForbiddenError("User not authorized");
   } */
 
-  const params: RemoveUserFromGroupRequest = validateRemoveUserFromGroupRequest({
-    ...jsonBody,
-    groupId: idParam.id,
-  });
+  const params = {
+    id: idParam.id,
+    data: validateRemoveUserFromGroupRequest(jsonBody) as RemoveUserFromGroupRequest,
+  };
   await removeUserFromGroup(cfg.db, params);
   return c.body(null, 204);
 }
@@ -83,11 +83,10 @@ export async function handlerAssignTaskToGroup(c: Context) {
     throw new UserForbiddenError("User not authorized");
   } */
 
-  const params: AssignTaskToGroupRequest = validateAssignTaskToGroupRequest({
-    ...jsonBody,
-    groupId: idParam.id,
-    assignedBy: user.id,
-  });
+  const params = {
+    id: idParam.id,
+    data: validateAssignTaskToGroupRequest(jsonBody) as AssignTaskToGroupRequest,
+  };
   await assignTaskToGroup(cfg.db, params);
   return c.body(null, 204);
 }
@@ -103,10 +102,10 @@ export async function handlerRemoveTaskFromGroup(c: Context) {
     throw new UserForbiddenError("User not authorized");
   } */
 
-  const params: RemoveTaskFromGroupRequest = validateRemoveTaskFromGroupRequest({
-    ...jsonBody,
-    groupId: idParam.id,
-  });
+  const params = {
+    id: idParam.id,
+    data: validateRemoveTaskFromGroupRequest(jsonBody) as RemoveTaskFromGroupRequest,
+  };
   await removeTaskFromGroup(cfg.db, params);
   return c.body(null, 204);
 }

@@ -55,7 +55,6 @@ export function validateCreateTaskRequest(item: unknown): CreateTaskRequest {
 }
 
 const updateTaskRequestSchema = z.object({
-  id: z.uuid(),
   title: z.string(),
   description: z.string().nullish().default(null),
   finishBy: z.coerce.date().nullish().default(null),
@@ -68,6 +67,21 @@ export function validateUpdateTaskRequest(item: unknown): UpdateTaskRequest {
   if (!result.success) {
     console.error('Invalid update task request:', result.error);
     throw new Error('Invalid update task request');
+  }
+  return result.data;
+}
+
+const UpdateTaskDoneStatusRequestSchema = z.object({
+  completed: z.boolean(),
+});
+
+export type UpdateTaskDoneStatusRequest = z.infer<typeof UpdateTaskDoneStatusRequestSchema>;
+
+export function validateUpdateTaskDoneStatusRequest(item: unknown): UpdateTaskDoneStatusRequest {
+  const result = UpdateTaskDoneStatusRequestSchema.safeParse(item);
+  if (!result.success) {
+    console.error('Invalid update task done status request:', result.error);
+    throw new Error('Invalid update task done status request');
   }
   return result.data;
 }

@@ -23,7 +23,7 @@ const LoginResponseSchema = z.object({
   tokens: z.object({
     accessToken: z.string(),
     refreshToken: z.string(),
-  }).nullish().default(null),
+  }),
 });
 
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;

@@ -1,7 +1,7 @@
 import { eq, inArray, and, or } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { users, groups, userGroups } from "../schema";
-import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest, DisabledUserRequest } from "@task-manager/common";
+import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest, UpdateUserDisabledRequest } from "@task-manager/common";
 import { AlreadyExistsConflictError } from "@task-manager/common";
 
 export async function getGroupRolesForUser(db: DBConn, params: DoByUUIDRequest) {
@@ -23,8 +23,8 @@ export async function createUser(db: DBConn, params: CreateUserRequest) {
   };
 }
 
-export async function updateUser(db: DBConn, params: UpdateUserRequest) {
-  const [result] = await db.update(users).set(params).where(eq(users.id, params.id)).returning();
+export async function updateUser(db: DBConn, params: { id: string, data: UpdateUserRequest}) {
+  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
 
@@ -68,8 +68,8 @@ export async function getUserById(db: DBConn, params: DoByUUIDRequest) {
   };
 }
 
-export async function updatePassword(db: DBConn, params: UpdatePasswordRequest) {
-  const [result] = await db.update(users).set(params).where(eq(users.id, params.id)).returning();
+export async function updatePassword(db: DBConn, params: { id: string, data: UpdatePasswordRequest}) {
+  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
 
@@ -103,10 +103,8 @@ export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
   return result;
 }
 
-export async function disabledUser(db: DBConn, params: DisabledUserRequest) {
-  const [result] = await db.update(users).set({
-    disabled: params.disabled,
-  }).where(eq(users.id, params.id)).returning();
+export async function updateUserDisabledStatus(db: DBConn, params: { id: string, data: UpdateUserDisabledRequest}) {
+  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
 
