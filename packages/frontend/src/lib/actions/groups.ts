@@ -1,155 +1,190 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { serverApiRequest } from "@/lib/auth/serverAuth";
-import type { ActionResult } from "@/lib/data/interfaces";
-import { validateGroup, validateCreateGroupRequest, validateUpdateGroupRequest } from "@task-manager/common";
-import type { Group, CreateGroupRequest, UpdateGroupRequest } from "@task-manager/common";
+import type { Group, CreateGroupRequest, UpdateGroupRequest, User, AddUserToGroupRequest, RemoveUserFromGroupRequest, Task, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest } from "@task-manager/common";
+import { validateCreateGroupRequest, validateUpdateGroupRequest, validateAddUserToGroupRequest, validateRemoveUserFromGroupRequest, validateAssignTaskToGroupRequest, validateRemoveTaskFromGroupRequest } from "@task-manager/common";
+import { serverFetch } from "@/lib/utils/serverFetch";
 
-export async function createGroupAction(formData: FormData): Promise<ActionResult<Group>> {
+export async function getGroupsAction(): Promise<Group[]> {
   try {
-    const rawData = {
-      name: formData.get("name") as string,
-      description: formData.get("description") as string,
-    };
-
-    const validated: CreateGroupRequest = validateCreateGroupRequest(rawData);
-
-    const res = await serverApiRequest<Group>("/groups", {
-      method: "POST",
-      body: JSON.stringify(validated),
-    });
-
-    revalidatePath("/groups");
-
-    return { success: true, data: validateGroup(res) };
+    return await serverFetch<Group[]>("/groups");
   } catch (error) {
-    console.error("Failed to create group", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to create group",
-    };
+    console.error("Failed to fetch groups:", error);
+    return [];
   }
 }
 
-export async function updateGroupAction(formData: FormData, groupId: string): Promise<ActionResult<Group>> {
+export async function getGroupAction(id: string): Promise<Group | null> {
+  try {
+    return await serverFetch<Group>(`/groups/${id}`);
+  } catch (error) {
+    console.error(`Failed to fetch group ${id}:`, error);
+    return null;
+  }
+}
+
+export async function getGroupTasksAction(id: string): Promise<Task[]> {
+  try {
+    return await serverFetch<Task[]>(`/groups/${id}/tasks`);
+  } catch (error) {
+    console.error(`Failed to fetch tasks for group ${id}:`, error);
+    return [];
+  }
+}
+
+export async function getGroupMembersAction(id: string): Promise<User[]> {
+  try {
+    return await serverFetch<User[]>(`/groups/${id}/users`);
+  } catch (error) {
+    console.error(`Failed to fetch users for group ${id}:`, error);
+    return [];
+  }
+}
+
+export async function createGroupAction(formData: FormData) {
   try {
     const rawData = {
       name: formData.get("name") as string,
-      description: formData.get("description") as string,
-    };
+      description: formData.get("description") as string || "",
+    }
+    const data: CreateGroupRequest = validateCreateGroupRequest(rawData);
 
-    const validated: UpdateGroupRequest = validateUpdateGroupRequest(rawData);
+    const response = await serverFetch<Group>("/groups", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
 
-    const res = await serverApiRequest<Group>(`/groups/${groupId}`, {
+    revalidatePath("/groups");
+    return response;
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Group creation failed" };
+  }
+}
+
+export async function updateGroupAction(id: string, formData: FormData) {
+  try {
+    const rawData = {
+      name: formData.get("name") as string,
+      description: formData.get("description") as string || "",
+    }
+    const data: UpdateGroupRequest = validateUpdateGroupRequest(rawData);
+
+    const response = await serverFetch<Group>(`/groups/${id}`, {
       method: "PUT",
-      body: JSON.stringify(validated),
+      body: JSON.stringify(data),
     });
 
     revalidatePath("/groups");
-    revalidatePath(`/groups/${groupId}`);
-
-    return { success: true, data: validateGroup(res) };
+    revalidatePath(`/groups/${id}`);
+    return response;
   } catch (error) {
-    console.error("Failed to update group", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update group",
-    };
+    return { error: error instanceof Error ? error.message : "Group update failed" };
   }
 }
 
-export async function deleteGroupAction(groupId: string): Promise<ActionResult> {
+export async function deleteGroupAction(id: string) {
   try {
-    await serverApiRequest<void>(`/groups/${groupId}`, {
+    await serverFetch(`/groups/${id}`, {
       method: "DELETE",
     });
 
     revalidatePath("/groups");
-    redirect("/groups");
+
+    return {};
   } catch (error) {
-    console.error("Failed to delete group", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete group",
-    };
+    return { error: error instanceof Error ? error.message : "Group deletion failed" };
   }
 }
 
-export async function addUserToGroupAction(groupId: string, userId: string): Promise<ActionResult> {
+export async function addUserToGroupAction(groupId: string, formData: FormData) {
   try {
-    await serverApiRequest<void>(`/groups/${groupId}/users`, {
+    const rawData = {
+      userId: formData.get("userId") as string,
+      role: formData.get("role") as string || "user",
+    }
+    const data: AddUserToGroupRequest = validateAddUserToGroupRequest(rawData);
+
+    const response = await serverFetch<Group>(`/groups/${groupId}/users`, {
       method: "POST",
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify(data),
     });
 
+    revalidatePath("/groups");
     revalidatePath(`/groups/${groupId}`);
-    revalidatePath(`/users/${userId}`);
+    revalidatePath("/users");
+    revalidatePath(`/users/${data.userId}`);
 
-    return { success: true };
+    return response;
   } catch (error) {
-    console.error("Failed to add user to group", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to add user to group",
-    };
+    return { error: error instanceof Error ? error.message : "Adding user to group failed" };
   }
 }
 
-export async function removeUserFromGroupAction(groupId: string, userId: string): Promise<ActionResult> {
+export async function removeUserFromGroupAction(groupId: string, formData: FormData) {
   try {
-    await serverApiRequest<void>(`/groups/${groupId}/users/${userId}`, {
+    const rawData = {
+      userId: formData.get("userId") as string,
+    }
+    const data: RemoveUserFromGroupRequest = validateRemoveUserFromGroupRequest(rawData);
+
+    const response = await serverFetch<Group>(`/groups/${groupId}/users`, {
       method: "DELETE",
+      body: JSON.stringify(data),
     });
 
+    revalidatePath("/groups");
     revalidatePath(`/groups/${groupId}`);
-    revalidatePath(`/users/${userId}`);
+    revalidatePath("/users");
+    revalidatePath(`/users/${data.userId}`);
 
-    return { success: true };
+    return response;
   } catch (error) {
-    console.error("Failed to remove user from group", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to remove user from group",
-    };
+    return { error: error instanceof Error ? error.message : "Removing user from group failed" };
   }
 }
 
-export async function assignTaskToGroupAction(groupId: string, taskId: string): Promise<ActionResult> {
+export async function assignTaskToGroupAction(groupId: string, formData: FormData) {
   try {
-    await serverApiRequest<void>(`/groups/${groupId}/tasks`, {
+    const rawData = {
+      taskId: formData.get("taskId") as string,
+      assignedBy: formData.get("assignedBy") as string,
+    }
+    const data: AssignTaskToGroupRequest = validateAssignTaskToGroupRequest(rawData);
+
+    const response = await serverFetch<Group>(`/groups/${groupId}/tasks`, {
       method: "POST",
-      body: JSON.stringify({ taskId }),
+      body: JSON.stringify(data),
     });
 
+    revalidatePath("/groups");
     revalidatePath(`/groups/${groupId}`);
-    revalidatePath(`/tasks/${taskId}`);
+    revalidatePath("/tasks");
+    revalidatePath(`/tasks/${data.taskId}`);
 
-    return { success: true };
+    return response;
   } catch (error) {
-    console.error("Failed to assign task to group", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to assign task to group",
-    };
+    return { error: error instanceof Error ? error.message : "Assigning task to group failed" };
   }
 }
 
-export async function removeTaskFromGroupAction(groupId: string, taskId: string): Promise<ActionResult> {
+export async function removeTaskFromGroupAction(groupId: string, formData: FormData) {
   try {
-    await serverApiRequest<void>(`/groups/${groupId}/tasks/${taskId}`, {
+    const rawData = {
+      taskId: formData.get("taskId") as string,
+    }
+    const data: RemoveTaskFromGroupRequest = validateRemoveTaskFromGroupRequest(rawData);
+
+    const response = await serverFetch<Group>(`/groups/${groupId}/tasks`, {
       method: "DELETE",
+      body: JSON.stringify(data),
     });
 
+    revalidatePath("/groups");
     revalidatePath(`/groups/${groupId}`);
-    revalidatePath(`/tasks/${taskId}`);
+    revalidatePath("/tasks");
+    revalidatePath(`/tasks/${data.taskId}`);
 
-    return { success: true };
+    return response;
   } catch (error) {
-    console.error("Failed to unassign task from group", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to unassign task from group",
-    };
+    return { error: error instanceof Error ? error.message : "Removing task from group failed" };
   }
 }

@@ -1,103 +1,103 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { serverApiRequest } from "@/lib/auth/serverAuth";
-import type { ActionResult } from "@/lib/data/interfaces";
-import { validateTask, validateCreateTaskRequest, validateUpdateTaskRequest } from "@task-manager/common";
-import type { Task, CreateTaskRequest, UpdateTaskRequest } from "@task-manager/common";
+import type { Task, CreateTaskRequest, UpdateTaskRequest, UpdateTaskDoneStatusRequest } from "@task-manager/common";
+import { validateCreateTaskRequest, validateUpdateTaskRequest, validateUpdateTaskDoneStatusRequest } from "@task-manager/common";
+import { serverFetch } from "@/lib/utils/serverFetch";
 
-export async function createTaskAction(formData: FormData): Promise<ActionResult<Task>> {
+export async function getTasksAction(): Promise<Task[]> {
+  try {
+    return await serverFetch<Task[]>("/tasks");
+  } catch (error) {
+    console.error("Failed to fetch tasks:", error);
+    return [];
+  }
+}
+
+export async function getTaskAction(id: string): Promise<Task | null> {
+  try {
+    return await serverFetch<Task>(`/tasks/${id}`);
+  } catch (error) {
+    console.error(`Failed to fetch task ${id}:`, error);
+    return null;
+  }
+}
+
+export async function createTaskAction(formData: FormData) {
   try {
     const rawData = {
       title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      finishBy: formData.get("finishBy") as string || undefined,
-      userId: formData.get("userId") as string,
-    };
+      description: formData.get("description") as string || "",
+      dueDate: formData.get("dueDate") ? new Date(formData.get("dueDate") as string).toISOString() : null,
+      priority: formData.get("priority") as string || "medium",
+    }
+    const data: CreateTaskRequest = validateCreateTaskRequest(rawData);
 
-    const validated: CreateTaskRequest = validateCreateTaskRequest(rawData);
-
-    const res = await serverApiRequest<Task>("/tasks", {
+    const response = await serverFetch<Task>("/tasks", {
       method: "POST",
-      body: JSON.stringify(validated),
+      body: JSON.stringify(data),
     });
 
     revalidatePath("/tasks");
-    revalidatePath("/dashboard");
-
-    return { success: true, data: validateTask(res) };
+    revalidatePath("/dashboard")
+    return response;
   } catch (error) {
-    console.error("Failed to create task", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to create task",
-    };
+    return { error: error instanceof Error ? error.message : "Task creation failed" };
   }
 }
 
-export async function updateTaskAction(formData: FormData, taskId: string): Promise<ActionResult<Task>> {
+export async function updateTaskAction(id: string, formData: FormData) {
   try {
     const rawData = {
       title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      finishBy: formData.get("finishBy") as string || undefined,
-    };
+      description: formData.get("description") as string || "",
+      finishBy: formData.get("finishBy") ? new Date(formData.get("finishBy") as string) : null,
+    }
+    const data: UpdateTaskRequest = validateUpdateTaskRequest(rawData);
 
-    const validated: UpdateTaskRequest = validateUpdateTaskRequest(rawData);
-
-    const res = await serverApiRequest<Task>(`/tasks/${taskId}`, {
+    const response = await serverFetch<Task>(`/tasks/${id}`, {
       method: "PUT",
-      body: JSON.stringify(validated),
+      body: JSON.stringify(data),
     });
 
     revalidatePath("/tasks");
-    revalidatePath(`/tasks/${taskId}`);
     revalidatePath("/dashboard");
-
-    return { success: true, data: validateTask(res) };
+    revalidatePath(`/tasks/${id}`);
+    return response;
   } catch (error) {
-    console.error("Failed to update task", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update task",
-    };
+    return { error: error instanceof Error ? error.message : "Task update failed" };
   }
 }
 
-export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
+export async function updateTaskDoneStatusAction(id: string, done: boolean) {
   try {
-    await serverApiRequest(`/tasks/${taskId}`, {
+    const rawData = { done };
+    const data: UpdateTaskDoneStatusRequest = validateUpdateTaskDoneStatusRequest(rawData);
+
+    const response = await serverFetch<Task>(`/tasks/${id}/done`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+
+    revalidatePath("/tasks");
+    revalidatePath("/dashboard");
+    revalidatePath(`/tasks/${id}`);
+    return response;
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Updating task status failed" };
+  }
+}
+
+export async function deleteTaskAction(id: string) {
+  try {
+    await serverFetch<void>(`/tasks/${id}`, {
       method: "DELETE",
     });
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
-    redirect("/tasks");
+    return true;
   } catch (error) {
-    console.error("Failed to delete task", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete task",
-    };
-  }
-}
-
-export async function toggleTaskCompletionAction(taskId: string): Promise<ActionResult<Task>> {
-  try {
-    const res = await serverApiRequest<Task>(`/tasks/${taskId}/done`, {
-      method: "PUT",
-    });
-
-    revalidatePath("/tasks");
-    revalidatePath(`/tasks/${taskId}`);
-    revalidatePath("/dashboard");
-
-    return { success: true, data: validateTask(res) };
-  } catch (error) {
-    console.error("Failed to toggle task completion", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to toggle task completion",
-    };
+    console.error(`Failed to delete task ${id}:`, error);
+    return false;
   }
 }

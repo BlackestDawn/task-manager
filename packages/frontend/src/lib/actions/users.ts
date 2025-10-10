@@ -1,124 +1,140 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { serverApiRequest } from "@/lib/auth/serverAuth";
-import type { ActionResult } from "@/lib/data/interfaces";
-import { validateUser, validateCreateUserRequest, validateUpdateUserRequest } from "@task-manager/common";
-import type { User, CreateUserRequest, UpdateUserRequest } from "@task-manager/common";
+import type { User, CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, UpdateUserDisabledRequest, Task, Group } from "@task-manager/common";
+import { validateCreateUserRequest, validateUpdateUserRequest, validateUpdatePasswordRequest, validateUpdateUserDisabledRequest } from "@task-manager/common";
+import { serverFetch } from "@/lib/utils/serverFetch";
 
-export async function createUserAction(formData: FormData): Promise<ActionResult<User>> {
+export async function getUsersAction(): Promise<User[]> {
+  try {
+    return await serverFetch<User[]>("/users");
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+    return [];
+  }
+}
+
+export async function getUserAction(id: string): Promise<User | null> {
+  try {
+    return await serverFetch<User>(`/users/${id}`);
+  } catch (error) {
+    console.error(`Failed to fetch user ${id}:`, error);
+    return null;
+  }
+}
+
+export async function getUserTasksAction(id: string): Promise<Task[]> {
+  try {
+    return await serverFetch<Task[]>(`/users/${id}/tasks`);
+  } catch (error) {
+    console.error(`Failed to fetch tasks for user ${id}:`, error);
+    return [];
+  }
+}
+
+export async function getUserGroupsAction(id: string): Promise<Group[]> {
+  try {
+    return await serverFetch<Group[]>(`/users/${id}/groups`);
+  } catch (error) {
+    console.error(`Failed to fetch groups for user ${id}:`, error);
+    return [];
+  }
+}
+
+export async function createUserAction(formData: FormData) {
   try {
     const rawData = {
-      username: formData.get("username") as string,
+      login: formData.get("login") as string,
+      name: formData.get("name") as string,
       email: formData.get("email") as string,
       password: formData.get("password") as string,
-      role: formData.get("role") as string || undefined,
-    };
+      accessLevel: formData.get("accessLevel") as string || "user",
+    }
+    const data: CreateUserRequest = validateCreateUserRequest(rawData);
 
-    const validated: CreateUserRequest = validateCreateUserRequest(rawData);
-
-    const res = await serverApiRequest<User>("/users", {
+    const response = await serverFetch<User>("/users", {
       method: "POST",
-      body: JSON.stringify(validated),
+      body: JSON.stringify(data),
     });
 
     revalidatePath("/users");
 
-    return { success: true, data: validateUser(res) };
+    return { user: response };
   } catch (error) {
-    console.error("Failed to create user", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to create user",
-    };
+    return { error: error instanceof Error ? error.message : "User creation failed" };
   }
 }
 
-export async function updateUserAction(formData: FormData, userId: string): Promise<ActionResult<User>> {
+export async function updateUserAction(id: string, formData: FormData) {
   try {
     const rawData = {
-      username: formData.get("username") as string,
-      email: formData.get("email") as string,
-      role: formData.get("role") as string || undefined,
-    };
+      login: formData.get("login") as string,
+      name: formData.get("name") as string,
+      email: formData.get("email") as string || null,
+      accessLevel: formData.get("accessLevel") as string || "user",
+    }
+    const data: UpdateUserRequest = validateUpdateUserRequest(rawData);
 
-    const validated: UpdateUserRequest = validateUpdateUserRequest(rawData);
-
-    const res = await serverApiRequest<User>(`/users/${userId}`, {
+    const response = await serverFetch<User>(`/users/${id}`, {
       method: "PUT",
-      body: JSON.stringify(validated),
+      body: JSON.stringify(data),
     });
 
     revalidatePath("/users");
-    revalidatePath(`/users/${userId}`);
+    revalidatePath(`/users/${id}`);
 
-    return { success: true, data: validateUser(res) };
+    return { user: response };
   } catch (error) {
-    console.error("Failed to update user", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update user",
-    };
+    return { error: error instanceof Error ? error.message : "User update failed" };
   }
 }
 
-export async function deleteUserAction(userId: string): Promise<ActionResult> {
+export async function updateUserPasswordAction(id: string, formData: FormData) {
   try {
-    await serverApiRequest(`/users/${userId}`, {
+    const rawData = {
+      password: formData.get("password") as string,
+    }
+    const data: UpdatePasswordRequest = validateUpdatePasswordRequest(rawData);
+
+    await serverFetch(`/users/${id}/password`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+
+    return { success: true };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Password update failed" };
+  }
+}
+
+export async function updateUserDisabledAction(id: string, disabled: boolean) {
+  try {
+    const rawData = { disabled };
+    const data: UpdateUserDisabledRequest = validateUpdateUserDisabledRequest(rawData);
+
+    const response = await serverFetch<User>(`/users/${id}/disabled`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+
+    revalidatePath("/users");
+    revalidatePath(`/users/${id}`);
+
+    return { user: response };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Failed to update user status" };
+  }
+}
+
+export async function deleteUserAction(id: string) {
+  try {
+    await serverFetch(`/users/${id}`, {
       method: "DELETE",
     });
 
     revalidatePath("/users");
-    redirect("/users");
+
+    return { success: true };
   } catch (error) {
-    console.error("Failed to delete user", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete user",
-    };
-  }
-}
-
-export async function updateUserPasswordAction(formData: FormData, userId: string): Promise<ActionResult<User>> {
-  try {
-    const password = formData.get("password") as string;
-    if (!password || password.length < 8) {
-      return { success: false, error: "Password must be at least 8 characters long" };
-    }
-
-    const res = await serverApiRequest<User>(`/users/${userId}/password`, {
-      method: "PUT",
-      body: JSON.stringify({ password }),
-    });
-
-    revalidatePath(`/users/${userId}`);
-
-    return { success: true, data: validateUser(res) };
-  } catch (error) {
-    console.error("Failed to update user password", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update user password",
-    };
-  }
-}
-
-export async function toggleUserDisabledAction(userId: string, disabled: boolean): Promise<ActionResult<User>> {
-  try {
-    const res = await serverApiRequest<User>(`/users/${userId}/disable`, {
-      method: "PUT",
-      body: JSON.stringify({ disabled }),
-    });
-
-    revalidatePath("/users");
-    revalidatePath(`/users/${userId}`);
-
-    return { success: true, data: validateUser(res) };
-  } catch (error) {
-    console.error("Failed to toggle user disabled status", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to toggle user disabled status",
-    };
+    return { error: error instanceof Error ? error.message : "User deletion failed" };
   }
 }
