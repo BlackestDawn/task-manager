@@ -3,8 +3,11 @@ import { validateID } from "../middleware/helpers";
 import { handlerCreateGroup, handlerGetAllGroups, handlerGetGroupsForSelf } from "./general";
 import { handlerUpdateGroup, handlerDeleteGroup, handlerGetGroupById } from "./direct";
 import { handlerGetGroupMembers, handlerGetGroupTasks, handlerAddUserToGroup, handlerRemoveUserFromGroup, handlerAssignTaskToGroup, handlerRemoveTaskFromGroup } from "./subs";
+import { authMiddleware } from "../middleware/config";
 
 export const groupRoutes = new Hono();
+
+groupRoutes.use("/api/groups/*", authMiddleware);
 
 groupRoutes.get("/api/groups", handlerGetGroupsForSelf);
 groupRoutes.post("/api/groups", handlerCreateGroup);

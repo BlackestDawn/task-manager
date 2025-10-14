@@ -3,13 +3,17 @@ import { type ApiConfig } from "../../config";
 import type { Task, CreateTaskRequest, DoByUUIDRequest, User } from "@task-manager/common";
 import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
 import { validateCreateTaskRequest, validateDoByUUIDRequest, validateTask, validateTaskArray } from "@task-manager/common";
-import { createTask, getTasksByUserId } from "../../db/queries/tasks";
+import { createTask, getAllTasksForUser, getAllTasks } from "../../db/queries/tasks";
 
 export async function handlerGetTasksByUserId(c: Context) {
   const cfg = c.get("config") as ApiConfig;
   const user = c.get("user") as User;
-  const body = await c.req.json() as DoByUUIDRequest;
-  const tasks = await getTasksByUserId(cfg.db, validateDoByUUIDRequest(body.id || user.id));
+  let tasks;
+  if (user.accessLevel === 'admin') {
+    tasks = await getAllTasks(cfg.db);
+  } else {
+    tasks = await getAllTasksForUser(cfg.db, validateDoByUUIDRequest(user.id));
+  }
   // const result = tasks.filter(t => canUserAccessTask(user.capabilities, t));
   const result = tasks;
   return c.json(validateTaskArray(result) as Task[]);

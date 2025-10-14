@@ -1,22 +1,22 @@
 'use client';
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { createContext, useContext, type ReactNode } from "react";
 import type { User, AppAbility } from "@task-manager/common";
-import type { AuthState } from "@/lib/data/interfaces/auth";
+import { defineAbilityFor } from "@task-manager/common";
 
 interface AuthContextType {
-  user: User | null | undefined;
+  user: User | null;
   ability: AppAbility;
   isAuthenticated: boolean;
-  isLoading: boolean;
-  error: unknown;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 declare global {
   interface Window {
-    __INITIAL_AUTH_STATE__?: AuthState;
+    __INITIAL_AUTH_STATE__?: {
+      user: User | null;
+      isAuthenticated: boolean;
+    };
   }
 }
 
@@ -25,19 +25,12 @@ interface ClientAuthProviderPops {
 }
 
 export function ClientAuthProvider({ children }: ClientAuthProviderPops) {
-  const [initialAuthState, setInitialAuthState] = useState<AuthState | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.__INITIAL_AUTH_STATE__) {
-      setInitialAuthState(window.__INITIAL_AUTH_STATE__);
-      delete window.__INITIAL_AUTH_STATE__;
-    }
-  }, []);
-
-  const auth = useAuth(initialAuthState);
+  const user = typeof window !== "undefined" ? window.__INITIAL_AUTH_STATE__?.user || null : null;
+  const isAuthenticated = typeof window !== "undefined" ? window.__INITIAL_AUTH_STATE__?.isAuthenticated || false : false;
+  const ability = defineAbilityFor(user);
 
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={{ user, ability, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

@@ -15,10 +15,10 @@ export async function handlerUpdateGroup(c: Context) {
     throw new NotFoundError("Group not found");
   }
 
-  const updateParams: UpdateGroupRequest = validateUpdateGroupRequest({
-    ...jsonBody,
+  const updateParams = {
     id: idParam.id,
-  });
+    data: validateUpdateGroupRequest(jsonBody) as UpdateGroupRequest,
+  };
 
   const result = await updateGroup(cfg.db, updateParams);
   return c.json(validateGroup(result) as Group);

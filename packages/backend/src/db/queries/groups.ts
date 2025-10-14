@@ -14,7 +14,7 @@ export async function getGroupById(db: DBConn, params: DoByUUIDRequest) {
   };
 }
 
-export async function getGroups(db: DBConn, params?: DoByUUIDRequest)  {
+export async function getGroups(db: DBConn, params?: DoByUUIDRequest) {
   let query = db.select({
     id: groups.id,
     name: groups.name,
@@ -25,18 +25,18 @@ export async function getGroups(db: DBConn, params?: DoByUUIDRequest)  {
     taskCount: sql<number>`(select count(*) from ${taskGroups} where ${taskGroups.groupId} = ${groups.id})`.as('taskCount'),
   }).from(groups);
 
-/*   if (params?.id) {
-    query = query.where(
-      exists(
-        db.select({ one: sql`1` })
-          .from(userGroups)
-          .where(and(
-            eq(userGroups.userId, params.id),
-            eq(userGroups.groupId, groups.id)
-          ))
-      )
-    );
-  } */
+  /*   if (params?.id) {
+      query = query.where(
+        exists(
+          db.select({ one: sql`1` })
+            .from(userGroups)
+            .where(and(
+              eq(userGroups.userId, params.id),
+              eq(userGroups.groupId, groups.id)
+            ))
+        )
+      );
+    } */
 
   const result = await query;
   return result.map(group => ({
@@ -55,8 +55,8 @@ export async function createGroup(db: DBConn, params: CreateGroupRequest) {
   };
 }
 
-export async function updateGroup(db: DBConn, params: UpdateGroupRequest) {
-  const [result] = await db.update(groups).set(params).where(eq(groups.id, params.id)).returning();
+export async function updateGroup(db: DBConn, params: { id: string, data: UpdateGroupRequest}) {
+  const [result] = await db.update(groups).set(params.data).where(eq(groups.id, params.id)).returning();
   return {
     __typename: 'Group',
     ...result,
@@ -67,23 +67,26 @@ export async function removeGroup(db: DBConn, params: DoByUUIDRequest) {
   await db.delete(groups).where(eq(groups.id, params.id)).returning();
 }
 
-export async function addUserToGroup(db: DBConn, params: AddUserToGroupRequest) {
+export async function addUserToGroup(db: DBConn, params: { id: string, data: AddUserToGroupRequest }) {
   const existing = await db.select().from(userGroups).where(and(
-    eq(userGroups.userId, params.userId),
-    eq(userGroups.groupId, params.groupId),
+    eq(userGroups.userId, params.data.userId),
+    eq(userGroups.groupId, params.id),
   ));
   if (existing.length > 0) throw new AlreadyExistsConflictError("User already in group");
-  const [result] = await db.insert(userGroups).values(params).returning();
+  const [result] = await db.insert(userGroups).values({
+    groupId: params.id,
+    ...params.data,
+  }).returning();
   return {
     __typename: 'User',
     ...result,
   };
 }
 
-export async function removeUserFromGroup(db: DBConn, params: RemoveUserFromGroupRequest) {
+export async function removeUserFromGroup(db: DBConn, params: { id: string, data:RemoveUserFromGroupRequest}) {
   await db.delete(userGroups).where(and(
-    eq(userGroups.userId, params.userId),
-    eq(userGroups.groupId, params.groupId),
+    eq(userGroups.userId, params.data.userId),
+    eq(userGroups.groupId, params.id),
   ));
 }
 
@@ -96,35 +99,38 @@ export async function getGroupMembers(db: DBConn, params: DoByUUIDRequest) {
       }).from(userGroups)
         .where(eq(userGroups.groupId, params.id))
     ));
-    const result = await Promise.all(
-      userRows.map(async (user) => {
-        const groups = await getGroupRolesForUser(db, params);
+  const result = await Promise.all(
+    userRows.map(async (user) => {
+      const groups = await getGroupRolesForUser(db, params);
 
-        return {
-          __typename: 'User',
-          ...user,
-          groups: groups,
-        };
-      })
-    );
+      return {
+        __typename: 'User',
+        ...user,
+        groups: groups,
+      };
+    })
+  );
 
   return result;
 }
 
-export async function assignTaskToGroup(db: DBConn, params: AssignTaskToGroupRequest) {
+export async function assignTaskToGroup(db: DBConn, params: { id: string, data: AssignTaskToGroupRequest}) {
   const existing = await db.select().from(taskGroups).where(and(
-    eq(taskGroups.taskId, params.taskId),
-    eq(taskGroups.groupId, params.groupId),
+    eq(taskGroups.taskId, params.data.taskId),
+    eq(taskGroups.groupId, params.id),
   ));
   if (existing.length > 0) throw new AlreadyExistsConflictError("Task already in group");
-  const [result] = await db.insert(taskGroups).values(params).returning();
+  const [result] = await db.insert(taskGroups).values({
+    groupId: params.id,
+    ...params.data,
+  }).returning();
   return result;
 }
 
-export async function removeTaskFromGroup(db: DBConn, params: RemoveTaskFromGroupRequest) {
+export async function removeTaskFromGroup(db: DBConn, params: { id: string, data: RemoveTaskFromGroupRequest}) {
   await db.delete(taskGroups).where(and(
-    eq(taskGroups.taskId, params.taskId),
-    eq(taskGroups.groupId, params.groupId),
+    eq(taskGroups.taskId, params.data.taskId),
+    eq(taskGroups.groupId, params.id),
   ));
 }
 
@@ -137,17 +143,17 @@ export async function getGroupTasks(db: DBConn, params: DoByUUIDRequest) {
       }).from(taskGroups)
         .where(eq(taskGroups.groupId, params.id))
     ));
-    const result = await Promise.all(
-      taskRows.map(async (task) => {
-        const groups = await getGroupsForTask(db, params);
+  const result = await Promise.all(
+    taskRows.map(async (task) => {
+      const groups = await getGroupsForTask(db, params);
 
-        return {
-          __typename: 'Task',
-          ...task,
-          groups: groups,
-        };
-      })
-    );
+      return {
+        __typename: 'Task',
+        ...task,
+        groups: groups,
+      };
+    })
+  );
 
   return result;
 }

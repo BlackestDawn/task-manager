@@ -48,3 +48,24 @@ export function sortTasksByFinishDate(a: Task, b: Task): number {
   const dateB = new Date(b.finishBy);
   return dateA.getTime() - dateB.getTime();
 }
+
+export function formatDate(date: Date) {
+  const taskDate = new Date(date);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (taskDate.toDateString() === today.toDateString()) {
+    return "Today";
+  }
+  if (taskDate.toDateString() === tomorrow.toDateString()) {
+    return "Tomorrow";
+  }
+
+  const diffTime = taskDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 0 && diffDays <= 7) return `In ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+
+  return taskDate.toLocaleDateString();
+}
