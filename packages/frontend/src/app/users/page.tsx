@@ -7,6 +7,8 @@ import { User as UserIcon, Mail, Shield, Plus } from "lucide-react";
 import type { User } from "@task-manager/common";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/general/loadingSpinner";
+import { Can } from "@/components/auth/can";
+import CreateUserSection from "@/components/users/createUserSection";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Users',
@@ -101,13 +103,9 @@ function UsersList({ users }: UsersListProps) {
               Manage users and permissions
             </p>
           </div>
-          <Link
-            href="/users/new"
-            className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New User
-          </Link>
+          <Can I="create" a="User">
+            <CreateUserSection />
+          </Can>
         </div>
       </div>
 
