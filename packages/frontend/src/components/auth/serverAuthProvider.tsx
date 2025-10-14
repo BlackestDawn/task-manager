@@ -1,6 +1,5 @@
 import { type ReactNode } from "react";
-import { getServerAuthState } from "@/lib/auth/serverAuth";
-import { defineAbilityFor } from "@task-manager/common";
+import { checkAuthAction } from "@/lib/actions/auth";
 import type { User } from "@task-manager/common";
 
 interface ServerAuthProviderProps {
@@ -14,11 +13,9 @@ export async function ServerAuthProvider({
   initialUser = null,
   initialIsAuthenticated = false,
 }: ServerAuthProviderProps) {
-  const authState = initialUser !== undefined ?
-    { user: initialUser, isAuthenticated: initialIsAuthenticated, } :
-    await getServerAuthState();
-
-  const ability = defineAbilityFor(authState.user);
+  const authState = initialUser !== undefined
+    ? { user: initialUser, isAuthenticated: initialIsAuthenticated, }
+    : await checkAuthAction();
 
   const authScript = `
     window.__INITIAL_AUTH_STATE__ = ${JSON.stringify({
