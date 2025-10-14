@@ -25,7 +25,7 @@ export type AppAbility = PureAbility<[Actions, Subjects]>;
 export function defineAbilityFor(user: UserContext | null): AppAbility {
   const { can: allow, cannot: forbid, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
-  if (!user) return build();
+  if (!user) throw new Error("Can't define ability for null user");
 
   const typeDetection = (object: any) => {
     return object.__typename || object.type;

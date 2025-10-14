@@ -18,7 +18,7 @@ export function isTaskOverdue(task: Task): boolean {
   return task.finishBy < today && !task.completed;
 }
 
-export function isThisWeek(date: string | Date): boolean {
+export function isThisWeek(date: string | Date | null): boolean {
   if (!date) return false;
   if (typeof date === 'string') date = new Date(date);
   const today = new Date();
@@ -27,7 +27,7 @@ export function isThisWeek(date: string | Date): boolean {
   return date >= firstOfWeek && date <= lastOfWeek;
 }
 
-export function isThisMonth(date: string | Date): boolean {
+export function isThisMonth(date: string | Date | null): boolean {
   if (!date) return false;
   if (typeof date === 'string') date = new Date(date);
   const today = new Date();

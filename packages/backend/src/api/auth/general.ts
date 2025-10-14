@@ -92,13 +92,9 @@ export async function handlerGetSelf(c: Context) {
 export async function handlerUpdateSelf(c: Context) {
   const cfg = c.get("config") as ApiConfig;
   const user = c.get("user") as User;
-  const body = await c.req.json();
-  const updateData: UpdateUserRequest = validateUpdateUserRequest({
-    id: user.id,
-    ...body
-  });
+  const body = await c.req.json() as UpdateUserRequest;
 
-  const updatedUser = await updateUser(cfg.db, updateData);
+  const updatedUser = await updateUser(cfg.db, { id: user.id, data: validateUpdateUserRequest(body) });
 
   if (!updatedUser) throw new BadRequestError("Failed to update user");
 

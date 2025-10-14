@@ -4,7 +4,6 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import type { Group, CreateGroupRequest, User } from "@task-manager/common";
 import { validateGroup, validateGroupArray, validateCreateGroupRequest, validateDoByUUIDRequest } from "@task-manager/common";
 import { createGroup, getGroups } from "../../db/queries/groups";
-import { getGroupsForUser } from "../../db/queries/users";
 
 export async function handlerCreateGroup(c: Context) {
   const cfg = c.get("config") as ApiConfig;
@@ -19,17 +18,10 @@ export async function handlerCreateGroup(c: Context) {
   return c.json(validateGroup(result) as Group, 201);
 }
 
-export async function handlerGetAllGroups(c: Context) {
+export async function handlerGetGroups(c: Context) {
   const cfg = c.get("config") as ApiConfig;
   const groups = await getGroups(cfg.db);
   // const result = groups.filter(g => canUserAccessGroup(user.capabilities, g));
   const result = groups;
   return c.json(validateGroupArray(result) as Group[]);
-}
-
-export async function handlerGetGroupsForSelf(c: Context) {
-  const cfg = c.get("config") as ApiConfig;
-  const user = c.get("user") as User;
-  const groups = await getGroupsForUser(cfg.db, validateDoByUUIDRequest(user.id));
-  return c.json(validateGroupArray(groups) as Group[]);
 }

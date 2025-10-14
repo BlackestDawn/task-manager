@@ -1,38 +1,33 @@
-import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { prefetchUserDetails } from "@/lib/auth/prefetching";
-import UserDetailsPage from "@/components/users/userDetailsPage";
-import ProtectedRoute from "@/components/auth/protectedRoute";
+import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { getUserAction, getUserGroupsAction, getUserTasksAction } from "@/lib/actions/users";
+import { checkAuthAction } from "@/lib/actions/auth";
+import UserDetailsContent from "@/components/users/userDetailsContent";
 import type { Metadata } from "next";
-import type { IDParamProp } from "@/lib/data/interfaces/general";
-import { FIVE_MINUTES } from "@/lib/data/consts";
 
 export const metadata: Metadata = {
-  title: "Task Managers - User Details",
-  description: "View and edit user details",
+  title: 'Task Manager - User Details',
+  description: 'View and manage user details',
+};
+
+interface UserPageProps {
+  params: Promise<{ id: string }>;
 }
 
-export default async function UserPage({ params }: IDParamProp) {
+export default async function UserPage({ params }: UserPageProps) {
   const { id } = await params;
+  if (!id) notFound();
 
-  if (!id) {
-    return <div>Invalid user ID</div>;
-  }
+  const { isAuthenticated } = await checkAuthAction();
+  if (!isAuthenticated) redirect(`/login?redirect=/users/${id}`);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: FIVE_MINUTES,
-      },
-    },
-  });
+  const [user, tasks, groups] = await Promise.all([
+    getUserAction(id),
+    getUserTasksAction(id),
+    getUserGroupsAction(id),
+  ]);
 
-  await prefetchUserDetails(queryClient, id);
+  if (!user) notFound();
 
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProtectedRoute>
-        <UserDetailsPage userId={id} />
-      </ProtectedRoute>
-    </HydrationBoundary>
-  );
+  return <UserDetailsContent user={user} tasks={tasks} groups={groups} />;
 }

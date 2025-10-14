@@ -5,6 +5,6 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
-export interface ServerAuthState extends AuthState {
-  ability: AppAbility | null;
+export interface AuthContextType extends AuthState {
+  ability: AppAbility;
 }

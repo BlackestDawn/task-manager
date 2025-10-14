@@ -4,6 +4,9 @@ import { Roboto_Flex, Roboto_Mono, Roboto_Serif } from "next/font/google";
 import './globals.css';
 import SiteHeader from '@/components/general/siteHeader';
 import SiteFooter from '@/components/general/siteFooter';
+import { ServerAuthProvider } from '@/components/auth/serverAuthProvider';
+import Providers from './providers';
+import { checkAuthAction } from '@/lib/actions/auth';
 
 const robotoFlex = Roboto_Flex({
   variable: '--font-roboto-flex',
@@ -25,25 +28,31 @@ export const metadata: Metadata = {
   description: 'A simple task management application',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { user, isAuthenticated } = await checkAuthAction();
+
   return (
     <html lang="en">
       <body className={`${robotoMono.variable} ${robotoSerif.variable} ${robotoFlex.variable} antialiased`}>
-        <div className="text-center font-sans">
-          <header className="pt-5 bg-gray-300 dark:bg-gray-800">
-            <SiteHeader />
-          </header>
-          <main className="pt-5 border-y-2 border-gray-900 dark:border-gray-200">
-            {children}
-          </main>
-          <footer className="pb-5 bg-gray-300 dark:bg-gray-800">
-            <SiteFooter />
-          </footer>
-        </div>
+        <ServerAuthProvider initialUser={user} initialIsAuthenticated={isAuthenticated}>
+          <Providers>
+            <div className="text-center font-sans">
+              <header className="pt-5 bg-gray-300 dark:bg-gray-800">
+                <SiteHeader />
+              </header>
+              <main className="pt-5 border-y-2 border-gray-900 dark:border-gray-200">
+                {children}
+              </main>
+              <footer className="pb-5 bg-gray-300 dark:bg-gray-800">
+                <SiteFooter />
+              </footer>
+            </div>
+          </Providers>
+        </ServerAuthProvider>
       </body>
     </html>
   )

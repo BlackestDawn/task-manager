@@ -1,13 +1,8 @@
 'use client';
 import { createContext, useContext, type ReactNode } from "react";
-import type { User, AppAbility } from "@task-manager/common";
+import type { User } from "@task-manager/common";
 import { defineAbilityFor } from "@task-manager/common";
-
-interface AuthContextType {
-  user: User | null;
-  ability: AppAbility;
-  isAuthenticated: boolean;
-}
+import type { AuthContextType } from "@/lib/data/interfaces/auth";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

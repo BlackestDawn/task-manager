@@ -14,7 +14,7 @@ import { cfg } from "./config"
 import { runMigrations, closeConnection } from "./db"
 import { errorHandlingMiddleware } from "./api/middleware/errors"
 import { corsOptions } from "./api/middleware/cors";
-import { withConfig } from "./api/middleware/config"
+import { addConfig } from "./api/middleware/config"
 
 import { authRoutes } from "./api/auth/routes"
 import { userRoutes } from "./api/users/routes"
@@ -33,7 +33,7 @@ app.use("*", cors(corsOptions));
 app.use("*", prettyJSON());
 app.use("*", etag());
 app.use("*", poweredBy());
-app.use("*", withConfig(cfg));
+app.use("*", addConfig);
 
 app.onError(errorHandlingMiddleware);
 
