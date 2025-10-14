@@ -7,7 +7,6 @@ import { User as UserIcon, Mail, Shield, Plus } from "lucide-react";
 import type { User } from "@task-manager/common";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/general/loadingSpinner";
-import { Can } from "@/components/auth/can";
 import CreateUserSection from "@/components/users/createUserSection";
 
 export const metadata: Metadata = {
@@ -103,9 +102,7 @@ function UsersList({ users }: UsersListProps) {
               Manage users and permissions
             </p>
           </div>
-          <Can I="create" a="User">
-            <CreateUserSection />
-          </Can>
+          <CreateUserSection />
         </div>
       </div>
 
