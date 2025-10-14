@@ -3,14 +3,13 @@ import Link from "next/link"
 import data from "@/lib/data/menuOptions.json";
 import { usePathname, useRouter } from "next/navigation";
 import type { HeaderNavbarProps, MenuItem } from "@/lib/data/interfaces/navigation";
-import { useAuthContext } from "../auth/clientAuthProvider";
-import { useLogout } from "@/lib/api/auth/queries";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
+import { logoutAction } from "@/lib/actions/auth";
 
 export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, user } = useAuthContext();
-  const logoutMutation = useLogout();
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -25,7 +24,7 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
 
   const handleLogout = async () => {
     try {
-      await logoutMutation.mutateAsync();
+      await logoutAction();
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
@@ -34,9 +33,9 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
     }
   };
 
-  const menuItems: MenuItem[] = [ ...data.menu, isAuthenticated
-    ? {href: "#", label: "Logout", action: "logout"}
-    : {href: "/login", label: "Login"} ];
+  const menuItems: MenuItem[] = [...data.menu, isAuthenticated
+    ? { href: "#", label: "Logout", action: "logout" }
+    : { href: "/login", label: "Login" }];
 
   const handleMenuItemClick = (item: MenuItem) => {
     if (item.action === "logout") {
@@ -57,12 +56,11 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
             {link.action === "logout" ? (
               <button
                 onClick={handleLogout}
-                disabled={logoutMutation.isPending}
                 className={`gap-2 hover:underline hover:underline-offset-4 disabled:opacity-50
                   ${isActive(link.href) ? 'text-white dark:text-gray-900' : ''}
                 `}
               >
-                {logoutMutation.isPending ? 'Logging out...' : link.label}
+                {link.label}
               </button>
             ) : (
               <Link
@@ -80,9 +78,8 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
 
       {/* Mobile */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <ul className="flex flex-col border-t border-gray-200 dark:border-gray-700">
           {menuItems.map((link) => (
@@ -90,14 +87,14 @@ export default function HeaderNavbar({ isMenuOpen, setIsMenuOpen }: HeaderNavbar
               {link.action === "logout" ? (
                 <button
                   onClick={handleLogout}
-                  disabled={logoutMutation.isPending}
+                  // disabled={logoutMutation.isPending}
                   className={`block w-full text-center px-4 py-3 text-lg font-semibold transition-colors duration-200 disabled:opacity-50
                     ${isActive(link.href)
                       ? 'bg-gray-900 text-white dark:bg-gray-200 dark:text-gray-900'
                       : 'hover:bg-gray-300 dark:hover:bg-gray-700'}
                   `}
                 >
-                  {logoutMutation.isPending ? 'Logging out...' : link.label}
+                  {link.label}
                 </button>
               ) : (
                 <Link
