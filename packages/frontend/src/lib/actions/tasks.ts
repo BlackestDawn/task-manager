@@ -1,12 +1,12 @@
 'use server';
 import { revalidatePath } from "next/cache";
 import type { Task, CreateTaskRequest, UpdateTaskRequest, UpdateTaskDoneStatusRequest } from "@task-manager/common";
-import { validateCreateTaskRequest, validateUpdateTaskRequest, validateUpdateTaskDoneStatusRequest } from "@task-manager/common";
-import { serverFetch } from "@/lib/utils/serverFetch";
+import { validateCreateTaskRequest, validateUpdateTaskRequest, validateUpdateTaskDoneStatusRequest} from "@task-manager/common";
+import { serverGet, serverPost, serverPut, serverDelete } from "@/lib/utils/serverFetch";
 
 export async function getTasksAction(): Promise<Task[]> {
   try {
-    return await serverFetch<Task[]>("/tasks");
+    return await serverGet<Task[]>("/tasks");
   } catch (error) {
     console.error("Failed to fetch tasks:", error);
     return [];
@@ -15,89 +15,72 @@ export async function getTasksAction(): Promise<Task[]> {
 
 export async function getTaskAction(id: string): Promise<Task | null> {
   try {
-    return await serverFetch<Task>(`/tasks/${id}`);
+    return await serverGet<Task>(`/tasks/${id}`);
   } catch (error) {
     console.error(`Failed to fetch task ${id}:`, error);
     return null;
   }
 }
 
-export async function createTaskAction(formData: FormData) {
+export async function createTaskAction(data: CreateTaskRequest) {
   try {
-    const rawData = {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string || "",
-      dueDate: formData.get("dueDate") ? new Date(formData.get("dueDate") as string).toISOString() : null,
-      priority: formData.get("priority") as string || "medium",
-    }
-    const data: CreateTaskRequest = validateCreateTaskRequest(rawData);
-
-    const response = await serverFetch<Task>("/tasks", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    const response = await serverPost<Task>("/tasks", validateCreateTaskRequest(data));
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard")
-    return response;
+    return { success: true, task: response };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Task creation failed" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Task creation failed",
+    };
   }
 }
 
-export async function updateTaskAction(id: string, formData: FormData) {
+export async function updateTaskAction(id: string, data: UpdateTaskRequest) {
   try {
-    const rawData = {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string || "",
-      finishBy: formData.get("finishBy") ? new Date(formData.get("finishBy") as string) : null,
-    }
-    const data: UpdateTaskRequest = validateUpdateTaskRequest(rawData);
-
-    const response = await serverFetch<Task>(`/tasks/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+    const response = await serverPut<Task>(`/tasks/${id}`, validateUpdateTaskRequest(data));
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
     revalidatePath(`/tasks/${id}`);
-    return response;
+    return { success: true, task: response };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Task update failed" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Task update failed",
+    };
   }
 }
 
-export async function updateTaskDoneStatusAction(id: string, done: boolean) {
+export async function updateTaskDoneStatusAction(id: string, data: UpdateTaskDoneStatusRequest) {
   try {
-    const rawData = { done };
-    const data: UpdateTaskDoneStatusRequest = validateUpdateTaskDoneStatusRequest(rawData);
-
-    const response = await serverFetch<Task>(`/tasks/${id}/done`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
+    const response = await serverPut<Task>(`/tasks/${id}/done`, validateUpdateTaskDoneStatusRequest(data));
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
     revalidatePath(`/tasks/${id}`);
-    return response;
+    return { success: true, task: response };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "Updating task status failed" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Updating task status failed",
+    };
   }
 }
 
 export async function deleteTaskAction(id: string) {
   try {
-    await serverFetch<void>(`/tasks/${id}`, {
-      method: "DELETE",
-    });
+    await serverDelete<void>(`/tasks/${id}`);
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
-    return true;
+    return { success: true };
   } catch (error) {
     console.error(`Failed to delete task ${id}:`, error);
-    return false;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Task deletion failed",
+    };
   }
 }
