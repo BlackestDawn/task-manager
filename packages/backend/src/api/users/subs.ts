@@ -5,7 +5,7 @@ import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticate
 import { validateTaskArray, validateGroupArray, validateUpdatePasswordRequest, validateUpdateUserDisabledRequest } from "@task-manager/common";
 import { getUserById, getGroupsForUser, updateUser, updatePassword, updateUserDisabledStatus } from "../../db/queries/users";
 import { getAllTasksForUser } from "../../db/queries/tasks";
-import { hashPassword } from "@backend/src/lib/auth/authentication";
+import { hashPassword } from "../../lib/auth/authentication";
 
 export async function handlerGetTasksForUser(c: Context) {
   const cfg = c.get("config") as ApiConfig;
