@@ -1,6 +1,6 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import type { Task, CreateTaskRequest, UpdateTaskRequest, UpdateTaskDoneStatusRequest } from "@task-manager/common";
+import type { Task, CreateTaskRequest, UpdateTaskRequest, UpdateTaskDoneStatusRequest, Group } from "@task-manager/common";
 import { validateCreateTaskRequest, validateUpdateTaskRequest, validateUpdateTaskDoneStatusRequest} from "@task-manager/common";
 import { serverGet, serverPost, serverPut, serverDelete } from "@/lib/utils/serverFetch";
 
@@ -19,6 +19,16 @@ export async function getTaskAction(id: string): Promise<Task | null> {
   } catch (error) {
     console.error(`Failed to fetch task ${id}:`, error);
     return null;
+  }
+}
+
+export async function getTaskGroupsAction(id: string): Promise<Group[]> {
+  try {
+    const result = await serverGet<Group[]>(`/tasks/${id}/groups`);
+    return result;
+  } catch (error) {
+    console.error(`Failed to fetch groups for task ${id}:`, error);
+    return [];
   }
 }
 
