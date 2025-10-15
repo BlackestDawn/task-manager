@@ -45,7 +45,7 @@ export default function GroupMembersListSection({ group, members, isEditing, onE
     "none": 0,
   };
 
-  const getAvaiableRoles = (): GroupRole[] => {
+  const getAvailableRoles = (): GroupRole[] => {
     if (currentUser?.accessLevel === "admin" || currentUser?.accessLevel === "manager") return [...groupRoleList]
 
     if (userRoleInGroup) {
@@ -56,7 +56,7 @@ export default function GroupMembersListSection({ group, members, isEditing, onE
     return ["user"];
   };
 
-  const availableRoles = getAvaiableRoles();
+  const availableRoles = getAvailableRoles();
 
   const getRoleIcon = (role: GroupRole) => {
     switch (role) {
