@@ -1,6 +1,6 @@
 'use client';
 import { useState } from "react";
-import CreateGroupForm from "@/components/groups/createGroupForm";
+import CreateGroupForm from "./createGroupForm";
 import { Can } from "@/components/auth/can";
 import { Users } from "lucide-react";
 

@@ -1,33 +1,48 @@
 'use client';
-import { useForm } from "@tanstack/react-form";
-import { useCreateGroup } from "@/lib/api/groups/queries";
-import type { CreateGroupRequest } from "@task-manager/common";
-import { validateCreateGroupRequest } from "@task-manager/common";
-import { X, UserPlus } from "lucide-react";
+import { useState, useTransition } from "react";
+import { createGroupAction } from "@/lib/actions/groups";
+import { Users, X } from "lucide-react";
 
 interface CreateGroupFormProps {
-  onSuccess: () => void;
-  onCancel: () => void;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export default function CreateGroupForm({ onSuccess, onCancel}: CreateGroupFormProps) {
-  const createGroupMutation = useCreateGroup();
+export default function CreateGroupForm({ onSuccess, onCancel }: CreateGroupFormProps) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm({
-    defaultValues: {
-      name: '',
-      description: '',
-    },
-    onSubmit: async ({ value }) => {
-      try {
-        const validatedData: CreateGroupRequest = validateCreateGroupRequest(value);
-        await createGroupMutation.mutateAsync(validatedData);
-        onSuccess?.();
-      } catch (error) {
-        console.error("Failed to create group:", error);
-      }
-    },
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
   });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!formData.name.trim()) {
+      setError("Group name is required");
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await createGroupAction({
+        name: formData.name,
+        description: formData.description || "",
+      });
+
+      if (result.success) {
+        setFormData({
+          name: "",
+          description: "",
+        });
+        if (onSuccess) onSuccess();
+      } else {
+        setError(result.error || "Failed to create group");
+      }
+    });
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -38,82 +53,73 @@ export default function CreateGroupForm({ onSuccess, onCancel}: CreateGroupFormP
         {onCancel && (
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            disabled={isPending}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50"
           >
             <X className="h-5 w-5" />
           </button>
         )}
       </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          form.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        <form.Field name="name">
-          {(field) => (
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                required
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                placeholder="Enter group name"
-              />
-            </div>
-          )}
-        </form.Field>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Group Name
+          </label>
+          <input
+            id="name"
+            type="text"
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+            placeholder="Enter group name"
+            disabled={isPending}
+          />
+        </div>
 
-        <form.Field name="description">
-          {(field) => (
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Desription
-              </label>
-              <input
-                id="description"
-                type="text"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                placeholder="Enter a description"
-              />
-            </div>
-          )}
-        </form.Field>
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Description
+          </label>
+          <textarea
+            id="description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            rows={3}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm"
+            placeholder="Enter group description (optional)"
+            disabled={isPending}
+          />
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Optional: Provide a brief description of the group&apos;s purpose
+          </p>
+        </div>
 
-        {createGroupMutation.error && (
-          <div className="rounded-md bg-red-50 dark:bg-red-900 p-4">
+        {error && (
+          <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
             <p className="text-sm text-red-800 dark:text-red-200">
-              Failed to create group. Please try again.
+              {error}
             </p>
           </div>
         )}
 
-        <div className="flex space-x-3">
+        <div className="flex space-x-3 pt-2">
           <button
             type="submit"
-            disabled={createGroupMutation.isPending}
+            disabled={isPending}
             className="flex-1 flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <UserPlus className="h-4 w-4 mr-2" />
-            {createGroupMutation.isPending ? 'Creating...' : 'Create Group'}
+            <Users className="h-4 w-4 mr-2" />
+            {isPending ? 'Creating...' : 'Create Group'}
           </button>
 
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={isPending}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
               Cancel
             </button>
