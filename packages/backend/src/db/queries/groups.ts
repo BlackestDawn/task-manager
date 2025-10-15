@@ -101,7 +101,7 @@ export async function getGroupMembers(db: DBConn, params: DoByUUIDRequest) {
     ));
   const result = await Promise.all(
     userRows.map(async (user) => {
-      const groups = await getGroupRolesForUser(db, params);
+      const groups = await getGroupRolesForUser(db, { id: user.id });
 
       return {
         __typename: 'User',
@@ -145,7 +145,7 @@ export async function getGroupTasks(db: DBConn, params: DoByUUIDRequest) {
     ));
   const result = await Promise.all(
     taskRows.map(async (task) => {
-      const groups = await getGroupsForTask(db, params);
+      const groups = await getGroupsForTask(db, { id: task.id });
 
       return {
         __typename: 'Task',
