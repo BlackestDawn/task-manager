@@ -3,7 +3,7 @@ import { validateID } from "../middleware/helpers";
 import { authMiddleware } from "../middleware/config";
 import { handlerCreateTask, handlerGetTasksByUserId } from "./general";
 import { handlerDeleteTask, handlerGetTaskById, handlerUpdateTask } from "./direct";
-import { handlerMarkDone } from "./subs";
+import { handlerMarkDone, handlerGetTaskGroups } from "./subs";
 
 export const taskRoutes = new Hono();
 
@@ -19,3 +19,4 @@ taskRoutes.put("/api/tasks/:id", handlerUpdateTask);
 taskRoutes.delete("/api/tasks/:id", handlerDeleteTask);
 
 taskRoutes.put("/api/tasks/:id/done", handlerMarkDone);
+taskRoutes.get("/api/tasks/:id/groups", handlerGetTaskGroups);
