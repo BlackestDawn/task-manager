@@ -140,7 +140,7 @@ export async function assignTaskToGroupAction(groupId: string, data: AssignTaskT
 
 export async function removeTaskFromGroupAction(groupId: string, data: RemoveTaskFromGroupRequest) {
   try {
-    serverDelete(`/groups/${groupId}/tasks`, { body: JSON.stringify(validateRemoveTaskFromGroupRequest(data)) });
+    await serverDelete(`/groups/${groupId}/tasks`, { body: JSON.stringify(validateRemoveTaskFromGroupRequest(data)) });
     revalidatePath("/groups");
     revalidatePath(`/groups/${groupId}`);
     revalidatePath("/tasks");

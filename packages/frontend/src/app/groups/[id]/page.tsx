@@ -1,38 +1,33 @@
-import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { prefetchGroupDetails } from "@/lib/auth/prefetching";
-import GroupDetailsPage from "@/components/groups/groupDetailsPage";
-import ProtectedRoute from "@/components/auth/protectedRoute";
+import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { getGroupAction, getGroupMembersAction, getGroupTasksAction } from "@/lib/actions/groups";
+import { checkAuthAction } from "@/lib/actions/auth";
+import GroupDetailsContent from "@/components/groups/groupDetailsContent";
 import type { Metadata } from "next";
-import type { IDParamProp } from "@/lib/data/interfaces/general";
-import { FIVE_MINUTES } from "@/lib/data/consts";
 
 export const metadata: Metadata = {
-  title: "Task Manager - Group details",
-  description: "View and manage a groups details",
+  title: 'Task Manager - Group Details',
+  description: 'View and manage group details',
+};
+
+interface GroupPageProps {
+  params: Promise<{ id: string }>;
 }
 
-export default async function GroupPage({ params }: IDParamProp) {
+export default async function GroupPage({ params }: GroupPageProps) {
   const { id } = await params;
+  if (!id) notFound();
 
-  if (!id) {
-    return <div>Invalid group ID</div>;
-  }
+  const { isAuthenticated } = await checkAuthAction();
+  if (!isAuthenticated) redirect(`/login?redirect=/groups/${id}`);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: FIVE_MINUTES,
-      },
-    },
-  });
+  const [group, members, tasks] = await Promise.all([
+    getGroupAction(id),
+    getGroupMembersAction(id),
+    getGroupTasksAction(id),
+  ]);
 
-  await prefetchGroupDetails(queryClient, id);
+  if (!group) notFound();
 
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProtectedRoute>
-        <GroupDetailsPage groupId={id} />
-      </ProtectedRoute>
-    </HydrationBoundary>
-  );
+  return <GroupDetailsContent group={group} members={members} tasks={tasks} />;
 }

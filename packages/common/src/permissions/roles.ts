@@ -1,5 +1,8 @@
 import { AbilityBuilder, createMongoAbility, type PureAbility } from "@casl/ability";
 import { type UserContext } from "./types";
+import type { User } from "../types/users";
+import type { Group } from "../types/groups";
+import type { Task } from "../types/tasks";
 
 export type GroupRole = 'manager' | 'editor' | 'user' | 'viewer' | 'none';
 export const groupRoleList = [
@@ -17,7 +20,7 @@ export const userRoleList = [
   "user",
 ] as const satisfies readonly UserRole[];
 
-export type Subjects = "Task" | "Group" | "User" | "all";
+export type Subjects = "Task" | "Group" | "User" | "all" | User | Group | Task;
 export type Actions = "create" | "read" | "update" | "delete" | "manage" | "assignTask" | "removeTask" | "assignUser" | "removeUser" | "markDone";
 
 export type AppAbility = PureAbility<[Actions, Subjects]>;
@@ -25,7 +28,7 @@ export type AppAbility = PureAbility<[Actions, Subjects]>;
 export function defineAbilityFor(user: UserContext | null): AppAbility {
   const { can: allow, cannot: forbid, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
-  if (!user) throw new Error("Can't define ability for null user");
+  if (!user) return build();
 
   const typeDetection = (object: any) => {
     return object.__typename || object.type;

@@ -46,6 +46,21 @@ function isTokenExpired(token: string): boolean {
   }
 }
 
+async function parseResponse<T>(response: Response): Promise<T> {
+  if (response.status === 204) return null as T;
+
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+
+  // If content-length is 0 or missing content-type, return null
+  if (contentLength === "0" || !contentType) return null as T;
+
+  // Only parse as JSON if content-type indicates JSON
+  if (contentType && contentType.includes("application/json")) return response.json();
+
+  return null as T;
+}
+
 async function serverFetch<T>(endpoint: string, options: ServerFetchOptions = {}): Promise<T> {
   const { skipAuth = false, skipRefresh = false, ...fetchOptions } = options;
 
@@ -99,7 +114,7 @@ async function serverFetch<T>(endpoint: string, options: ServerFetchOptions = {}
         throw new Error(errorData.message || `API Error: ${retryResponse.status}`);
       }
 
-      return retryResponse.json();
+      return parseResponse<T>(retryResponse);
 
     } catch (refreshError) {
       console.error("Token refresh failed:", refreshError);
@@ -115,7 +130,7 @@ async function serverFetch<T>(endpoint: string, options: ServerFetchOptions = {}
     throw new Error(errorData.message || `API Error: ${response.status}`);
   }
 
-  return response.json();
+  return parseResponse<T>(response);
 }
 
 export async function serverGet<T>(endpoint: string, option?: ServerFetchOptions): Promise<T> {
