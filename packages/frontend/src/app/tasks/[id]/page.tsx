@@ -1,39 +1,31 @@
-import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { prefetchTaskDetails } from "@/lib/auth/prefetching";
-import TaskDetailsClient from "@/components/tasks/taskDetailsClient";
-import ProtectedRoute from "@/components/auth/protectedRoute";
+import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { getTaskAction, getTaskGroupsAction } from "@/lib/actions/tasks";
+import { checkAuthAction } from "@/lib/actions/auth";
+import TaskDetailsContent from "@/components/tasks/taskDetailsContent";
 import type { Metadata } from "next";
-import type { IDParamProp } from "@/lib/data/interfaces/general";
-import { FIVE_MINUTES } from "@/lib/data/consts";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Task Details',
-  description: 'Viewing details of a specific task.',
+  description: 'View and manage task details',
 };
 
-export default async function TaskDetailsPage({ params }: IDParamProp) {
+interface TaskPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function TaskPage({ params }: TaskPageProps) {
   const { id } = await params;
+  if (!id) notFound();
 
-  if (!id) {
-    return <div>Invalid task ID</div>;
-  }
+  const { isAuthenticated } = await checkAuthAction();
+  if (!isAuthenticated) redirect(`/login?redirect=/tasks/${id}`);
+  const [task, groups] = await Promise.all([
+    getTaskAction(id),
+    getTaskGroupsAction(id),
+  ]);
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: FIVE_MINUTES,
-      },
-    },
-  });
+  if (!task) notFound();
 
-  // Prefetch the specific task details
-  await prefetchTaskDetails(queryClient, id);
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProtectedRoute>
-        <TaskDetailsClient taskId={id} />
-      </ProtectedRoute>
-    </HydrationBoundary>
-  );
+  return <TaskDetailsContent task={task} groups={groups} />;
 }
