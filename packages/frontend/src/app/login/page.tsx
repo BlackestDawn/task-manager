@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { checkAuthAction } from "@/lib/actions/auth";
 import LoginForm from "@/components/auth/loginForm";
+import { Suspense } from "react";
+import RedirectNotification from "@/components/auth/redirectNotification";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Login',
@@ -28,6 +30,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
         <LoginForm redirectTo={redirectTo} />
       </div>
+
+      <Suspense fallback={null}>
+        <RedirectNotification />
+      </Suspense>
     </div>
   );
 }
