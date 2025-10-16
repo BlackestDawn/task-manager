@@ -1,31 +1,26 @@
-import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { prefetchTaskData } from "@/lib/auth/prefetching";
-import TasksClient from "@/components/tasks/tasksClient";
-import ProtectedRoute from "@/components/auth/protectedRoute";
+import { redirect } from "next/navigation";
+import { checkAuthAction } from "@/lib/actions/auth";
+import { getTasksAction } from "@/lib/actions/tasks";
+import TasksCalendar from "@/components/tasks/tasksCalendar";
 import type { Metadata } from "next";
-import { FIVE_MINUTES } from "@/lib/data/consts";
+import { Suspense } from "react";
+import LoadingSpinner from "@/components/general/loadingSpinner";
 
 export const metadata: Metadata = {
-  title: 'Task Manager - Tasks',
-  description: 'Displaying and manage tasks.',
-};
+  title: "Task Manager- Tasks",
+  description: "Manage tasks"
+}
 
 export default async function TasksPage() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: FIVE_MINUTES,
-      },
-    },
-  });
+  const { isAuthenticated } = await checkAuthAction();
 
-  await prefetchTaskData(queryClient);
+  if (!isAuthenticated) redirect("/login?redirect=/tasks");
+
+  const tasks = await getTasksAction();
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProtectedRoute>
-        <TasksClient />
-      </ProtectedRoute>
-    </HydrationBoundary>
+    <Suspense fallback={<LoadingSpinner />}>
+      <TasksCalendar initialTasks={tasks} />
+    </Suspense>
   );
 }
