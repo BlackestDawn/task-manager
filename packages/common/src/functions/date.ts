@@ -14,8 +14,11 @@ export function justDate(date: Date | string): string {
 
 export function isTaskOverdue(task: Task): boolean {
   if (!task.finishBy) return false;
+  const taskDate = new Date(task.finishBy);
+  taskDate.setHours(0, 0, 0, 0);
   const today = new Date();
-  return task.finishBy < today && !task.completed;
+  today.setHours(0, 0, 0, 0);
+  return taskDate < today && !task.completed;
 }
 
 export function isThisWeek(date: string | Date | null): boolean {
