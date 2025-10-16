@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, X } from "lucide-react";
@@ -15,8 +15,10 @@ export default function RedirectNotification() {
   }, []);
 
   useEffect(() => {
-    const wasRedirected = searchParams.get("redirected") === "true";
-    const fromPath = searchParams.get("from");
+    if (!mounted) return;
+
+    const fromPath = searchParams.get("redirect");
+    const wasRedirected = !!fromPath;
 
     if (wasRedirected) {
       setRedirectedFrom(fromPath);
@@ -28,9 +30,11 @@ export default function RedirectNotification() {
 
       return () => clearTimeout(timer);
     }
-  }, [searchParams]);
+  }, [searchParams, mounted]);
 
-  if (!isVisible) return null;
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+  }, []);
 
   const getPageName = (path: string | null): string => {
     if (!path || typeof path !== "string") return "Restricted page";
@@ -56,25 +60,21 @@ export default function RedirectNotification() {
 
   const modalContent = (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black bg-opacity-50 z-[9998] transition-opacity duration-300"
-        onClick={() => setIsVisible(false)}
+        onClick={handleClose}
       />
 
-      {/* Modal */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-md mx-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 relative animate-in fade-in slide-in-from-top-4 duration-300">
-          {/* Close button */}
           <button
-            onClick={() => setIsVisible(false)}
+            onClick={handleClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             aria-label="Close notification"
           >
             <X className="h-5 w-5" />
           </button>
 
-          {/* Content */}
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <AlertCircle className="h-6 w-6 text-amber-500" />
@@ -99,7 +99,6 @@ export default function RedirectNotification() {
             </div>
           </div>
 
-          {/* Progress bar */}
           <div className="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
             <div
               className="bg-indigo-600 h-1 rounded-full transition-all duration-[5000ms] ease-linear"
