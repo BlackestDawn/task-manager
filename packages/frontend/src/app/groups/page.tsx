@@ -14,20 +14,14 @@ export const metadata: Metadata = {
   description: "Manage groups and team collaboration",
 }
 
-interface GroupsListProps {
-  groups: Group[];
-}
-
 export default async function GroupsPage() {
   const { isAuthenticated } = await checkAuthAction();
 
   if (!isAuthenticated) redirect("/login?redirect=/groups");
 
-  const groups = await getGroupsAction();
-
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <GroupsList groups={groups} />
+      <GroupsList />
     </Suspense>
   )
 }
@@ -69,7 +63,9 @@ function GroupCard({ group }: { group: Group }) {
   );
 }
 
-function GroupsList({ groups }: GroupsListProps) {
+async function GroupsList() {
+  const groups = await getGroupsAction();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
