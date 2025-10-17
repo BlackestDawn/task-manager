@@ -30,17 +30,3 @@ export function Cannot({ I, a, field, children }: CanProps) {
     </CaslCan>
   );
 }
-
-function detectSubjectType(obj: any): Subjects {
-  if (obj.type) return obj.type as Subjects;
-
-  if ('login' in obj && 'accessLevel' in obj) return 'User';
-  if ('title' in obj && 'userId' in obj) return 'Task';
-  if ('name' in obj && 'description' in obj && !('userId' in obj)) return 'Group';
-
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('Could not detect subject type for object:', obj);
-  }
-
-  return 'all';
-}
