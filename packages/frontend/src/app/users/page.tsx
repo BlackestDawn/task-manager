@@ -14,20 +14,14 @@ export const metadata: Metadata = {
   description: 'Manage users',
 };
 
-interface UsersListProps {
-  users: User[];
-}
-
 export default async function UsersPage() {
   const { isAuthenticated } = await checkAuthAction();
 
   if (!isAuthenticated) redirect("/login?redirect=/users");
 
-  const users = await getUsersAction();
-
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <UsersList users={users} />
+      <UsersList />
     </Suspense>
   );
 }
@@ -89,7 +83,9 @@ function UserCard({ user }: { user: User }) {
   );
 }
 
-function UsersList({ users }: UsersListProps) {
+async function UsersList() {
+  const users = await getUsersAction();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
