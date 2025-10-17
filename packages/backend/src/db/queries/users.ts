@@ -1,4 +1,4 @@
-import { eq, inArray, and, or } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { users, groups, userGroups } from "../schema";
 import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest, UpdateUserDisabledRequest } from "@task-manager/common";
@@ -23,7 +23,7 @@ export async function createUser(db: DBConn, params: CreateUserRequest) {
   };
 }
 
-export async function updateUser(db: DBConn, params: { id: string, data: UpdateUserRequest}) {
+export async function updateUser(db: DBConn, params: { id: string, data: UpdateUserRequest }) {
   const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
@@ -68,7 +68,7 @@ export async function getUserById(db: DBConn, params: DoByUUIDRequest) {
   };
 }
 
-export async function updatePassword(db: DBConn, params: { id: string, data: UpdatePasswordRequest}) {
+export async function updatePassword(db: DBConn, params: { id: string, data: UpdatePasswordRequest }) {
   const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
@@ -103,7 +103,7 @@ export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
   return result;
 }
 
-export async function updateUserDisabledStatus(db: DBConn, params: { id: string, data: UpdateUserDisabledRequest}) {
+export async function updateUserDisabledStatus(db: DBConn, params: { id: string, data: UpdateUserDisabledRequest }) {
   const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);

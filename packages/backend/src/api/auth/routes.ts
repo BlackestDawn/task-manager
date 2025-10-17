@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { cfg } from "../../config";
 import { authMiddleware } from "../middleware/config";
 import { handlerLoginUser, handlerRefreshAccessToken, handlerRevokeRefreshToken, handlerGetSelf, handlerUpdateSelf } from "./general";
 

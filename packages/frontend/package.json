@@ -12,7 +12,6 @@
     "@casl/react": "^5.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/joy": "^5.0.0-beta.52",
     "@tailwindcss/postcss": "^4.1.14",
     "@task-manager/common": "workspace:*",
     "autoprefixer": "^10.4.21",

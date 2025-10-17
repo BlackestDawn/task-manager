@@ -1,7 +1,6 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
 import type { User, CreateUserRequest } from "@task-manager/common";
-import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
 import { validateCreateUserRequest, validateUser, validateUserArray } from "@task-manager/common";
 import { createUser, getUsers } from "../../db/queries/users";
 import { hashPassword } from "../../lib/auth/authentication";

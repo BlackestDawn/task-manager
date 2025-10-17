@@ -1,8 +1,7 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
-import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError } from "@task-manager/common";
-import type { Group, CreateGroupRequest, User } from "@task-manager/common";
-import { validateGroup, validateGroupArray, validateCreateGroupRequest, validateDoByUUIDRequest } from "@task-manager/common";
+import type { Group, CreateGroupRequest } from "@task-manager/common";
+import { validateGroup, validateGroupArray, validateCreateGroupRequest } from "@task-manager/common";
 import { createGroup, getGroups } from "../../db/queries/groups";
 
 export async function handlerCreateGroup(c: Context) {

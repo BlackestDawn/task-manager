@@ -1,7 +1,6 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
 import type { Task, UpdateTaskRequest, DoByUUIDRequest } from "@task-manager/common";
-import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
 import { validateUpdateTaskRequest, validateTask } from "@task-manager/common";
 import { updateTask, deleteTask, getTaskById } from "../../db/queries/tasks";
 

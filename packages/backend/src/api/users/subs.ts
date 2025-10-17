@@ -1,9 +1,9 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
 import type { User, Group, DoByUUIDRequest, Task, UpdatePasswordRequest, UpdateUserDisabledRequest } from "@task-manager/common";
-import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError, AlreadyExistsConflictError, validateUser } from "@task-manager/common";
+import { NotFoundError, BadRequestError, validateUser } from "@task-manager/common";
 import { validateTaskArray, validateGroupArray, validateUpdatePasswordRequest, validateUpdateUserDisabledRequest } from "@task-manager/common";
-import { getUserById, getGroupsForUser, updateUser, updatePassword, updateUserDisabledStatus } from "../../db/queries/users";
+import { getUserById, getGroupsForUser, updatePassword, updateUserDisabledStatus } from "../../db/queries/users";
 import { getAllTasksForUser } from "../../db/queries/tasks";
 import { hashPassword } from "../../lib/auth/authentication";
 
