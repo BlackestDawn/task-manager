@@ -23,18 +23,20 @@ export function isTaskOverdue(task: Task): boolean {
 
 export function isThisWeek(date: string | Date | null): boolean {
   if (!date) return false;
-  if (typeof date === 'string') date = new Date(date);
+  const testDate = new Date(date);
+  testDate.setHours(0, 0, 0, 0);
   const today = new Date();
-  const firstOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 1);
-  const lastOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 7);
-  return date >= firstOfWeek && date <= lastOfWeek;
+  today.setHours(0, 0, 0, 0);
+  const firstOfWeek = new Date(today.getDate() - today.getDay() + 1);
+  const lastOfWeek = new Date(today.getDate() - today.getDay() + 7);
+  return testDate >= firstOfWeek && testDate <= lastOfWeek;
 }
 
 export function isThisMonth(date: string | Date | null): boolean {
   if (!date) return false;
-  if (typeof date === 'string') date = new Date(date);
+  const testDate = new Date(date);
   const today = new Date();
-  return date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+  return testDate.getMonth() === today.getMonth() && testDate.getFullYear() === today.getFullYear();
 }
 
 export function isFutureTask(task: Task): boolean {

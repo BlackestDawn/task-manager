@@ -3,31 +3,26 @@ import { redirect } from "next/navigation";
 import { checkAuthAction } from "@/lib/actions/auth";
 import { getUsersAction } from "@/lib/actions/users";
 import Link from "next/link";
-import { User as UserIcon, Mail, Shield, Plus } from "lucide-react";
+import { User as UserIcon, Mail } from "lucide-react";
 import type { User } from "@task-manager/common";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/general/loadingSpinner";
 import CreateUserSection from "@/components/users/createUserSection";
+import UserAccesslevelBadge from "@/components/users/userAccesslevelBadge";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Users',
   description: 'Manage users',
 };
 
-interface UsersListProps {
-  users: User[];
-}
-
 export default async function UsersPage() {
   const { isAuthenticated } = await checkAuthAction();
 
   if (!isAuthenticated) redirect("/login?redirect=/users");
 
-  const users = await getUsersAction();
-
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <UsersList users={users} />
+      <UsersList />
     </Suspense>
   );
 }
@@ -71,16 +66,15 @@ function UserCard({ user }: { user: User }) {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
             @{user.login}
           </p>
-          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             {user.email && (
-              <div className="flex items-center">
+              <div className="flex items-center mb-2">
                 <Mail className="h-4 w-4 mr-1" />
                 <span className="truncate">{user.email}</span>
               </div>
             )}
             <div className="flex items-center">
-              <Shield className="h-4 w-4 mr-1" />
-              <span className="capitalize">{user.accessLevel}</span>
+              <UserAccesslevelBadge accessLevel={user.accessLevel} />
             </div>
           </div>
         </div>
@@ -89,7 +83,9 @@ function UserCard({ user }: { user: User }) {
   );
 }
 
-function UsersList({ users }: UsersListProps) {
+async function UsersList() {
+  const users = await getUsersAction();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -112,16 +108,6 @@ function UsersList({ users }: UsersListProps) {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             No users yet
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Create your first user to get started
-          </p>
-          <Link
-            href="/users/new"
-            className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create User
-          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -40,7 +40,7 @@ export default async function RootLayout({
       <body className={`${robotoMono.variable} ${robotoSerif.variable} ${robotoFlex.variable} antialiased`}>
         <ServerAuthProvider initialUser={user} initialIsAuthenticated={isAuthenticated}>
           <Providers>
-            <div className="text-center font-sans">
+            <div className="font-sans">
               <header className="pt-5 bg-gray-300 dark:bg-gray-800">
                 <SiteHeader />
               </header>
