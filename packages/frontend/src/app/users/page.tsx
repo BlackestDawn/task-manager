@@ -3,11 +3,12 @@ import { redirect } from "next/navigation";
 import { checkAuthAction } from "@/lib/actions/auth";
 import { getUsersAction } from "@/lib/actions/users";
 import Link from "next/link";
-import { User as UserIcon, Mail, Shield } from "lucide-react";
+import { User as UserIcon, Mail } from "lucide-react";
 import type { User } from "@task-manager/common";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/general/loadingSpinner";
 import CreateUserSection from "@/components/users/createUserSection";
+import UserAccesslevelBadge from "@/components/users/userAccesslevelBadge";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Users',
@@ -65,16 +66,15 @@ function UserCard({ user }: { user: User }) {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
             @{user.login}
           </p>
-          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             {user.email && (
-              <div className="flex items-center">
+              <div className="flex items-center mb-2">
                 <Mail className="h-4 w-4 mr-1" />
                 <span className="truncate">{user.email}</span>
               </div>
             )}
             <div className="flex items-center">
-              <Shield className="h-4 w-4 mr-1" />
-              <span className="capitalize">{user.accessLevel}</span>
+              <UserAccesslevelBadge accessLevel={user.accessLevel} />
             </div>
           </div>
         </div>

@@ -2,12 +2,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { User, Task, Group } from "@task-manager/common";
-import { ArrowLeft, User as userIcon, Mail, Calendar, Shield, ShieldOff, Crown, Settings, Briefcase, Users } from "lucide-react";
+import { ArrowLeft, Mail, Calendar, Shield, ShieldOff, Crown, Briefcase, Users } from "lucide-react";
 import UserBasicInfoSection from "./userBasicInfoSection";
 import UserPasswordSection from "./userPasswordSection";
 import UserStatusSection from "./userStatusSection";
 import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import { Can } from "@/components/auth/can";
+import UserAccesslevelBadge from "./userAccesslevelBadge";
 
 interface UserDetailsContentProps {
   user: User;
@@ -20,22 +21,6 @@ export default function UserDetailsContent({ user, tasks, groups }: UserDetailsC
   const { user: currentUser } = useAuthContext();
 
   const isCurrentUser = currentUser?.id === user.id;
-
-  const getAccessLevelIcon = (level: string) => {
-    switch (level) {
-      case "admin": return <Crown className="h-3 w-3 mr-1" />;
-      case "manager": return <Briefcase className="h-3 w-3 mr-1" />;
-      default: return <Users className="h-3 w-3 mr-1" />;
-    }
-  };
-
-  const getAccessLevelColor = (level: string) => {
-    switch (level) {
-      case "admin": return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-      case "manager": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    }
-  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -89,10 +74,7 @@ export default function UserDetailsContent({ user, tasks, groups }: UserDetailsC
                 Access Level
               </dt>
               <dd className="mt-1 text-sm sm:mt-0 sm:col-span-2">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getAccessLevelColor(user.accessLevel)}`}>
-                  {getAccessLevelIcon(user.accessLevel)}
-                  {user.accessLevel}
-                </span>
+                <UserAccesslevelBadge accessLevel={user.accessLevel} />
               </dd>
             </div>
 
