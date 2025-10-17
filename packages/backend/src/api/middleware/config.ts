@@ -1,4 +1,4 @@
-import type { Context, Next, MiddlewareHandler } from "hono";
+import type { Context, Next } from "hono";
 import { cfg, type ApiConfig } from "../../config";
 import { NotFoundError, UserForbiddenError } from "@task-manager/common";
 import { validateDoByUUIDRequest, AbilityChecker, validateUser } from "@task-manager/common";

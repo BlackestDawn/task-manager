@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
-import { respondWithJSON } from "../../lib/utils/response";
 import { UserForbiddenError } from "@task-manager/common";
 import { resetDb } from "../../db/queries/admin";
 

@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
 import type { DoByUUIDRequest } from "@task-manager/common";
 import { validateDoByUUIDRequest, validateUpdateTaskDoneStatusRequest } from "@task-manager/common";
-import { getTaskById, updateTaskDoneStatus, getGroupsForTask } from "../../db/queries/tasks";
+import { updateTaskDoneStatus, getGroupsForTask } from "../../db/queries/tasks";
 
 export async function handlerMarkDone(c: Context) {
   const cfg = c.get("config") as ApiConfig;
