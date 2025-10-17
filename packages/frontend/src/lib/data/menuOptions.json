@@ -1,9 +1,9 @@
 {
   "menu": [
     { "href": "/", "label": "Home" },
+    { "href": "/dashboard", "label": "Dashboard" },
     { "href": "/tasks", "label": "Tasks" },
     { "href": "/groups", "label": "Groups" },
-    { "href": "/users", "label": "Users" },
-    { "href": "/settings", "label": "Settings" }
+    { "href": "/users", "label": "Users" }
   ]
 }
