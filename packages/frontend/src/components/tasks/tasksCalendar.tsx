@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { getTasksAction } from "@/lib/actions/tasks";
 import { Can } from "@/components/auth/can";
 import type { Task } from "@task-manager/common";
-import { isTaskOverdue } from "@task-manager/common";
-import { Calendar, ChevronLeft, ChevronRight, Plus, CheckSquare, Square, AlertTriangle, Clock } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Plus, CheckSquare, Square } from "lucide-react";
 import Link from "next/link";
 import CreateTaskDialog from "@/components/tasks/createTaskDialog";
+import TaskStatusBadge from "./taskStatusBadge";
 
 type CalendarView = "week" | "month" | "year";
 
@@ -203,31 +203,6 @@ export default function TasksPage({ initialTasks }: TasksCalendarProps) {
     } else {
       return currentDate.toLocaleDateString("en-US", { year: "numeric" });
     }
-  }
-
-  const getStatusBadge = (task: Task) => {
-    if (task.completed) {
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-          <CheckSquare className="h-3 w-3 mr-1" />
-          Completed
-        </span>
-      );
-    }
-    if (isTaskOverdue(task)) {
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-          <AlertTriangle className="h-3 w-3 mr-1" />
-          Overdue
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-        <Clock className="h-3 w-3 mr-1" />
-        In Progress
-      </span>
-    );
   }
 
   return (
@@ -462,7 +437,7 @@ export default function TasksPage({ initialTasks }: TasksCalendarProps) {
                             </p>
                           )}
                           <div className="mt-2 flex items-center gap-3">
-                            {getStatusBadge(task)}
+                            <TaskStatusBadge task={task} />
                             {task.finishBy && view !== "year" && (
                               <span className="text-xs text-gray-500 dark:text-gray-400">
                                 Due: {new Date(task.finishBy).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}

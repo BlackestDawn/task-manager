@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useState, useTransition } from "react";
 import type { Group, Task } from "@task-manager/common";
-import { isTaskOverdue } from "@task-manager/common";
 import { removeTaskFromGroupAction, assignTaskToGroupAction } from "@/lib/actions/groups";
 import { getTasksAction } from "@/lib/actions/tasks";
-import { CheckSquare, Square, Calendar, Minus, Edit, X, Plus, AlertTriangle } from "lucide-react";
+import { CheckSquare, Square, Calendar, Minus, Edit, X, Plus } from "lucide-react";
 import Link from "next/link";
 import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import { useGroupPermissions } from "@/hooks/useGroupPermissions";
+import TaskStatusBadge from "@/components/tasks/taskStatusBadge";
 
 interface GroupTasksListSectionProps {
   group: Group;
@@ -87,30 +87,6 @@ export default function GroupTasksListSection({ group, tasks, isEditing, onEdit,
         setError(result.error || "Failed to assign task");
       }
     });
-  };
-
-  const getStatusBadge = (task: Task) => {
-    if (task.completed) {
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-          <CheckSquare className="h-3 w-3 mr-1" />
-          Completed
-        </span>
-      );
-    }
-    if (isTaskOverdue(task)) {
-      return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
-          <AlertTriangle className="h-3 w-3 mr-1" />
-          Overdue
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
-        In Progress
-      </span>
-    );
   };
 
   if (isEditing && canManageTasks) {
@@ -241,7 +217,7 @@ export default function GroupTasksListSection({ group, tasks, isEditing, onEdit,
                           {new Date(task.finishBy).toLocaleDateString()}
                         </span>
                       )}
-                      {getStatusBadge(task)}
+                      <TaskStatusBadge task={task} />
                     </div>
                   </div>
                 </div>
@@ -313,7 +289,7 @@ export default function GroupTasksListSection({ group, tasks, isEditing, onEdit,
                           {new Date(task.finishBy).toLocaleDateString()}
                         </span>
                       )}
-                      {getStatusBadge(task)}
+                      <TaskStatusBadge task={task} />
                     </div>
                   </div>
                 </div>

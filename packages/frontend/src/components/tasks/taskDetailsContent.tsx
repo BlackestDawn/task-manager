@@ -3,11 +3,12 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Task, Group } from "@task-manager/common";
 import { isTaskOverdue } from "@task-manager/common";
-import { ArrowLeft, CheckSquare, Calendar, Clock, Users, AlertTriangle } from "lucide-react";
+import { ArrowLeft, CheckSquare, Calendar, Clock, Users } from "lucide-react";
 import TaskBasicInfoSection from "@/components/tasks/taskBasicInfoSection";
 import TaskStatusSection from "@/components/tasks/taskStatusSection";
 import TaskGroupsSection from "@/components/tasks/taskGroupsSection";
 import { Can } from "@/components/auth/can";
+import TaskStatusBadge from "./taskStatusBadge";
 
 interface TaskDetailsContentProps {
   task: Task;
@@ -18,31 +19,6 @@ export default function TaskDetailsContent({ task, groups }: TaskDetailsContentP
   const [editingSection, setEditingSection] = useState<"basic" | "status" | null>(null);
 
   const isOverdue = isTaskOverdue(task);
-
-  const getStatusBadge = () => {
-    if (task.completed) {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-          <CheckSquare className="h-4 w-4 mr-1" />
-          Completed
-        </span>
-      );
-    }
-    if (isOverdue) {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-          <AlertTriangle className="h-4 w-4 mr-1" />
-          Overdue
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-        <Clock className="h-4 w-4 mr-1" />
-        In Progress
-      </span>
-    );
-  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -66,7 +42,7 @@ export default function TaskDetailsContent({ task, groups }: TaskDetailsContentP
               </p>
             )}
           </div>
-          {getStatusBadge()}
+          <TaskStatusBadge task={task} />
         </div>
       </div>
 
