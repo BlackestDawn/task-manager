@@ -3,7 +3,7 @@ import { useState, useTransition} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
-import HamburgerButton from "./hamburgermenu";
+import HamburgerButton from "./hamburgerButton";
 import menuData from "@/lib/data/menuOptions.json";
 
 interface HeaderComponentProps {
