@@ -47,7 +47,7 @@ export default async function RootLayout({
               <main className="flex-1 bg-background">
                 {children}
               </main>
-              <footer className="bg-gray-50 dark-bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+              <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
                 <SiteFooter />
               </footer>
             </div>
