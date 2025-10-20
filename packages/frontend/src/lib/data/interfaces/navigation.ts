@@ -1,7 +1,6 @@
 export interface HamburgerButtonProps {
   isOpen: boolean;
   onClick: () => void;
-  className?: string;
 }
 
 export interface HeaderNavbarProps {
