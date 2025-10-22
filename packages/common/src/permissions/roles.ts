@@ -4,9 +4,9 @@ import type { User } from "../types/users";
 import type { Group } from "../types/groups";
 import type { Task } from "../types/tasks";
 
-export type GroupRole = 'manager' | 'editor' | 'user' | 'viewer' | 'none';
+export type GroupRole = 'supervisor' | 'editor' | 'user' | 'viewer' | 'none';
 export const groupRoleList = [
-  'manager',
+  'supervisor',
   'editor',
   'user',
   'viewer',
@@ -55,7 +55,7 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
 
   user.groups.forEach(({ id: groupId, role }) => {
     switch (role) {
-      case "manager":
+      case "supervisor":
         allow(["assignTask", "removeTask", "assignUser", "removeUser", "update"], "Group", { id: groupId });
         allow("manage", "Task", { 'groups.id': groupId });
         break;

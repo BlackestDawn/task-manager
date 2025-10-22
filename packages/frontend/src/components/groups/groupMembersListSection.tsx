@@ -38,7 +38,7 @@ export default function GroupMembersListSection({ group, members, isEditing, onE
   );
 
   const roleHierarchy: Record<GroupRole, number> = {
-    "manager": 4,
+    "supervisor": 4,
     "editor": 3,
     "user": 2,
     "viewer": 1,
@@ -60,7 +60,7 @@ export default function GroupMembersListSection({ group, members, isEditing, onE
 
   const getRoleIcon = (role: GroupRole) => {
     switch (role) {
-      case "manager": return <Crown className="h-4 w-4" />;
+      case "supervisor": return <Crown className="h-4 w-4" />;
       case "editor": return <Edit className="h-4 w-4" />;
       case "user": return <UsersIcon className="h-4 w-4" />;
       case "viewer": return <Eye className="h-4 w-4" />;
@@ -71,7 +71,7 @@ export default function GroupMembersListSection({ group, members, isEditing, onE
 
   const getRoleColor = (role: GroupRole) => {
     switch (role) {
-      case 'manager': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'supervisor': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'editor': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'user': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'viewer': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
@@ -82,7 +82,7 @@ export default function GroupMembersListSection({ group, members, isEditing, onE
 
   const getRoleDescription = (role: GroupRole) => {
     switch (role) {
-      case 'manager': return 'Full group management - can manage members, tasks, and settings';
+      case 'supervisor': return 'Full group management - can manage members, tasks, and settings';
       case 'editor': return 'Can create, edit, and delete tasks in the group';
       case 'user': return 'Can view tasks and mark them as done';
       case 'viewer': return 'Read-only access to group tasks';
