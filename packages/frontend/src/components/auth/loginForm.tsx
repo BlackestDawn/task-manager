@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { loginAction } from "@/lib/actions/auth";
 import { LogIn } from "lucide-react";
 import { validateLoginRequest } from "@task-manager/common";
+import { tokenManager } from "@/lib/utils/tokenManager";
 
 interface LoginFormProps {
   redirectTo?: string;
@@ -23,7 +24,9 @@ export default function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps)
     startTransition(async () => {
       const result = await loginAction(validateLoginRequest({ login, password }));
 
-      if (result.success ) {
+      if (result.success && result.tokens) {
+        tokenManager.setToken(result.tokens.accessToken, result.tokens.refreshToken);
+
         router.push(redirectTo);
         router.refresh();
       } else {
