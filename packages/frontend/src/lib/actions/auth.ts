@@ -11,8 +11,13 @@ export async function loginAction(credentials: LoginRequest) {
 
     await setAuthCookies(response.tokens.accessToken, response.tokens.refreshToken);
 
-    // revalidatePath("/", "layout");
-    return { success: true };
+    return {
+      success: true,
+      tokens: {
+        accessToken: response.tokens.accessToken,
+        refreshToken: response.tokens.refreshToken
+      }
+    };
   } catch (error) {
     return {
       success: false,
