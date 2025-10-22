@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
 import type { User, Group, DoByUUIDRequest, Task, UpdatePasswordRequest, UpdateUserDisabledRequest } from "@task-manager/common";
-import { NotFoundError, BadRequestError, validateUser } from "@task-manager/common";
+import { NotFoundError, BadRequestError, validateUser, UserForbiddenError } from "@task-manager/common";
 import { validateTaskArray, validateGroupArray, validateUpdatePasswordRequest, validateUpdateUserDisabledRequest } from "@task-manager/common";
 import { getUserById, getGroupsForUser, updatePassword, updateUserDisabledStatus } from "../../db/queries/users";
 import { getAllTasksForUser } from "../../db/queries/tasks";
@@ -14,11 +14,11 @@ export async function handlerGetTasksForUser(c: Context) {
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
-  /* if (!canUserAccessUser(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
   const tasks = await getAllTasksForUser(cfg.db, idParam);
-  return c.json(validateTaskArray(tasks) as Task[]);
+  const result = tasks.filter(t => abilities.canViewObject(t));
+  return c.json(validateTaskArray(result) as Task[]);
 }
 
 export async function handlerGetGroupsForUser(c: Context) {
@@ -28,11 +28,11 @@ export async function handlerGetGroupsForUser(c: Context) {
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
-  /* if (!canUserAccessUser(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
   const groups = await getGroupsForUser(cfg.db, idParam);
-  return c.json(validateGroupArray(groups) as Group[]);
+  const result = groups.filter(g => abilities.canViewObject(g));
+  return c.json(validateGroupArray(result) as Group[]);
 }
 
 export async function handlerUpdateUserPassword(c: Context) {
@@ -44,9 +44,10 @@ export async function handlerUpdateUserPassword(c: Context) {
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
-  /* if (!canUserModifyUser(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canEditObjectField(existingUser, "password")) throw new UserForbiddenError("User not authorized");
+
   if (!jsonBody.password || jsonBody.password.length < 8) {
     throw new BadRequestError("Password must be at least 8 characters long");
   }
@@ -70,9 +71,9 @@ export async function handlerUpdateUserDisabled(c: Context) {
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
-  /* if (!canUserModifyUser(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canEditObjectField(existingUser, "disabled")) throw new UserForbiddenError("User not authorized");
 
   const updateParams = {
     id: idParam.id,
