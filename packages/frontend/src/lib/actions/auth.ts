@@ -34,8 +34,7 @@ export async function logoutAction() {
   }
 
   await clearAuthCookies();
-
-  // revalidatePath("/", "layout");
+  return { success: true };
 }
 
 export async function getProfileAction() {
