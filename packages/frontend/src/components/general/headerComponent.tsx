@@ -5,6 +5,7 @@ import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import HamburgerButton from "./hamburgerButton";
 import menuData from "@/lib/data/menuOptions.json";
+import { tokenManager } from "@/lib/utils/tokenManager";
 
 interface HeaderComponentProps {
   isAuthenticated: boolean;
@@ -21,6 +22,7 @@ export default function HeaderComponent({ isAuthenticated }: HeaderComponentProp
   const handleLogout = async () => {
     startTransition(async () => {
       await logoutAction();
+      tokenManager.clearTokens();
       router.push("/");
       router.refresh();
     });
