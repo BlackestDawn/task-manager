@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
 import type { User, UpdateUserRequest, DoByUUIDRequest } from "@task-manager/common";
-import { NotFoundError } from "@task-manager/common";
+import { NotFoundError, UserForbiddenError } from "@task-manager/common";
 import { validateUpdateUserRequest, validateUser } from "@task-manager/common";
 import { updateUser, deleteUser, getUserById } from "../../db/queries/users";
 
@@ -14,9 +14,10 @@ export async function handlerUpdateUser(c: Context) {
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
-  /* if (!canUserModifyUser(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canEditObject(existingUser)) throw new UserForbiddenError("User not authorized");
+
   const updateParams = {
     id: idParam.id,
     data: validateUpdateUserRequest({
@@ -34,10 +35,11 @@ export async function handlerDeleteUser(c: Context) {
   const cfg = c.get("config") as ApiConfig;
   const idParam = c.get("recID") as DoByUUIDRequest;
   const existingUser = await getUserById(cfg.db, idParam) as User;
+
   if (existingUser) {
-    /* if (!canUserDeleteUser(user.capabilities, existingUser)) {
-      throw new UserForbiddenError("User not authorized");
-    } */
+    const abilities = c.get("capabilities");
+    if (!abilities.canDeleteObject(existingUser)) throw new UserForbiddenError("User not authorized");
+
     await deleteUser(cfg.db, idParam);
   }
   return c.body(null, 204);
@@ -47,11 +49,12 @@ export async function handlerGetUserById(c: Context) {
   const cfg = c.get("config") as ApiConfig;
   const idParam = c.get("recID") as DoByUUIDRequest;
   const existingUser = await getUserById(cfg.db, idParam) as User;
+
   if (!existingUser) {
     throw new NotFoundError("User not found");
   }
-  /* if (!canUserAccessUser(user.capabilities, existingUser)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canViewObject(existingUser)) throw new UserForbiddenError("User not authorized");
   return c.json(validateUser(existingUser));
 }
