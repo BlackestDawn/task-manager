@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
-import { NotFoundError } from "@task-manager/common";
+import { NotFoundError, UserForbiddenError } from "@task-manager/common";
 import type { DoByUUIDRequest, Group, UpdateGroupRequest } from "@task-manager/common";
 import { validateGroup, validateUpdateGroupRequest } from "@task-manager/common";
 import { updateGroup, removeGroup, getGroupById } from "../../db/queries/groups";
@@ -14,6 +14,9 @@ export async function handlerUpdateGroup(c: Context) {
   if (!existingGroup) {
     throw new NotFoundError("Group not found");
   }
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canEditObject(existingGroup)) throw new UserForbiddenError("User not authorized");
 
   const updateParams = {
     id: idParam.id,
@@ -31,9 +34,9 @@ export async function handlerDeleteGroup(c: Context) {
   if (!group) {
     throw new NotFoundError("Group not found");
   }
-  /* if (!canUserDeleteGroup(user.capabilities, group)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canDeleteObject(group)) throw new UserForbiddenError("User not authorized");
 
   await removeGroup(cfg.db, idParam);
   return c.body(null, 204);
@@ -46,9 +49,9 @@ export async function handlerGetGroupById(c: Context) {
   if (!result) {
     throw new NotFoundError("Group not found");
   }
-  /* if (!canUserAccessGroup(user.capabilities, result)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canViewObject(result)) throw new UserForbiddenError("User not authorized");
 
   return c.json(validateGroup(result) as Group);
 }

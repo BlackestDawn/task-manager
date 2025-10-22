@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
-import { NotFoundError } from "@task-manager/common";
+import { NotFoundError, UserForbiddenError } from "@task-manager/common";
 import type { AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest, DoByUUIDRequest, User } from "@task-manager/common";
 import {
   validateUserArray, validateTaskArray,
@@ -15,8 +15,11 @@ export async function handlerGetGroupMembers(c: Context) {
   if (!group) {
     throw new NotFoundError("Group not found");
   }
+
+  const abilities = c.get("capabilities");
   const members = await getGroupMembers(cfg.db, idParam);
-  return c.json(validateUserArray(members));
+  const result = members.filter(m => abilities.canViewObject(m));
+  return c.json(validateUserArray(result));
 }
 
 export async function handlerGetGroupTasks(c: Context) {
@@ -27,8 +30,10 @@ export async function handlerGetGroupTasks(c: Context) {
     throw new NotFoundError("Group not found");
   }
 
+  const abilities = c.get("capabilities");
   const tasks = await getGroupTasks(cfg.db, idParam);
-  return c.json(validateTaskArray(tasks));
+  const result = tasks.filter(t => abilities.canViewObject(t));
+  return c.json(validateTaskArray(result));
 }
 
 export async function handlerAddUserToGroup(c: Context) {
@@ -37,12 +42,10 @@ export async function handlerAddUserToGroup(c: Context) {
   const jsonBody = await c.req.json() as AddUserToGroupRequest;
 
   const group = await getGroupById(cfg.db, idParam);
-  if (!group) {
-    throw new NotFoundError("Group not found");
-  }
-  /* if (!canUserAssignToGroup(user.capabilities, group)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+  if (!group) throw new NotFoundError("Group not found");
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canAssignUser(group)) throw new UserForbiddenError("User not authorized");
 
   const params = {
     id: idParam.id,
@@ -59,9 +62,9 @@ export async function handlerRemoveUserFromGroup(c: Context) {
 
   const group = await getGroupById(cfg.db, idParam);
   if (!group) throw new NotFoundError("Group not found");
-  /* if (!canUserRemoveFromGroup(user.capabilities, group)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canRemoveUser(group)) throw new UserForbiddenError("User not authorized");
 
   const params = {
     id: idParam.id,
@@ -79,9 +82,9 @@ export async function handlerAssignTaskToGroup(c: Context) {
 
   const group = await getGroupById(cfg.db, idParam);
   if (!group) throw new NotFoundError("Group not found");
-  /* if (!canUserAssignToGroup(user.capabilities, group)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canAssignTask(group)) throw new UserForbiddenError("User not authorized");
 
   const params = {
     id: idParam.id,
@@ -98,9 +101,9 @@ export async function handlerRemoveTaskFromGroup(c: Context) {
 
   const group = await getGroupById(cfg.db, idParam);
   if (!group) throw new NotFoundError("Group not found");
-  /* if (!canUserRemoveFromGroup(user.capabilities, group)) {
-    throw new UserForbiddenError("User not authorized");
-  } */
+
+  const abilities = c.get("capabilities");
+  if (!abilities.canRemoveTask(group)) throw new UserForbiddenError("User not authorized");
 
   const params = {
     id: idParam.id,
