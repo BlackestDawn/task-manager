@@ -94,6 +94,12 @@ class TokenManager {
         console.warn("Failed to update server cookies", error);
       }
 
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("token_refreshed", {
+          detail: { accessToken: data.accessToken }
+        }));
+      }
+
       return data.accessToken;
     } catch (error) {
       console.error("Error refreshing access token:", error);
@@ -110,7 +116,7 @@ class TokenManager {
       token = tokens.accessToken;
     }
 
-    if (token && this.isTokenExpired(token)){
+    if (token && this.isTokenExpired(token)) {
       console.log("Access token expired, refreshing...");
       const newToken = await this.refreshAccessToken();
       if (!newToken) {

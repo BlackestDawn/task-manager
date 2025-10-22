@@ -6,6 +6,7 @@ import { logoutAction } from "@/lib/actions/auth";
 import HamburgerButton from "./hamburgerButton";
 import menuData from "@/lib/data/menuOptions.json";
 import { tokenManager } from "@/lib/utils/tokenManager";
+import { useAuthContext } from "@/components/auth/clientAuthProvider";
 
 interface HeaderComponentProps {
   isAuthenticated: boolean;
@@ -15,6 +16,7 @@ export default function HeaderComponent({ isAuthenticated }: HeaderComponentProp
   const [isPending, startTransition] = useTransition();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const { refreshAuth } = useAuthContext();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -22,7 +24,11 @@ export default function HeaderComponent({ isAuthenticated }: HeaderComponentProp
   const handleLogout = async () => {
     startTransition(async () => {
       await logoutAction();
+
       tokenManager.clearTokens();
+      await refreshAuth();
+      if (typeof window !== "undefined") localStorage.setItem("auth_changed", Date.now().toString());
+
       router.push("/");
       router.refresh();
     });

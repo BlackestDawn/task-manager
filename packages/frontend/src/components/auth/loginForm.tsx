@@ -5,6 +5,7 @@ import { loginAction } from "@/lib/actions/auth";
 import { LogIn } from "lucide-react";
 import { validateLoginRequest } from "@task-manager/common";
 import { tokenManager } from "@/lib/utils/tokenManager";
+import { useAuthContext } from "./clientAuthProvider";
 
 interface LoginFormProps {
   redirectTo?: string;
@@ -16,6 +17,7 @@ export default function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps)
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
   const router = useRouter();
+  const { refreshAuth } = useAuthContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +28,10 @@ export default function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps)
 
       if (result.success && result.tokens) {
         tokenManager.setToken(result.tokens.accessToken, result.tokens.refreshToken);
+        await refreshAuth();
+
+
+        if (typeof window !== "undefined")localStorage.setItem("auth_changed", Date.now().toString());
 
         router.push(redirectTo);
         router.refresh();
