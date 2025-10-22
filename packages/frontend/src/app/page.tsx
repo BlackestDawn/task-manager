@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, Users, Shield, Database, Code2, Zap, Lock, GitBranch } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: 'Task Manager - Welcome',
@@ -115,19 +116,19 @@ export default async function Page() {
               <ul className="space-y-3">
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">Next.js</span> - React framework with SSR</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://nextjs.org/">Next.js</Link></span> - React framework with SSR</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">TypeScript</span> - Type-safe development</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://www.typescriptlang.org/">TypeScript</Link></span> - Type-safe development</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">Tailwind CSS</span> - Utility-first styling</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://tailwindcss.com/">Tailwind CSS</Link></span> - Utility-first styling</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">CASL React</span> - Declarative permissions</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://casl.js.org/v6/en/package/casl-react">CASL React</Link></span> - Declarative permissions</span>
                 </li>
               </ul>
             </div>
@@ -142,19 +143,15 @@ export default async function Page() {
               <ul className="space-y-3">
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">Bun</span> - Ultra-fast JavaScript runtime</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://hono.dev/">Hono</Link></span> - Lightweight web framework</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">Hono</span> - Lightweight web framework</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://orm.drizzle.team/">Drizzle ORM</Link></span> - Type-safe SQL toolkit</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">Drizzle ORM</span> - Type-safe SQL toolkit</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">PostgreSQL</span> - Relational database</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://www.postgresql.org/">PostgreSQL</Link></span> - Relational database</span>
                 </li>
               </ul>
             </div>
@@ -169,15 +166,15 @@ export default async function Page() {
               <ul className="space-y-3">
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">Zod</span> - Schema validation library</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://zod.dev/">Zod</Link></span> - Schema validation library</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">CASL</span> - Authorization framework</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://casl.js.org/">CASL</Link></span> - Authorization framework</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white">TypeScript</span> - Shared type definitions</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://www.typescriptlang.org/">TypeScript</Link></span> - Shared type definitions</span>
                 </li>
               </ul>
             </div>
