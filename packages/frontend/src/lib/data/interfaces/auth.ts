@@ -7,4 +7,5 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   ability: AppAbility;
+  refreshAuth: () => Promise<void>;
 }
