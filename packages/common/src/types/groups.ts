@@ -6,7 +6,7 @@ const groupSchema = z.object({
   id: z.uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  name: z.string(),
+  name: z.string().min(1),
   description: z.string().nullish().default(null),
 });
 
@@ -30,33 +30,8 @@ export function validateGroupArray(groups: unknown[]): Group[] {
   return result.data;
 }
 
-const groupWithStatsSchema = groupSchema.extend({
-  userCount: z.number().default(0),
-  taskCount: z.number().default(0),
-});
-
-export type GroupWithStats = z.infer<typeof groupWithStatsSchema>;
-
-export function validateGroupWithStats(group: unknown): GroupWithStats {
-  const result = groupWithStatsSchema.safeParse(group);
-  if (!result.success) {
-    console.error('Invalid group with stats:', result.error);
-    throw new Error('Invalid group with stats');
-  }
-  return result.data;
-}
-
-export function validateGroupWithStatsArray(groups: unknown[]): GroupWithStats[] {
-  const result = groupWithStatsSchema.array().safeParse(groups);
-  if (!result.success) {
-    console.error('Invalid group with stats array:', result.error);
-    throw new Error('Invalid group with stats array');
-  }
-  return result.data;
-}
-
 const createGroupRequestSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1),
   description: z.string().nullish().default(null),
 });
 
@@ -72,7 +47,7 @@ export function validateCreateGroupRequest(item: unknown): CreateGroupRequest {
 }
 
 const updateGroupRequestSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1),
   description: z.string().nullish().default(null),
 });
 
