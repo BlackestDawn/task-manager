@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 import { Can as CaslCan } from "@casl/react"
 import { useAuthContext } from "./clientAuthProvider";
 import type { Actions, Subjects, User, Task, Group } from "@task-manager/common";
@@ -13,6 +13,13 @@ interface CanProps {
 
 export function Can({ I, a, field, children }: CanProps) {
   const { ability } = useAuthContext();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <CaslCan I={I} a={a} field={field} ability={ability} >
@@ -23,6 +30,13 @@ export function Can({ I, a, field, children }: CanProps) {
 
 export function Cannot({ I, a, field, children }: CanProps) {
   const { ability } = useAuthContext();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <CaslCan not I={I} a={a} field={field} ability={ability} >
