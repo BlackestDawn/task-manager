@@ -37,7 +37,7 @@ export function validateTaskArray(items: unknown[]): Task[] {
 }
 
 const createTaskRequestSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1),
   description: z.string().nullish().default(null),
   finishBy: z.coerce.date().nullish().default(null),
   userId: z.uuid()
@@ -55,7 +55,7 @@ export function validateCreateTaskRequest(item: unknown): CreateTaskRequest {
 }
 
 const updateTaskRequestSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1),
   description: z.string().nullish().default(null),
   finishBy: z.coerce.date().nullish().default(null),
 });
