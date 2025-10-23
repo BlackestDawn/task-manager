@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { type ApiConfig } from "../../config";
 import type { DoByUUIDRequest } from "@task-manager/common";
-import { UserForbiddenError, validateDoByUUIDRequest, validateUpdateTaskDoneStatusRequest } from "@task-manager/common";
+import { UserForbiddenError, validateDoByUUIDRequest, validateUpdateTaskDoneStatusRequest, validateGroupArray } from "@task-manager/common";
 import { updateTaskDoneStatus, getGroupsForTask, getTaskById } from "../../db/queries/tasks";
 
 export async function handlerMarkDone(c: Context) {
@@ -33,5 +33,5 @@ export async function handlerGetTaskGroups(c: Context) {
 
   const params = validateDoByUUIDRequest(idParam);
   const res = await getGroupsForTask(cfg.db, params);
-  return c.json(res, 200);
+  return c.json(validateGroupArray(res), 200);
 }
