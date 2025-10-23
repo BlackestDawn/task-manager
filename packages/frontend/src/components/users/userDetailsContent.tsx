@@ -9,6 +9,7 @@ import UserStatusSection from "./userStatusSection";
 import { useAuthContext } from "@/components/auth/clientAuthProvider";
 import { Can } from "@/components/auth/can";
 import UserAccesslevelBadge from "./userAccesslevelBadge";
+import UserGroupsSection from "./userGroupsSection";
 
 interface UserDetailsContentProps {
   user: User;
@@ -137,7 +138,7 @@ export default function UserDetailsContent({ user, tasks, groups }: UserDetailsC
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 mb-6">
         <Can I="update" a={user}>
           <UserBasicInfoSection
             user={user}
@@ -168,6 +169,8 @@ export default function UserDetailsContent({ user, tasks, groups }: UserDetailsC
           />
         </Can>
       </div>
+
+      <UserGroupsSection groups={groups} />
     </div>
   );
 }
