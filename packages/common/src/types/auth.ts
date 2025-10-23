@@ -12,7 +12,7 @@ export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 export function validateLoginRequest(item: unknown): LoginRequest {
   const result = LoginRequestSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid login request:', result.error);
+    console.error('Invalid login request:', result.error.message);
     throw new UserNotAuthenticatedError('invalid username or password');
   }
   return result.data;
@@ -21,8 +21,8 @@ export function validateLoginRequest(item: unknown): LoginRequest {
 const LoginResponseSchema = z.object({
   user: UserSchema,
   tokens: z.object({
-    accessToken: z.string(),
-    refreshToken: z.string(),
+    accessToken: z.string().min(1),
+    refreshToken: z.string().min(1),
   }),
 });
 
@@ -31,14 +31,14 @@ export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 export function validateLoginResponse(item: unknown): LoginResponse {
   const result = LoginResponseSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid login response:', result.error);
+    console.error('Invalid login response:', result.error.message);
     throw new Error('Invalid login response');
   }
   return result.data;
 }
 
 const RefreashTokenSchema = z.object({
-  token: z.string(),
+  token: z.string().min(1),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   userId: z.uuid(),
@@ -51,14 +51,14 @@ export type RefreashToken = z.infer<typeof RefreashTokenSchema>;
 export function validateRefreashToken(item: unknown): RefreashToken {
   const result = RefreashTokenSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid refresh token:', result.error);
+    console.error('Invalid refresh token:', result.error.message);
     throw new Error('Invalid refresh token');
   }
   return result.data;
 }
 
 const RegisterRefreashTokenSchema = z.object({
-  token: z.string(),
+  token: z.string().min(1),
   userId: z.uuid(),
   expiresAt: z.coerce.date(),
 });
@@ -68,14 +68,14 @@ export type RegisterRefreashToken = z.infer<typeof RegisterRefreashTokenSchema>;
 export function validateRegisterRefreashToken(item: unknown): RegisterRefreashToken {
   const result = RegisterRefreashTokenSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid register refresh token:', result.error);
+    console.error('Invalid register refresh token:', result.error.message);
     throw new Error('Invalid register refresh token');
   }
   return result.data;
 }
 
 const DoRefreashTokenByTokenSchema = z.object({
-  token: z.string(),
+  token: z.string().min(1),
 });
 
 export type DoRefreashTokenByToken = z.infer<typeof DoRefreashTokenByTokenSchema>;
@@ -83,14 +83,14 @@ export type DoRefreashTokenByToken = z.infer<typeof DoRefreashTokenByTokenSchema
 export function validateRefreashTokenByToken(item: unknown): DoRefreashTokenByToken {
   const result = DoRefreashTokenByTokenSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid refresh token by token:', result.error);
+    console.error('Invalid refresh token by token:', result.error.message);
     throw new Error('Invalid refresh token by token');
   }
   return result.data;
 }
 
 const RefreshAccessTokenResponseSchema = z.object({
-  accessToken: z.string(),
+  accessToken: z.string().min(1),
 });
 
 export type RefreshAccessTokenResponse = z.infer<typeof RefreshAccessTokenResponseSchema>;
@@ -98,7 +98,7 @@ export type RefreshAccessTokenResponse = z.infer<typeof RefreshAccessTokenRespon
 export function validateRefreshAccessTokenResponse(item: unknown): RefreshAccessTokenResponse {
   const result = RefreshAccessTokenResponseSchema.safeParse(item);
   if (!result.success) {
-    console.error('Invalid refresh access token response:', result.error);
+    console.error('Invalid refresh access token response:', result.error.message);
     throw new Error('Invalid refresh access token response');
   }
   return result.data;
