@@ -97,7 +97,7 @@ export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
     .where(inArray(
       groups.id,
       db.select({
-        groupId: userGroups.id
+        groupId: userGroups.groupId
       }).from(userGroups).where(eq(userGroups.userId, params.id))
     ));
   return result;
