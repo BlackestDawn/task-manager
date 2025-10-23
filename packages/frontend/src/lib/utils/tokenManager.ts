@@ -67,7 +67,7 @@ class TokenManager {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify({ token: refreshToken }),
         cache: "no-store",
       });
 
