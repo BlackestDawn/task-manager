@@ -2,11 +2,11 @@ import type { Group } from "@task-manager/common";
 import { Users, Eye } from "lucide-react";
 import Link from "next/link";
 
-interface TaskDetailsContentProps {
+interface TaskGroupsSectionProps {
   groups: Group[];
 }
 
-export default function TaskDetailsContent({ groups }: TaskDetailsContentProps) {
+export default function TaskGroupsSection({ groups }: TaskGroupsSectionProps) {
   return (
     <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
       <div className="px-4 py-5 sm:px-6">

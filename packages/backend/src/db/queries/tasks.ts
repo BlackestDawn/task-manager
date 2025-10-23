@@ -1,9 +1,23 @@
 import { eq, sql, or, inArray } from "drizzle-orm";
 import { type DBConn } from "../../config";
-import type { CreateTaskRequest, UpdateTaskRequest, DoByUUIDRequest, Task, UpdateTaskDoneStatusRequest } from "@task-manager/common";
+import type { CreateTaskRequest, UpdateTaskRequest, DoByUUIDRequest, Task, UpdateTaskDoneStatusRequest, Group } from "@task-manager/common";
 import { tasks, taskGroups, groups, userGroups } from "../schema";
 
 export async function getGroupsForTask(db: DBConn, params: DoByUUIDRequest) {
+  const result = await db.select().from(groups)
+    .where(inArray(
+      groups.id,
+      db.select({
+        groupId: taskGroups.groupId,
+      }).from(taskGroups).where(eq(taskGroups.taskId, params.id))
+    ));
+  return result.map(group => ({
+    __typename: 'Group',
+    ...group,
+  })) as Group[];
+}
+
+async function getGroupIdsForTask(db: DBConn, params: DoByUUIDRequest) {
   const result = await db.select({
     id: groups.id,
   }).from(groups)
@@ -28,7 +42,7 @@ export async function createTask(db: DBConn, params: CreateTaskRequest) {
 export async function updateTask(db: DBConn, params: { id: string, data: UpdateTaskRequest }) {
   const [result] = await db.update(tasks).set(params).where(eq(tasks.id, params.id)).returning();
   if (!result) return null;
-  const groups = await getGroupsForTask(db, params);
+  const groups = await getGroupIdsForTask(db, params);
 
   return {
     __typename: 'Task',
@@ -45,7 +59,7 @@ export async function getAllTasks(db: DBConn) {
   const taskRows = await db.select().from(tasks);
   const result = await Promise.all(
     taskRows.map(async (task) => {
-      const groups = await getGroupsForTask(db, { id: task.id });
+      const groups = await getGroupIdsForTask(db, { id: task.id });
 
       return {
         __typename: 'Task',
@@ -78,7 +92,7 @@ export async function updateTaskDoneStatus(db: DBConn, params: { id: string, dat
     completed: params.data.completed,
     completedAt: params.data.completed ? sql`now()` : null,
   }).where(eq(tasks.id, params.id)).returning();
-  const groups = await getGroupsForTask(db, params);
+  const groups = await getGroupIdsForTask(db, params);
   return {
     __typename: 'Task',
     ...result,
@@ -88,7 +102,7 @@ export async function updateTaskDoneStatus(db: DBConn, params: { id: string, dat
 
 export async function getTasksByUserId(db: DBConn, params: DoByUUIDRequest) {
   const result = await db.select().from(tasks).where(eq(tasks.userId, params.id));
-  const groups = await getGroupsForTask(db, params);
+  const groups = await getGroupIdsForTask(db, params);
   return {
     __typename: 'Task',
     ...result,
@@ -114,7 +128,7 @@ export async function getAllTasksForUser(db: DBConn, params: DoByUUIDRequest) {
     ));
   const result = await Promise.all(
     taskRows.map(async (task) => {
-      const groups = await getGroupsForTask(db, { id: task.id });
+      const groups = await getGroupIdsForTask(db, { id: task.id });
 
       return {
         __typename: 'Task',
