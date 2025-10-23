@@ -9,7 +9,7 @@ export type DoByUUIDRequest = z.infer<typeof DoByUUIDRequestSchema>;
 
 export function validateDoByUUIDRequest(item: unknown): DoByUUIDRequest {
   if (typeof item === 'string') {
-    item = { id: item };
+    item = { id: item.toLocaleLowerCase() };
   }
   const result = DoByUUIDRequestSchema.safeParse(item);
   if (!result.success) {
