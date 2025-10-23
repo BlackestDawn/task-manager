@@ -38,9 +38,9 @@ export function validateUserArray(users: unknown[]): User[] {
 }
 
 const CreateUserRequestSchema = z.object({
-  login: z.string(),
-  password: z.string(),
-  name: z.string(),
+  login: z.string().min(3),
+  password: z.string().min(8),
+  name: z.string().min(1),
   email: z.string().nullish().default(null),
   accessLevel: z.enum(userRoleList).default("user"),
 });
@@ -57,8 +57,8 @@ export function validateCreateUserRequest(item: unknown): CreateUserRequest {
 }
 
 const UpdateUserRequestSchema = z.object({
-  login: z.string(),
-  name: z.string(),
+  login: z.string().min(3),
+  name: z.string().min(1),
   email: z.string().nullish().default(null),
   accessLevel: z.enum(userRoleList).default("user"),
 });
@@ -75,7 +75,7 @@ export function validateUpdateUserRequest(item: unknown): UpdateUserRequest {
 }
 
 const UpdatePasswordRequestSchema = z.object({
-  password: z.string(),
+  password: z.string().min(8),
 });
 
 export type UpdatePasswordRequest = z.infer<typeof UpdatePasswordRequestSchema>;
