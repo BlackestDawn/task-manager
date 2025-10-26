@@ -13,7 +13,6 @@ RUN bun install
 WORKDIR /app/packages/common
 RUN bun install
 RUN bun run build
-RUN bunx tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist
 
 WORKDIR /app/packages/backend
 RUN bun install

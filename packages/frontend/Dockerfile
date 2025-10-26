@@ -18,7 +18,6 @@ RUN bun install
 WORKDIR /app/packages/common
 RUN bun install
 RUN bun run build
-RUN bunx tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist
 
 WORKDIR /app/packages/frontend
 RUN bun remove eslint eslint-config-next eslint-pligin-react-hooks @eslint/eslintrc @next/eslint-plugin-next
@@ -33,6 +32,7 @@ ENV NODE_ENV=production
 # Copy node_modules and built files
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/packages/common ./packages/common
+COPY --from=build /app/packages/frontend/node_modules ./packages/frontend/node_modules
 COPY --from=build /app/packages/frontend/.next ./packages/frontend/.next
 # COPY --from=build /app/packages/frontend/src/public ./packages/frontend/src/public
 COPY --from=build /app/packages/frontend/package.json ./packages/frontend/
