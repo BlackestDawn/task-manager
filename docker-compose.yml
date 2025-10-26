@@ -1,0 +1,87 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: task-manager-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-taskmanager}
+      POSTGRES_USER: ${POSTGRES_USER:-taskmanager}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-taskmanager_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/db/init:/docker-entrypoint-initdb.d
+      - ./docker/db/reset-db.sql:/tmp/reset-db.sql
+      - ./docker/db/sample_data.sql:/tmp/sample_data.sql
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - task-manager-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-taskmanager} -d ${POSTGRES_DB:-taskmanager}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Service
+  backend:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile
+    container_name: task-manager-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PLATFORM: ${PLATFORM:-prod}
+      PORT: ${BACKEND_PORT:-3020}
+      DB_URL: postgresql://${POSTGRES_USER:-taskmanager}:${POSTGRES_PASSWORD:-taskmanager_password}@db:5432/${POSTGRES_DB:-taskmanager}
+      JWT_SECRET: ${JWT_SECRET}
+      APP_DOMAIN: ${APP_DOMAIN:-http://localhost:3000}
+    ports:
+      - "${BACKEND_PORT:-3020}:3020"
+    networks:
+      - task-manager-network
+    healthcheck:
+      test: ["CMD", "bun", "run", "-e", "fetch('http://localhost:3020/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: ./packages/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:3020/api}
+    container_name: task-manager-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PLATFORM: ${PLATFORM:-prod}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:3020/api}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - task-manager-network
+    healthcheck:
+      test: ["CMD", "bun", "run", "-e", "fetch('http://localhost:3000').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  task-manager-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

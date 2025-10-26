@@ -26,7 +26,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "concurrently": "^9.2.1",
-    "dotenv": "^17.2.2"
+    "dotenv": "^17.2.3"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
