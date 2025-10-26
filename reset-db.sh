@@ -1,3 +1,3 @@
 source ./.env
 
-psql "$DB_URL" -f ./reset-db.sql
+psql "$DB_URL" -f ./docker/db/reset-db.sql
