@@ -18,18 +18,3 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
 EOSQL
 
 echo "Database initialized successfully!"
-
-# Check if sample data should be loaded
-if [ "$LOAD_SAMPLE_DATA" = "true" ]; then
-    echo "Loading sample data..."
-    if [ -f /tmp/sample_data.sql ]; then
-        psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /tmp/sample_data.sql
-        echo "Sample data loaded successfully!"
-    else
-        echo "Warning: sample_data.sql file not found, skipping sample data load"
-    fi
-else
-    echo "Skipping sample data load (LOAD_SAMPLE_DATA is not set to true)"
-fi
-
-echo "Database setup complete!"
