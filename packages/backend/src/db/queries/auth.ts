@@ -30,13 +30,3 @@ export async function getValidRefreshTokenByUserId(db: DBConn, params: DoByUUIDR
     ));
   return result;
 }
-
-export async function revokeAllRefreshTokensForUser(db: DBConn, params: DoByUUIDRequest) {
-  const [result] = await db.update(refresh_tokens).set({
-    revokedAt: getTZNormalizedDate(),
-  }).where(and(
-    eq(refresh_tokens.userId, params.id),
-    isNull(refresh_tokens.revokedAt)
-  )).returning();
-  return result;
-}

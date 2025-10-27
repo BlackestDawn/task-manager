@@ -1,6 +1,4 @@
 import z from "zod";
-import { type AppAbility } from "./roles";
-import { type User } from "../types/users";
 import { userRoleList, groupRoleList } from "./roles";
 
 const UserContextSchema = z.object({
@@ -21,9 +19,4 @@ export function validateUserContext(item: unknown): UserContext {
     throw new Error('Invalid user context');
   }
   return result.data;
-}
-
-export type loggedinUser = {
-  capabilities: AppAbility;
-  userInfo: User;
 }
