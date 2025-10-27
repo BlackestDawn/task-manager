@@ -48,17 +48,3 @@ export const corsOptions = {
   credentials: true,
   maxAge: 86400, // 24 hours
 };
-
-export function getSimpleCORSHeaders(origin?: string): Record<string, string> {
-  const allowedOrigin = origin && corsOptions.origin
-    ? (typeof corsOptions.origin === 'function' ? corsOptions.origin(origin) : corsOptions.origin)
-    : envOrDefault('APP_DOMAIN', 'http://localhost:3000');
-
-  return {
-    'Access-Control-Allow-Origin': Array.isArray(allowedOrigin) ? allowedOrigin[0] : allowedOrigin,
-    'Access-Control-Allow-Methods': corsOptions.allowMethods?.join(', ') || 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': corsOptions.allowHeaders?.join(', ') || 'Content-Type, Authorization',
-    'Access-Control-Allow-Credentials': corsOptions.credentials ? 'true' : 'false',
-    'Access-Control-Max-Age': corsOptions.maxAge?.toString() || '86400'
-  };
-}
