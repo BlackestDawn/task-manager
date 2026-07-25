@@ -30,7 +30,7 @@ export default function LayoutVerification() {
       // If ClientAuthProvider is present, window.__INITIAL_AUTH_STATE__ should be read
       // We can't directly test useContext here, but we can check the setup
       hasContext = hasInitialState || hasAuthScript;
-    } catch (e) {
+    } catch {
       hasContext = false;
     }
 
