@@ -20,8 +20,12 @@ export function isThisWeek(date: string | Date | null): boolean {
   testDate.setHours(0, 0, 0, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const firstOfWeek = new Date(today.getDate() - today.getDay() + 1);
-  const lastOfWeek = new Date(today.getDate() - today.getDay() + 7);
+  // Monday-start week. getDay() is 0 (Sun) - 6 (Sat); this maps Monday to 0.
+  const daysSinceMonday = (today.getDay() + 6) % 7;
+  const firstOfWeek = new Date(today);
+  firstOfWeek.setDate(today.getDate() - daysSinceMonday);
+  const lastOfWeek = new Date(firstOfWeek);
+  lastOfWeek.setDate(firstOfWeek.getDate() + 6);
   return testDate >= firstOfWeek && testDate <= lastOfWeek;
 }
 
