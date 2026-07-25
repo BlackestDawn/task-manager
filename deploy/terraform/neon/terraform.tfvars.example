@@ -1,0 +1,2 @@
+app_name  = "task-manager"
+region_id = "aws-eu-central-1"

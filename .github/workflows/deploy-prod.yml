@@ -1,0 +1,104 @@
+name: Deploy to production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Git SHA running on staging to promote. Leave blank to promote whatever is currently running on staging."
+        required: false
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  REGION: ${{ secrets.GCP_REGION }}
+  REPO: apps
+  APP_NAME: task-manager
+  FRONTEND_URL: https://tasks.${{ secrets.DOMAIN }}
+  BACKEND_URL: https://tasks-api.${{ secrets.DOMAIN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Requires a GitHub Environment named "production" with a required
+    # reviewer configured (Settings > Environments) so this job pauses for
+    # manual approval regardless of who triggers the workflow.
+    environment: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Resolve image tag to promote
+        id: resolve
+        run: |
+          TAG="${{ inputs.image_tag }}"
+          if [ -z "$TAG" ]; then
+            TAG=$(gcloud run services describe task-manager-backend-staging \
+              --region "$REGION" \
+              --format='value(spec.template.spec.containers[0].image)' \
+              | sed 's/.*://')
+            echo "No image_tag given — promoting whatever staging is currently running: $TAG"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the exact commit being promoted
+        run: git checkout "${{ steps.resolve.outputs.tag }}"
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      # Backend has no build-time environment baked in, so the exact image
+      # tested on staging is promoted unchanged — no rebuild.
+      - name: Deploy backend to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: task-manager-backend-prod
+          region: ${{ env.REGION }}
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/${{ env.APP_NAME }}-backend:${{ steps.resolve.outputs.tag }}
+          flags: --service-account=${{ secrets.GCP_RUNTIME_SA }} --allow-unauthenticated --port=3020
+          env_vars: |
+            PLATFORM=prod
+            APP_DOMAIN=${{ env.FRONTEND_URL }}
+          secrets: |
+            DB_URL=${{ env.APP_NAME }}-prod-database-url:latest
+            JWT_SECRET=${{ env.APP_NAME }}-prod-jwt-secret:latest
+
+      # Frontend bakes NEXT_PUBLIC_API_URL into the JS bundle at build time,
+      # so the staging image can't be reused as-is — rebuild from the exact
+      # same promoted commit with the prod backend URL baked in instead.
+      - name: Build and push frontend image for prod
+        env:
+          FRONTEND_IMAGE: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/${{ env.APP_NAME }}-frontend:${{ steps.resolve.outputs.tag }}-prod
+        run: |
+          docker build -f packages/frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}/api" \
+            -t "$FRONTEND_IMAGE" .
+          docker push "$FRONTEND_IMAGE"
+          echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$GITHUB_ENV"
+
+      - name: Deploy frontend to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: task-manager-frontend-prod
+          region: ${{ env.REGION }}
+          image: ${{ env.FRONTEND_IMAGE }}
+          flags: --service-account=${{ secrets.GCP_RUNTIME_SA }} --allow-unauthenticated --port=3000
+          env_vars: |
+            NODE_ENV=production
+            PLATFORM=prod

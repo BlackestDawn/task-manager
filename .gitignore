@@ -42,3 +42,11 @@ output.log
 test-frontend/
 old/
 .tanstack/
+
+# terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+**/terraform.tfvars
+crash.log
