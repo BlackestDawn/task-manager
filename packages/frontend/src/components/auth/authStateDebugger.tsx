@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react';
 import { useAuthContext } from './clientAuthProvider';
 import { useMounted } from '@/hooks/useMounted';
 import { checkAuthAction } from '@/lib/actions/auth';
+import type { AuthState } from '@/lib/data/interfaces/auth';
 
 export default function AuthStateDebugger() {
   const mounted = useMounted();
-  const [serverAuthState, setServerAuthState] = useState<any>(null);
-  const [windowState, setWindowState] = useState<any>(null);
+  const [serverAuthState, setServerAuthState] = useState<AuthState | null>(null);
+  const [windowState, setWindowState] = useState<AuthState | null>(null);
   const [cookies, setCookies] = useState<string>('');
   const { user, isAuthenticated, ability } = useAuthContext();
 
@@ -15,7 +16,7 @@ export default function AuthStateDebugger() {
     // Check window state
     if (typeof window !== 'undefined') {
       Promise.resolve().then(() => {
-        setWindowState(window.__INITIAL_AUTH_STATE__);
+        setWindowState(window.__INITIAL_AUTH_STATE__ ?? null);
         setCookies(document.cookie);
       });
 
