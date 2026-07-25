@@ -1,4 +1,4 @@
-import { type Task } from '@task-manager/common';
+import type { Task } from '../types/tasks';
 
 export const getTZNormalizedDate = (offset?: number) => {
   const now = new Date();

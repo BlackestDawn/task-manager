@@ -1,5 +1,5 @@
 import { AbilityBuilder, createMongoAbility, type PureAbility } from "@casl/ability";
-import { type UserContext } from "./types";
+import type { UserContext } from "./types";
 import type { User } from "../types/users";
 import type { Group } from "../types/groups";
 import type { Task } from "../types/tasks";

@@ -25,13 +25,14 @@ jobs:
       - name: Check build
         run: bun run build
 
-      # TODO: re-enable once packages/common/src/permissions/types.ts's
-      # z.enum(groupRoleList) load-order bug is fixed (5 of 8 test files
-      # currently fail to even load — see the 105-passing/5-erroring split
-      # from `bun run test` locally) and CI env vars (DB_URL, PLATFORM,
-      # JWT_SECRET) are wired in for the backend's config.ts.
-      # - name: Run unit tests
-      #   run: bun run test
+      - name: Run unit tests
+        env:
+          # Dummy values so the backend's config.ts (envOrThrow at module
+          # scope) can load — these tests don't touch a real database.
+          DB_URL: postgresql://postgres:postgres@localhost:5432/taskmanager
+          PLATFORM: prod
+          JWT_SECRET: ci-test-secret
+        run: bun run test
 
   # TODO: docker-smoke-test job (build + run both service images against a
   # Postgres service container, hit /health) once the two-service Docker
