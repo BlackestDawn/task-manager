@@ -25,7 +25,7 @@ export async function handlerCreateTask(c: Context) {
   const jsonBody = await c.req.json() as CreateTaskRequest;
 
   const abilities = c.get("capabilities");
-  if (!abilities.canCreateObject("task")) throw new UserForbiddenError("User not authorized");
+  if (!abilities.canCreateObject("Task")) throw new UserForbiddenError("User not authorized");
 
   const createParams: CreateTaskRequest = validateCreateTaskRequest({
     ...jsonBody,

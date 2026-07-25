@@ -14,7 +14,7 @@ export async function handlerMarkDone(c: Context) {
   if (!abilities.canViewObject(task)) throw new UserForbiddenError("User not authorized");
 
   const jsonBody = await c.req.json();
-  if (!abilities.canEditObjectField(task, "completed")) throw new UserForbiddenError("User not authorized");
+  if (!abilities.canMarkTaskDone(task)) throw new UserForbiddenError("User not authorized");
 
   const params = {
     id: idParam.id,

@@ -16,7 +16,7 @@ export async function handlerGetUsers(c: Context) {
 export async function handlerCreateUser(c: Context) {
   const cfg = c.get("config") as ApiConfig;
   const abilities = c.get("capabilities");
-  if (!abilities.canCreateObject("user")) throw new UserForbiddenError("User not authorized");
+  if (!abilities.canCreateObject("User")) throw new UserForbiddenError("User not authorized");
 
   const jsonBody = await c.req.json() as CreateUserRequest;
   const params: CreateUserRequest = validateCreateUserRequest({

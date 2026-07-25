@@ -8,7 +8,7 @@ export async function handlerCreateGroup(c: Context) {
   const cfg = c.get("config") as ApiConfig;
   const jsonBody = await c.req.json() as CreateGroupRequest;
   const abilities = c.get("capabilities");
-  if (!abilities.canCreateObject("group")) throw new UserForbiddenError("User not authorized");
+  if (!abilities.canCreateObject("Group")) throw new UserForbiddenError("User not authorized");
 
   const createParams: CreateGroupRequest = validateCreateGroupRequest({
     ...jsonBody,

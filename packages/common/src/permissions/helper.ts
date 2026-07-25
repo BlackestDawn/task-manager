@@ -73,4 +73,9 @@ export class AbilityChecker {
     if (!subject) return false;
     return this.abilities.can("removeUser", subject);
   }
+
+  canMarkTaskDone(subject?: any) {
+    if (!subject) return false;
+    return this.abilities.can("markDone", subject);
+  }
 }

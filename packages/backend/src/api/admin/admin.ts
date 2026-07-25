@@ -9,6 +9,6 @@ export async function handlerResetDb(c: Context) {
     throw new UserForbiddenError("This endpoint is only available in development mode");
   }
 
-  resetDb(cfg.db);
+  await resetDb(cfg.db);
   return c.json({ message: "Database reset successfully" });
 }
