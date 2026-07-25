@@ -6,7 +6,7 @@
     "dev": "bun --watch --verbose src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target node",
     "start": "bun dist/index.js",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist *.tsbuildinfo",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
