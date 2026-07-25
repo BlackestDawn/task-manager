@@ -19,11 +19,10 @@ export async function authMiddleware(c: Context, next: Next) {
   const userId = await validateJWT(authHeader);
   console.warn(`Authenticated user ID: ${userId}`);
 
-  const userInfo = validateUser(
-    await getUserById(cfg.db, validateDoByUUIDRequest(userId))
-  );
+  const userRow = await getUserById(cfg.db, validateDoByUUIDRequest(userId));
+  if (!userRow) throw new NotFoundError("User not found");
+  const userInfo = validateUser(userRow);
 
-  if (!userInfo) throw new NotFoundError("User not found");
   if (userInfo.disabled) throw new UserForbiddenError("User is disabled");
 
   const capabilities = new AbilityChecker({ user: userInfo });
