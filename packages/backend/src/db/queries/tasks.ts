@@ -40,7 +40,7 @@ export async function createTask(db: DBConn, params: CreateTaskRequest) {
 }
 
 export async function updateTask(db: DBConn, params: { id: string, data: UpdateTaskRequest }) {
-  const [result] = await db.update(tasks).set(params).where(eq(tasks.id, params.id)).returning();
+  const [result] = await db.update(tasks).set(params.data).where(eq(tasks.id, params.id)).returning();
   if (!result) return null;
   const groups = await getGroupIdsForTask(db, params);
 
@@ -74,6 +74,7 @@ export async function getAllTasks(db: DBConn) {
 
 export async function getTaskById(db: DBConn, params: DoByUUIDRequest) {
   const [result] = await db.select().from(tasks).where(eq(tasks.id, params.id));
+  if (!result) return null;
   const groups = await db.select(
     {
       id: taskGroups.groupId,
@@ -92,6 +93,7 @@ export async function updateTaskDoneStatus(db: DBConn, params: { id: string, dat
     completed: params.data.completed,
     completedAt: params.data.completed ? sql`now()` : null,
   }).where(eq(tasks.id, params.id)).returning();
+  if (!result) return null;
   const groups = await getGroupIdsForTask(db, params);
   return {
     __typename: 'Task',

@@ -34,6 +34,42 @@ jobs:
           JWT_SECRET: ci-test-secret
         run: bun run test
 
+  integration-tests:
+    runs-on: ubuntu-latest
+    # DB query builder tests (packages/backend/src/db/queries/*.integration.test.ts)
+    # against a real Postgres — see vitest.integration.config.ts. Locally
+    # this same suite runs via `bun run test:integration`, which manages its
+    # own disposable container instead of relying on a GitHub-managed
+    # service container.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: taskmanager_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run integration tests
+        env:
+          DB_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
+        run: bunx vitest run --config vitest.integration.config.ts
+
   # TODO: docker-smoke-test job (build + run both service images against a
   # Postgres service container, hit /health) once the two-service Docker
   # setup here is worth automating that way — see urlshortener's

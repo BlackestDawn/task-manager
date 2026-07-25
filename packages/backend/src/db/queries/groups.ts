@@ -1,4 +1,4 @@
-import { eq, and, inArray, sql } from "drizzle-orm";
+import { eq, and, inArray, sql, count } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { groups, users, userGroups, tasks, taskGroups } from "../schema";
 import type { DoByUUIDRequest, CreateGroupRequest, UpdateGroupRequest, AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest } from "@task-manager/common";
@@ -8,6 +8,7 @@ import { AlreadyExistsConflictError } from "@task-manager/common";
 
 export async function getGroupById(db: DBConn, params: DoByUUIDRequest) {
   const [result] = await db.select().from(groups).where(eq(groups.id, params.id));
+  if (!result) return null;
   return {
     __typename: 'Group',
     ...result,
@@ -15,14 +16,25 @@ export async function getGroupById(db: DBConn, params: DoByUUIDRequest) {
 }
 
 export async function getGroups(db: DBConn, params?: DoByUUIDRequest) {
+  // Raw sql`...` template interpolation of column references doesn't
+  // qualify them by table, so a plain `${groups.id}` inside a subquery
+  // whose FROM table has its own `id` column (user_groups, task_groups)
+  // silently resolves to that inner column instead — correlate via the
+  // query builder instead so drizzle qualifies everything correctly.
+  const userCountSubquery = db.select({ value: count() }).from(userGroups).where(eq(userGroups.groupId, groups.id));
+  const taskCountSubquery = db.select({ value: count() }).from(taskGroups).where(eq(taskGroups.groupId, groups.id));
+
   let query = db.select({
     id: groups.id,
     name: groups.name,
     description: groups.description,
     createdAt: groups.createdAt,
     updatedAt: groups.updatedAt,
-    userCount: sql<number>`(select count(*) from ${userGroups} where ${userGroups.groupId} = ${groups.id})`.as('userCount'),
-    taskCount: sql<number>`(select count(*) from ${taskGroups} where ${taskGroups.groupId} = ${groups.id})`.as('taskCount'),
+    // count(*) is bigint, which postgres.js returns as a string to avoid
+    // precision loss — cast to int32 (group/task counts are always small)
+    // so callers actually get a JS number, matching the sql<number> type.
+    userCount: sql<number>`(${userCountSubquery})::int`.as('userCount'),
+    taskCount: sql<number>`(${taskCountSubquery})::int`.as('taskCount'),
   }).from(groups);
 
   /*   if (params?.id) {
@@ -57,6 +69,7 @@ export async function createGroup(db: DBConn, params: CreateGroupRequest) {
 
 export async function updateGroup(db: DBConn, params: { id: string, data: UpdateGroupRequest }) {
   const [result] = await db.update(groups).set(params.data).where(eq(groups.id, params.id)).returning();
+  if (!result) return null;
   return {
     __typename: 'Group',
     ...result,

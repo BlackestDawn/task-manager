@@ -10,10 +10,11 @@ export async function handlerUpdateGroup(c: Context) {
   const idParam = c.get("recID") as DoByUUIDRequest;
   const jsonBody = await c.req.json() as UpdateGroupRequest;
 
-  const existingGroup = validateGroup(await getGroupById(cfg.db, idParam));
-  if (!existingGroup) {
+  const existingGroupRow = await getGroupById(cfg.db, idParam);
+  if (!existingGroupRow) {
     throw new NotFoundError("Group not found");
   }
+  const existingGroup = validateGroup(existingGroupRow);
 
   const abilities = c.get("capabilities");
   if (!abilities.canEditObject(existingGroup)) throw new UserForbiddenError("User not authorized");
@@ -24,6 +25,7 @@ export async function handlerUpdateGroup(c: Context) {
   };
 
   const result = await updateGroup(cfg.db, updateParams);
+  if (!result) throw new NotFoundError("Group not found");
   return c.json(validateGroup(result) as Group);
 }
 

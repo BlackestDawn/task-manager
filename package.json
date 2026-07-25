@@ -20,6 +20,7 @@
     "test:frontend": "bun --filter @task-manager/frontend test",
     "test:common": "bun --filter @task-manager/common test",
     "test": "vitest --run",
+    "test:integration": "bash scripts/run-integration-tests.sh",
     "lint:frontend": "bun --filter @task-manager/frontend lint",
     "typecheck:backend": "tsc --noEmit -p packages/backend/tsconfig.json",
     "typecheck:frontend": "tsc --noEmit -p packages/frontend/tsconfig.json",
