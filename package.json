@@ -22,8 +22,9 @@
     "test": "vitest --run",
     "lint:frontend": "bun --filter @task-manager/frontend lint",
     "typecheck:backend": "tsc --noEmit -p packages/backend/tsconfig.json",
+    "typecheck:frontend": "tsc --noEmit -p packages/frontend/tsconfig.json",
     "typecheck:common": "tsc --noEmit -p packages/common/tsconfig.json",
-    "lint": "bun run build:common && concurrently 'bun run lint:frontend' 'bun run typecheck:backend' 'bun run typecheck:common'"
+    "lint": "bun run build:common && concurrently 'bun run lint:frontend' 'bun run typecheck:backend' 'bun run typecheck:frontend' 'bun run typecheck:common'"
   },
   "module": "index.ts",
   "type": "module",
