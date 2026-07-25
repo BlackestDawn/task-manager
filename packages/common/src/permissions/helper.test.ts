@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { AbilityChecker } from './helper';
 import { defineAbilityFor } from './roles';
 import type { UserContext } from './types';
