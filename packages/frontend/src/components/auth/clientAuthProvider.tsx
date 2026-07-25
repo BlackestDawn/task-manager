@@ -42,7 +42,7 @@ export function ClientAuthProvider({ children }: ClientAuthProviderPops) {
   };
 
   useEffect(() => {
-    if (!authState.user && typeof window !== "undefined") refreshAuth();
+    if (!authState.user && typeof window !== "undefined") Promise.resolve().then(refreshAuth);
 
     const interval = setInterval(() => {
       refreshAuth();

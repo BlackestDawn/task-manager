@@ -1,7 +1,8 @@
 'use client';
-import { type ReactNode, useState, useEffect } from "react";
+import { type ReactNode } from "react";
 import { Can as CaslCan } from "@casl/react"
 import { useAuthContext } from "./clientAuthProvider";
+import { useMounted } from "@/hooks/useMounted";
 import type { Actions, Subjects, User, Task, Group } from "@task-manager/common";
 
 interface CanProps {
@@ -13,11 +14,7 @@ interface CanProps {
 
 export function Can({ I, a, field, children }: CanProps) {
   const { ability } = useAuthContext();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   if (!mounted) return null;
 
@@ -30,11 +27,7 @@ export function Can({ I, a, field, children }: CanProps) {
 
 export function Cannot({ I, a, field, children }: CanProps) {
   const { ability } = useAuthContext();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   if (!mounted) return null;
 

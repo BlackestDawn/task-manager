@@ -42,7 +42,7 @@ export default function LayoutVerification() {
       layoutCorrect: hasAuthScript && windowState,
     };
 
-    setChecks(allChecks);
+    Promise.resolve().then(() => setChecks(allChecks));
 
     // Log to console for debugging
     console.log('🔍 Layout Verification:', allChecks);

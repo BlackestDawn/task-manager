@@ -39,7 +39,7 @@ export default function GroupTasksListSection({ group, tasks, isEditing, onEdit,
 
   useEffect(() => {
     if (isEditing && allTasks.length === 0) {
-      setLoadingTasks(true);
+      Promise.resolve().then(() => setLoadingTasks(true));
       getTasksAction().then(tasks => {
         setAllTasks(tasks);
         setLoadingTasks(false);
