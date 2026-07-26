@@ -39,5 +39,34 @@ export default defineConfig({
     // frontend's — it only calls expect.extend(), no DOM access at import
     // time — so this doesn't need per-project scoping.
     setupFiles: ['./packages/frontend/src/testHelpers/setupTests.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      reportsDirectory: './coverage',
+      include: ['packages/*/src/**/*.{ts,tsx}'],
+      exclude: [
+        ...configDefaults.coverage.exclude,
+        '**/*.test.{ts,tsx}',
+        '**/*.integration.test.ts',
+        '**/testHelpers/**',
+        '**/db/migrations/**',
+        // Barrel re-export files — trivial pass-throughs unit tests never
+        // import directly, so they'd otherwise show as 0% for no signal.
+        'packages/*/src/index.ts',
+        // DB query builders are exercised by the real-Postgres integration
+        // suite (test:integration), not this unit run — counting them here
+        // would just show a permanent 0%.
+        'packages/backend/src/db/queries/**',
+        // Next.js route wiring (page/layout/route.ts) and Hono route
+        // registration are thin composition over already-tested
+        // components/handlers — see this session's earlier judgment call
+        // that these are wiring, not logic worth unit-testing directly.
+        'packages/frontend/src/app/**',
+        '**/routes.ts',
+        // Pure type/interface declarations — no runtime logic to cover.
+        'packages/frontend/src/lib/data/interfaces.ts',
+        'packages/frontend/src/lib/data/interfaces/**',
+      ],
+    },
   },
 })

@@ -29,7 +29,7 @@
     "@types/bun": "latest",
     "@types/jsonwebtoken": "^9.0.10",
     "drizzle-kit": "^0.31.5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
