@@ -49,9 +49,13 @@ export function defineAbilityFor(user: UserContext | null): AppAbility {
   if (user.accessLevel === "manager") {
     allow("manage", "Group");
     allow("create", "User");
-    allow("update", "User", ["disabled", "name", "email", "password"]);
+    allow("update", "User", ["disabled", "name", "email", "password", "accessLevel"]);
     allow("delete", "User");
   }
+
+  // No one may change their own disabled/accessLevel status — admins are
+  // exempt (they return above before reaching this rule).
+  forbid("update", "User", ["disabled", "accessLevel"], { id: user.id });
 
   user.groups.forEach(({ id: groupId, role }) => {
     switch (role) {

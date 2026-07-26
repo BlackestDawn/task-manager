@@ -191,15 +191,11 @@ describe("UserDetailsContent — permission gating", () => {
     expect(screen.getByText(/PasswordSection stub/)).toBeInTheDocument();
   });
 
-  // Known gap (not introduced here, left as-is by design decision): self-update
-  // in roles.ts only forbids the "login" field, so a plain user's own
-  // `disabled` field is still editable — the status section is shown even for
-  // a non-admin/manager viewing their own profile.
-  it("also shows the status section for a plain user viewing their own profile (self-disable is currently permitted)", () => {
+  it("hides the status section for a plain user viewing their own profile (self-disable is forbidden)", () => {
     mockCurrentUser({ id: CURRENT_USER_ID, accessLevel: "user", groups: [] });
     render(<UserDetailsContent user={makeUser({ id: CURRENT_USER_ID })} tasks={[]} groups={[]} />);
 
-    expect(screen.getByText(/StatusSection stub/)).toBeInTheDocument();
+    expect(screen.queryByText(/StatusSection stub/)).not.toBeInTheDocument();
   });
 });
 

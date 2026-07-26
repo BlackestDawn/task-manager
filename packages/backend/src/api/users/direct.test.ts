@@ -103,6 +103,96 @@ describe("handlerUpdateUser", () => {
 
     expect(result.data.name).toBe("Renamed");
   });
+
+  it("rejects a user attempting to change their own login", async () => {
+    vi.mocked(getUserById).mockResolvedValue(makeUserRow() as any);
+
+    const c = makeContext({
+      get: { recID: { id: USER_ID }, capabilities: makeAbilities({ id: USER_ID }) },
+      jsonBody: { login: "newlogin" },
+    });
+
+    await expect(handlerUpdateUser(c)).rejects.toThrow("User not authorized");
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects a user attempting to change their own accessLevel (regression: self privilege escalation)", async () => {
+    vi.mocked(getUserById).mockResolvedValue(makeUserRow() as any);
+
+    const c = makeContext({
+      get: { recID: { id: USER_ID }, capabilities: makeAbilities({ id: USER_ID }), user: makeUserRow() },
+      jsonBody: { accessLevel: "admin" },
+    });
+
+    await expect(handlerUpdateUser(c)).rejects.toThrow("User not authorized");
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects a manager attempting to change their own accessLevel", async () => {
+    vi.mocked(getUserById).mockResolvedValue(makeUserRow({ accessLevel: "manager" }) as any);
+
+    const c = makeContext({
+      get: {
+        recID: { id: USER_ID },
+        capabilities: makeAbilities({ id: USER_ID, accessLevel: "manager" }),
+        user: makeUserRow({ accessLevel: "manager" }),
+      },
+      jsonBody: { accessLevel: "user" },
+    });
+
+    await expect(handlerUpdateUser(c)).rejects.toThrow("User not authorized");
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("allows a manager to change another user's accessLevel to a non-admin role", async () => {
+    vi.mocked(getUserById).mockResolvedValue(makeUserRow({ id: OTHER_USER_ID }) as any);
+    vi.mocked(updateUser).mockResolvedValue(makeUserRow({ id: OTHER_USER_ID, accessLevel: "manager" }) as any);
+
+    const c = makeContext({
+      get: {
+        recID: { id: OTHER_USER_ID },
+        capabilities: makeAbilities({ id: USER_ID, accessLevel: "manager" }),
+        user: makeUserRow({ id: USER_ID, accessLevel: "manager" }),
+      },
+      jsonBody: { accessLevel: "manager" },
+    });
+    const result = await handlerUpdateUser(c) as any;
+
+    expect(result.data.accessLevel).toBe("manager");
+  });
+
+  it("rejects a manager attempting to promote another user to admin", async () => {
+    vi.mocked(getUserById).mockResolvedValue(makeUserRow({ id: OTHER_USER_ID }) as any);
+
+    const c = makeContext({
+      get: {
+        recID: { id: OTHER_USER_ID },
+        capabilities: makeAbilities({ id: USER_ID, accessLevel: "manager" }),
+        user: makeUserRow({ id: USER_ID, accessLevel: "manager" }),
+      },
+      jsonBody: { accessLevel: "admin" },
+    });
+
+    await expect(handlerUpdateUser(c)).rejects.toThrow("User not authorized");
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("allows an admin to promote another user to admin", async () => {
+    vi.mocked(getUserById).mockResolvedValue(makeUserRow({ id: OTHER_USER_ID }) as any);
+    vi.mocked(updateUser).mockResolvedValue(makeUserRow({ id: OTHER_USER_ID, accessLevel: "admin" }) as any);
+
+    const c = makeContext({
+      get: {
+        recID: { id: OTHER_USER_ID },
+        capabilities: makeAbilities({ id: USER_ID, accessLevel: "admin" }),
+        user: makeUserRow({ id: USER_ID, accessLevel: "admin" }),
+      },
+      jsonBody: { accessLevel: "admin" },
+    });
+    const result = await handlerUpdateUser(c) as any;
+
+    expect(result.data.accessLevel).toBe("admin");
+  });
 });
 
 describe("handlerDeleteUser", () => {
