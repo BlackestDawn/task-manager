@@ -100,10 +100,87 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
-  # TODO: docker-smoke-test job (build + run both service images against a
-  # Postgres service container, hit /health) once the two-service Docker
-  # setup here is worth automating that way — see urlshortener's
-  # docker-smoke-test job for the shape.
+  docker-smoke-test:
+    runs-on: ubuntu-latest
+    # Minimal check that the actual images deploy-staging.yml/deploy-prod.yml
+    # ship (not just `bun run build`) build and boot correctly — e2e-tests
+    # above already covers real user flows by running the services straight
+    # from source, so this only needs to prove the Docker artifacts come up.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: taskmanager_smoke
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build backend image
+        run: docker build -f packages/backend/Dockerfile -t task-manager-backend:smoke .
+
+      - name: Build frontend image
+        run: |
+          docker build -f packages/frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=http://localhost:3020/api \
+            -t task-manager-frontend:smoke .
+
+      - name: Start backend container
+        run: |
+          docker run -d --name backend-smoke --network host \
+            -e DB_URL=postgresql://postgres:postgres@localhost:5432/taskmanager_smoke \
+            -e PLATFORM=prod \
+            -e JWT_SECRET=smoke-test-secret \
+            -e PORT=3020 \
+            task-manager-backend:smoke
+
+      - name: Wait for backend /health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3020/health > /dev/null; then
+              echo "Backend is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Backend never became healthy"
+          docker logs backend-smoke
+          exit 1
+
+      - name: Start frontend container
+        run: docker run -d --name frontend-smoke --network host task-manager-frontend:smoke
+
+      - name: Wait for frontend to respond
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000 > /dev/null; then
+              echo "Frontend is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Frontend never became healthy"
+          docker logs frontend-smoke
+          exit 1
+
+      - name: Show container logs on failure
+        if: failure()
+        run: |
+          echo "--- backend logs ---"
+          docker logs backend-smoke || true
+          echo "--- frontend logs ---"
+          docker logs frontend-smoke || true
+
+      - name: Clean up containers
+        if: always()
+        run: docker rm -f backend-smoke frontend-smoke || true
 
   # TODO: coverage job, once there's a coverage tool/threshold decided for
   # the Bun/Vitest side — see urlshortener's coverage job + coverage-baseline.yml
