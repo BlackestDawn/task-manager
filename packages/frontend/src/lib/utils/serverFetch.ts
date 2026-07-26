@@ -109,9 +109,9 @@ async function serverFetch<T>(endpoint: string, options: ServerFetchOptions = {}
 
       if (!retryResponse.ok) {
         const errorData = await retryResponse.json().catch(() => ({
-          message: `Request failed: ${retryResponse.status}`
+          error: `Request failed: ${retryResponse.status}`
         }));
-        throw new Error(errorData.message || `API Error: ${retryResponse.status}`);
+        throw new Error(errorData.error || `API Error: ${retryResponse.status}`);
       }
 
       return parseResponse<T>(retryResponse);
@@ -125,9 +125,9 @@ async function serverFetch<T>(endpoint: string, options: ServerFetchOptions = {}
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({
-      message: `Request failed: ${response.status}`
+      error: `Request failed: ${response.status}`
     }));
-    throw new Error(errorData.message || `API Error: ${response.status}`);
+    throw new Error(errorData.error || `API Error: ${response.status}`);
   }
 
   return parseResponse<T>(response);

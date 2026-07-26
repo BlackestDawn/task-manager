@@ -25,8 +25,10 @@ export default defineConfig({
   test: {
     // Integration tests need a real Postgres and run separately via
     // `bun run test:integration` (see vitest.integration.config.ts) — keep
-    // the default `bun run test` DB-free and fast.
-    exclude: [...configDefaults.exclude, '**/*.integration.test.ts'],
+    // the default `bun run test` DB-free and fast. E2E specs (also
+    // *.spec.ts, which vitest's default include would otherwise match) run
+    // via Playwright through `bun run test:e2e`, not vitest.
+    exclude: [...configDefaults.exclude, '**/*.integration.test.ts', 'e2e/**'],
     // Component/hook tests need a DOM; backend/common stay on the faster
     // default "node" environment since they never touch one.
     environmentMatchGlobs: [

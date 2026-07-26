@@ -21,6 +21,7 @@
     "test:common": "bun --filter @task-manager/common test",
     "test": "vitest --run",
     "test:integration": "bash scripts/run-integration-tests.sh",
+    "test:e2e": "bash scripts/run-e2e-tests.sh",
     "lint:frontend": "bun --filter @task-manager/frontend lint",
     "typecheck:backend": "tsc --noEmit -p packages/backend/tsconfig.json",
     "typecheck:frontend": "tsc --noEmit -p packages/frontend/tsconfig.json",
@@ -30,6 +31,7 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@types/bun": "latest",
     "concurrently": "^9.2.1",
     "dotenv": "^17.2.3"

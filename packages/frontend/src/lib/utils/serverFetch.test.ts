@@ -282,7 +282,7 @@ describe("error responses (non-401)", () => {
   });
 
   it("throws using the API's error message", async () => {
-    fetchMock.mockResolvedValue(jsonResponse({ message: "Task not found" }, { status: 404 }));
+    fetchMock.mockResolvedValue(jsonResponse({ error: "Task not found" }, { status: 404 }));
     await expect(serverGet("/tasks/missing")).rejects.toThrow("Task not found");
   });
 
@@ -295,7 +295,7 @@ describe("error responses (non-401)", () => {
 describe("401 handling and token refresh", () => {
   it("does not attempt a refresh when skipAuth is set, and just throws", async () => {
     mockCookies({ accessToken: VALID_TOKEN });
-    fetchMock.mockResolvedValue(jsonResponse({ message: "unauthorized" }, { status: 401 }));
+    fetchMock.mockResolvedValue(jsonResponse({ error: "unauthorized" }, { status: 401 }));
 
     await expect(serverGet("/tasks", { skipAuth: true })).rejects.toThrow("unauthorized");
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -303,7 +303,7 @@ describe("401 handling and token refresh", () => {
 
   it("does not attempt a refresh when skipRefresh is set, and just throws", async () => {
     mockCookies({ accessToken: VALID_TOKEN });
-    fetchMock.mockResolvedValue(jsonResponse({ message: "unauthorized" }, { status: 401 }));
+    fetchMock.mockResolvedValue(jsonResponse({ error: "unauthorized" }, { status: 401 }));
 
     await expect(serverGet("/tasks", { skipRefresh: true })).rejects.toThrow("unauthorized");
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -312,7 +312,7 @@ describe("401 handling and token refresh", () => {
   it("refreshes the token and retries the request on a 401", async () => {
     mockCookies({ accessToken: VALID_TOKEN, refreshToken: REFRESH_TOKEN });
     fetchMock
-      .mockResolvedValueOnce(jsonResponse({ message: "unauthorized" }, { status: 401 })) // original request
+      .mockResolvedValueOnce(jsonResponse({ error: "unauthorized" }, { status: 401 })) // original request
       .mockResolvedValueOnce(jsonResponse({ accessToken: "refreshed-token" })) // refresh call
       .mockResolvedValueOnce(jsonResponse({ id: "1", title: "A task" })); // retried request
 
@@ -330,7 +330,7 @@ describe("401 handling and token refresh", () => {
 
   it("redirects to /login when there's no refresh token to use", async () => {
     mockCookies({ accessToken: VALID_TOKEN });
-    fetchMock.mockResolvedValue(jsonResponse({ message: "unauthorized" }, { status: 401 }));
+    fetchMock.mockResolvedValue(jsonResponse({ error: "unauthorized" }, { status: 401 }));
 
     await expect(serverGet("/tasks")).rejects.toThrow("NEXT_REDIRECT:/login");
     expect(redirect).toHaveBeenCalledWith("/login");
@@ -339,7 +339,7 @@ describe("401 handling and token refresh", () => {
   it("redirects to /login when the refresh call itself fails", async () => {
     mockCookies({ accessToken: VALID_TOKEN, refreshToken: REFRESH_TOKEN });
     fetchMock
-      .mockResolvedValueOnce(jsonResponse({ message: "unauthorized" }, { status: 401 })) // original request
+      .mockResolvedValueOnce(jsonResponse({ error: "unauthorized" }, { status: 401 })) // original request
       .mockResolvedValueOnce(new Response(null, { status: 401 })); // refresh call itself fails
 
     await expect(serverGet("/tasks")).rejects.toThrow("NEXT_REDIRECT:/login");
@@ -349,9 +349,9 @@ describe("401 handling and token refresh", () => {
   it("redirects to /login when the retried request also fails", async () => {
     mockCookies({ accessToken: VALID_TOKEN, refreshToken: REFRESH_TOKEN });
     fetchMock
-      .mockResolvedValueOnce(jsonResponse({ message: "unauthorized" }, { status: 401 })) // original request
+      .mockResolvedValueOnce(jsonResponse({ error: "unauthorized" }, { status: 401 })) // original request
       .mockResolvedValueOnce(jsonResponse({ accessToken: "refreshed-token" })) // refresh succeeds
-      .mockResolvedValueOnce(jsonResponse({ message: "still unauthorized" }, { status: 401 })); // retry fails too
+      .mockResolvedValueOnce(jsonResponse({ error: "still unauthorized" }, { status: 401 })); // retry fails too
 
     await expect(serverGet("/tasks")).rejects.toThrow("NEXT_REDIRECT:/login");
     expect(redirect).toHaveBeenCalledWith("/login");

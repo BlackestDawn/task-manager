@@ -76,9 +76,12 @@ describe("TaskStatusSection — edit mode", () => {
     );
     expect(screen.getByText(/marked as/).textContent).toMatch(/in progress/);
 
-    await user.click(screen.getByRole("button", { name: "" }));
+    const toggle = screen.getByRole("switch");
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+    await user.click(toggle);
 
     expect(screen.getByText(/marked as/).textContent).toMatch(/completed/);
+    expect(toggle).toHaveAttribute("aria-checked", "true");
     await vi.waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
     expect(updateTaskDoneStatusAction).toHaveBeenCalledWith("task-1", { completed: true });
   });
@@ -90,7 +93,7 @@ describe("TaskStatusSection — edit mode", () => {
     render(
       <TaskStatusSection task={makeTask({ completed: false })} isEditing={true} onEdit={vi.fn()} onCancel={vi.fn()} onSuccess={vi.fn()} />
     );
-    await user.click(screen.getByRole("button", { name: "" }));
+    await user.click(screen.getByRole("switch"));
 
     expect(await screen.findByText("Status update failed")).toBeInTheDocument();
     expect(screen.getByText(/marked as/).textContent).toMatch(/in progress/);
