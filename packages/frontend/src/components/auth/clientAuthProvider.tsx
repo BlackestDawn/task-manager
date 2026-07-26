@@ -49,7 +49,8 @@ export function ClientAuthProvider({ children }: ClientAuthProviderPops) {
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [authState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {

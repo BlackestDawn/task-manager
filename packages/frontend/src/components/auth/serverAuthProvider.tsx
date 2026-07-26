@@ -10,7 +10,7 @@ interface ServerAuthProviderProps {
 
 export async function ServerAuthProvider({
   children,
-  initialUser = null,
+  initialUser,
   initialIsAuthenticated = false,
 }: ServerAuthProviderProps) {
   const authState = initialUser !== undefined
