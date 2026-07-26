@@ -1,308 +1,177 @@
 # Task Manager
 
-A full-stack task management application built as a capstone/milestone project for frontend education, incorporating self-paced backend learning to create a complete, production-ready solution.
+[![CI](https://github.com/BlackestDawn/task-manager/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/BlackestDawn/task-manager/actions/workflows/pr-checks.yml)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](./LICENSE)
+
+A full-stack task management application — Next.js frontend, Hono API backend, Postgres via Drizzle ORM — with fine-grained CASL-based permissions, a multi-layer automated test suite, and a Terraform-provisioned CI/CD pipeline deploying to Google Cloud Run.
+
+Built solo as a self-directed learning project (frontend-first, backend and infrastructure picked up along the way), it's grown into a full production-shaped stack: real authentication and authorization, a real deployment pipeline, and a real testing discipline — including a genuine privilege-escalation vulnerability that automated testing caught and a fix verified, not just a coverage number chased for its own sake.
+
+**Live demo:** [tasks.alexstauch.app](https://tasks.alexstauch.app) — seeded with an admin account (`admin` / `admin123`) so you can explore the permission model directly.
 
 ## 📑 Table of Contents
 
-- [Project Context](#-project-context)
-- [Project Structure](#-project-structure)
-  - [Package Overview](#package-overview)
-- [Technologies & Tools](#-technologies--tools)
+- [Highlights](#-highlights)
+- [Tech Stack](#-tech-stack)
+- [Architecture](#-architecture)
+- [Testing & Quality](#-testing--quality)
+- [CI/CD & Deployment](#-cicd--deployment)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Development](#development)
+  - [Testing](#testing)
   - [Running with Docker](#running-with-docker)
   - [Adding Sample Data](#adding-sample-data)
-- [Package Architecture](#-package-architecture)
-- [Project Goals](#-project-goals)
 - [License](#-license)
 
-## 📚 Project Context
+## ✨ Highlights
 
-This project serves as a comprehensive demonstration of modern web development practices, combining:
+- **Multi-layer automated testing** — unit and component tests (Vitest + Testing Library), integration tests against a real disposable Postgres instance, and end-to-end tests (Playwright) that build and run production artifacts of both services. All run in CI on every PR.
+- **Testing that finds real bugs, not just coverage** — this process caught and fixed a genuine privilege-escalation vulnerability (a non-admin user could promote themselves via a direct API call, bypassing UI-only restrictions), a runaway network-request loop in the auth provider, and several silent data-correctness bugs — each found via a real test failure, confirmed, and fixed with a regression test locked in.
+- **CI/CD as a first-class concern** — five independent GitHub Actions jobs (build/lint/unit tests, integration tests, E2E tests, a Docker image smoke test, and coverage tracking), gating every pull request.
+- **Coverage tracked as a ratchet, not a fixed threshold** — each PR's coverage is diffed against a rolling baseline captured from `main`, so it can only go up, without needing to hand-pick an arbitrary percentage.
+- **Infrastructure as code** — GCP Cloud Run + Neon serverless Postgres provisioned via Terraform, with GitHub Actions authenticating via Workload Identity Federation (no long-lived cloud credentials).
+- **Single source of truth for types, validation, and permissions** — Zod schemas define both compile-time types and runtime validation once, shared across frontend and backend; CASL abilities built from that same schema layer drive both API authorization and conditional UI rendering.
 
-- **Frontend Development (Primary Focus)**: Implementing advanced React patterns, state management, and user experience design using Next.js and modern tooling
-- **Backend Development (Self-Paced Learning)**: Building a robust API server with authentication, authorization, and database integration using Bun and Drizzle ORM
-- **Full-Stack Integration**: Connecting frontend and backend with type-safe APIs, shared validation logic, and permission-based access control
+## 🛠️ Tech Stack
 
-## 🏗️ Project Structure
+**Core**
+- [Bun](https://bun.sh/) — runtime, bundler, and workspace package manager
+- [TypeScript](https://www.typescriptlang.org/) — end-to-end, in strict mode
+- [Next.js](https://nextjs.org/) — frontend, App Router, Server Actions
+- [Hono](https://hono.dev/) — backend API framework
+- [Drizzle ORM](https://orm.drizzle.team/) + Postgres — type-safe database access
 
-The project is organized as a monorepo with three distinct packages:
+**Validation & Authorization**
+- [Zod](https://zod.dev/) — schema validation and type inference
+- [CASL](https://casl.js.org/) — isomorphic permission/ability definitions
+
+**Testing**
+- [Vitest](https://vitest.dev/) — unit, component, and integration tests
+- [Testing Library](https://testing-library.com/) — component/hook testing
+- [Playwright](https://playwright.dev/) — end-to-end tests
+
+**Infrastructure**
+- [Terraform](https://www.terraform.io/) — GCP + Neon provisioning
+- [Google Cloud Run](https://cloud.google.com/run) — container hosting
+- [Neon](https://neon.tech/) — serverless Postgres
+- [GitHub Actions](https://github.com/features/actions) — CI/CD
+- [Docker](https://www.docker.com/) — containerized deployment and local dev
+
+## 🏗️ Architecture
+
+A Bun-workspaces monorepo with three packages:
 
 ```
 task-manager/
-├── docker/
-|   └── db
-|       ├── init                   # Containerized database initialization scripts
-│       ├── reset-db.sql           # SQL file for reseting database
-│       └── sample_data.sql        # SQL file with sample data
-│
 ├── packages/
-│   ├── frontend/          # Next.js application (@task-manager/frontend)
-│   │   ├── src/
-│   │   │   ├── app/           # Next.js app directory (routes)
-│   │   │   ├── components/    # React components
-│   │   │   ├── hooks/         # Custom React hooks (permissions, API)
-│   │   │   └── lib/           # Utility functions and configurations
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   │
+│   ├── frontend/          # Next.js app (@task-manager/frontend)
+│   │   └── src/{app,components,hooks,lib}
 │   ├── backend/           # Hono API server (@task-manager/backend)
-│   │   ├── src/
-│   │   │   ├── routes/        # API route handlers and middlewares
-│   │   │   ├── db/            # Database schema, connection and migrations
-│   │   │   ├── config.ts      # Config object
-│   │   │   └── index.ts       # Server entry point
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   │
-│   └── common/            # Shared types and validation (@task-manager/common)
-│       ├── src/
-│       │   ├── classes/       # Error code classes
-│       │   ├── types/         # Zod schemas, infered types, and validators
-│       │   ├── permissions/   # CASL permission definitions and ability builder
-│       │   └── functions/     # Various helper functions
-│       ├── package.json
-│       └── tsconfig.json
+│   │   └── src/{api,db,lib}
+│   └── common/            # Shared types, validation, permissions (@task-manager/common)
+│       └── src/{types,permissions,classes,functions}
 │
-├── sample_data.sh         # Generate sample data
-├── reset-db.sh            # Reset database to initial state
-├── docker-manager.sh      # Docker management script
-├── docker-compose.yml
-├── package.json
-└── README.md
+├── e2e/                    # Playwright end-to-end specs
+├── deploy/                 # Terraform (GCP + Neon) and deployment docs
+├── scripts/                # CI/local tooling (integration & E2E test runners, coverage)
+└── .github/workflows/      # CI/CD pipelines
 ```
 
-### Package Overview
+**Dependency flow:** `frontend → common ← backend`. All three packages depend on `common` for types, Zod schemas, and CASL permission definitions — nothing is duplicated or redefined between frontend and backend, so there's no drift between what's validated, what TypeScript thinks the shape is, and what a given role is allowed to do with it.
 
-#### **Frontend** (`@task-manager/frontend`)
-The client-facing application built with Next.js and modern React patterns.
+## 🧪 Testing & Quality
 
-**Key Responsibilities:**
-- User interface and experience
-- Client-side routing and state management
-- Permission-based rendering with CASL
-- Form validation and error handling
+Tests live next to the code they cover (`*.test.ts`/`*.test.tsx`) and run via a single root Vitest config, with three additional tiers layered on top:
 
-**Technologies:**
-- **Next.js**: React framework with server-side rendering
-- **Tailwind CSS**: Utility-first CSS framework for styling
-- **CASL React**: Permission and authorization on the frontend
-- **Custom Hooks**: Reusable logic for permissions and API interactions
-- **TypeScript**: Strict type safety with explicit imports
-- **ESLint**: Enforced code quality with strict rules (no implicit `any` types)
+| Layer | Tool | What it covers |
+| --- | --- | --- |
+| Unit & component | Vitest + Testing Library | Business logic, permission checks, React components/hooks — mocked at the network boundary |
+| Integration | Vitest against real Postgres | Drizzle query builders, run per-test inside a rolled-back transaction on an ephemeral Docker Postgres |
+| End-to-end | Playwright | Full user flows (auth, tasks, groups, permission gating) against production builds of both services |
+| Coverage | `@vitest/coverage-v8` | Diffed against a `main`-branch baseline on every PR (`scripts/compare-coverage.ts`) — regressions fail the build |
 
-#### **Backend** (`@task-manager/backend`)
-The API server handling business logic, data persistence, and authentication.
+Run everything locally:
 
-**Key Responsibilities:**
-- RESTful API endpoints
-- Database operations and migrations
-- Authentication and session management
-- Business logic and validation
+```bash
+bun run test              # unit + component (fast, no DB)
+bun run test:integration  # real Postgres, ephemeral Docker container
+bun run test:e2e          # Playwright, builds and runs both services
+bun run test:coverage     # unit + component with a coverage report
+```
 
-**Technologies:**
-- **Bun**: Fast all-in-one JavaScript runtime and toolkit
-- **Hono**: Lightweight, ultrafast web framework for the edge
-- **Drizzle ORM**: TypeScript ORM for type-safe database queries
-- **TypeScript**: End-to-end type safety
+## 🚀 CI/CD & Deployment
 
-#### **Common** (`@task-manager/common`)
-Shared code between frontend and backend ensuring consistency and reducing duplication.
+Every pull request runs five independent GitHub Actions jobs (`.github/workflows/pr-checks.yml`): build/lint/unit tests, integration tests, end-to-end tests, a Docker image smoke test (builds and boots the actual images that ship), and coverage tracking.
 
-**Key Responsibilities:**
-- Single source of truth for data structures
-- Validation logic shared across packages
-- Permission definitions and ability checks
+```
+merge to main ──▶ build & push images ──▶ deploy Cloud Run staging (backend + frontend)
+                                                          │
+                                              (manual trigger, approval gate)
+                                                          ▼
+                                    reuse backend image, rebuild frontend ──▶ deploy Cloud Run prod
+```
 
-**Technologies:**
-- **Zod**: Schema validation and type inference (exclusive schema definition)
-- **CASL**: Authorization library for defining user permissions
-- **TypeScript**: Exported types inferred from Zod schemas
-
-**Exports:**
-- Zod schemas for all data structures
-- TypeScript types inferred from schemas
-- Validation functions for every defined type
-- Type lists for enumerations
-- CASL ability definitions
-
-## 🛠️ Technologies & Tools
-
-### Core Technologies
-- **Runtime**: [Bun](https://bun.sh/) - Fast JavaScript runtime, bundler, and package manager
-- **Language**: [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
-- **Frontend Framework**: [Next.js](https://nextjs.org/) - React framework with SSR/SSG
-- **Backend Framework**: [Hono](https://hono.dev/) - Lightweight, ultrafast web framework
-- **Database ORM**: [Drizzle](https://orm.drizzle.team/) - TypeScript-first ORM
-
-### Key Libraries
-- **Validation**: [Zod](https://zod.dev/) - Schema validation with TypeScript inference
-- **Authorization**: [CASL](https://casl.js.org/) - Isomorphic authorization library
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-
-### Development Tools
-- **Package Manager**: Bun (workspaces)
-- **Linting**: ESLint with strict TypeScript rules
-- **Type Checking**: TypeScript compiler
+Infrastructure — Cloud Run services, Neon Postgres branches, Workload Identity Federation — is provisioned via Terraform, not clicked together by hand. Full setup instructions: **[deploy/README.md](./deploy/README.md)**.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- [Bun](https://bun.sh/) (v1.0.0 or higher)
-- Node.js (v18.0.0 or higher) - for tooling compatibility
+- [Bun](https://bun.sh/) v1.3+
+- [Docker](https://www.docker.com/) (for integration/E2E tests, and optionally for local dev)
 
 ### Installation
 
-1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone git@github.com:BlackestDawn/task-manager.git
 cd task-manager
-```
-
-2. Install dependencies:
-```bash
 bun install
+cp env.example .env   # fill in DB_URL, PLATFORM, JWT_SECRET, etc.
 ```
 
-3. Set up environment variables:
-```bash
-# Copy example env files
-cp packages/backend/env.example packages/backend/.env
-cp packages/frontend/env.example packages/frontend/.env
-```
-
-**Note:** Database migrations are automatically applied when the backend starts, so no manual migration step is required. It will also create an admin user ('admin:admin123') if no other users exists.
+**Note:** database migrations run automatically when the backend starts — no manual migration step needed. It also seeds an initial admin account (`admin` / `admin123`) if the database is empty.
 
 ### Development
 
-Start all packages in development mode:
 ```bash
-bun run dev
-```
+bun run dev              # everything, via concurrently
 
-Or run individual packages:
-```bash
-# Common, needs building so frontend/backend can import from it
+# or individually — common needs building first so frontend/backend can import from it
 bun run build:common
-
-# Frontend only
 bun run dev:frontend
-
-# Backend only
 bun run dev:backend
 ```
+
+### Testing
+
+See [Testing & Quality](#-testing--quality) above for the full breakdown of `bun run test`, `test:integration`, `test:e2e`, and `test:coverage`.
 
 ### Running with Docker
 
-The project includes a Docker setup for easy deployment. Use the `docker-manager.sh` script to manage Docker containers:
-
 ```bash
-# Start all services (frontend, backend, database)
-./docker-manager.sh start
-
-# Stop all services
+./docker-manager.sh start     # start all services (frontend, backend, database)
 ./docker-manager.sh stop
-
-# Restart all services
 ./docker-manager.sh restart
-
-# View logs
-./docker-manager.sh logs
-
-# Remove all containers and volumes
-./docker-manager.sh clean
+./docker-manager.sh logs [service]
+./docker-manager.sh health
+./docker-manager.sh clean     # remove all containers and volumes
+./docker-manager.sh help      # full command list, incl. db:backup/restore/shell
 ```
 
-Alternatively, use Docker Compose directly:
-```bash
-# Start services
-docker-compose up -d
-
-# Stop services
-docker-compose down
-
-# View logs
-docker-compose logs -f
-```
+Or with Compose directly: `docker-compose up -d` / `docker-compose down` / `docker-compose logs -f`.
 
 ### Adding Sample Data
 
-To populate the database with sample data for testing and development:
-
-#### Option 1: Using the sample_data.sh script
 ```bash
-# Make sure the backend is running first
-bun run dev:backend
-
-# In another terminal, run the sample data script
-./sample_data.sh
-```
-
-#### Option 2: Using the docker-manager.sh script
-```bash
-# If running with Docker, use the docker-manager script
+bun run dev:backend      # make sure the backend is running first
+./sample-data.sh         # in another terminal
+# or, if running via Docker:
 ./docker-manager.sh db:sample
 ```
 
-The sample data includes:
-- Users with different site-level permission
-- Groups with members of different group-level permissions
-- Tasks with various statuses and finish dates
-- Assignment relationships
-
-## 📦 Package Architecture
-
-### Dependency Flow
-```
-frontend  →  common  ←  backend
-```
-
-- **Frontend** imports types, schemas, and validation from **common**
-- **Backend** imports types, schemas, and validation from **common**
-- **Common** has no dependencies on other packages
-
-### Type Safety
-All type definitions originate in the **common** package as Zod schemas, ensuring:
-- Single source of truth for data structures
-- Automatic TypeScript type inference
-- Runtime validation matches compile-time types
-- No type drift between frontend and backend
-
-### Permission Model
-CASL abilities defined in **common** are used by:
-- **Backend**: Enforce permissions on API endpoints
-- **Frontend**: Conditionally render UI elements and enable/disable features
-
-## 🎯 Project Goals
-
-This project demonstrates proficiency in:
-
-1. **Modern Frontend Development**
-   - Component-based architecture
-   - Server-side rendering and static generation
-   - Responsive design with Tailwind CSS
-   - Permission-based UI rendering
-
-2. **Backend Development**
-   - RESTful API design
-   - Database modeling and relationships
-   - Authentication and authorization
-   - Type-safe ORM usage
-
-3. **Full-Stack Integration**
-   - Shared type definitions
-   - End-to-end type safety
-   - Consistent validation logic
-   - Monorepo architecture
-
-4. **Professional Development Practices**
-   - Monorepo management
-   - Code quality enforcement
-   - Separation of concerns
-   - Scalable architecture
+Populates users at each access level, groups with mixed member roles, and tasks in various states — useful for exercising the permission model manually.
 
 ## 📝 License
 
-This project is created for educational purposes as part of a frontend development capstone project.
+[Creative Commons Attribution 4.0 International](./LICENSE) — see `LICENSE` for the full text.
