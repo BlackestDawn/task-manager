@@ -42,4 +42,7 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
+echo "Building common..."
+bun run build:common
+
 bunx vitest run --config vitest.integration.config.ts

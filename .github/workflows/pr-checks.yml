@@ -65,6 +65,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Build common
+        run: bun run build:common
+
       - name: Run integration tests
         env:
           DB_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
@@ -197,6 +200,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Build common
+        run: bun run build:common
 
       - name: Run tests with coverage
         env:
