@@ -6,6 +6,13 @@ import path from 'path'
 dotenv.config()
 
 export default defineConfig({
+  // Matches tsconfig's "jsx": "react-jsx" (the automatic runtime — no
+  // `import React` needed). Vite/esbuild's own default is the classic
+  // runtime, which would fail with "React is not defined" on every .tsx
+  // test otherwise.
+  esbuild: {
+    jsx: 'automatic',
+  },
   resolve: {
     alias: {
       // Matches packages/frontend/tsconfig.json's baseUrl/paths ("@/*" ->
@@ -20,5 +27,15 @@ export default defineConfig({
     // `bun run test:integration` (see vitest.integration.config.ts) — keep
     // the default `bun run test` DB-free and fast.
     exclude: [...configDefaults.exclude, '**/*.integration.test.ts'],
+    // Component/hook tests need a DOM; backend/common stay on the faster
+    // default "node" environment since they never touch one.
+    environmentMatchGlobs: [
+      ['packages/frontend/**', 'jsdom'],
+    ],
+    // Registers @testing-library/jest-dom's matchers (toBeInTheDocument,
+    // toBeDisabled, etc). Safe to load for every test file, not just
+    // frontend's — it only calls expect.extend(), no DOM access at import
+    // time — so this doesn't need per-project scoping.
+    setupFiles: ['./packages/frontend/src/testHelpers/setupTests.ts'],
   },
 })
