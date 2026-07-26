@@ -1,5 +1,5 @@
-import React from "react";
-import { CheckCircle2, Users, Shield, Database, Code2, Zap, Lock, GitBranch } from "lucide-react";
+import type { ReactNode } from "react";
+import { CheckCircle2, Users, Shield, Database, Code2, Zap, Lock, GitBranch, TestTube2, Github, LogIn } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   title: 'Task Manager - Welcome',
   description: 'Task manager homepage',
 };
+
+function ExternalLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="hover:underline">
+      {children}
+    </a>
+  );
+}
 
 export default async function Page() {
   return (
@@ -21,9 +29,28 @@ export default async function Page() {
           </h1>
           <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
             A full-stack collaborative task management platform showcasing modern web development practices,
-            role-based access control, and enterprise architecture patterns. Built as a comprehensive milestone
-            project demonstrating software engineering skills.
+            role-based access control, and enterprise architecture patterns — built solo, end to end, with a
+            production-grade testing and CI/CD discipline behind it.
           </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-10">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90 transition-opacity"
+            >
+              <LogIn className="w-5 h-5" />
+              Sign In to the Demo
+            </Link>
+            <a
+              href="https://github.com/BlackestDawn/task-manager"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-slate-600 text-slate-200 font-semibold hover:border-slate-400 hover:bg-slate-800/50 transition-colors"
+            >
+              <Github className="w-5 h-5" />
+              View Source on GitHub
+            </a>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-20">
@@ -116,19 +143,19 @@ export default async function Page() {
               <ul className="space-y-3">
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://nextjs.org/">Next.js</Link></span> - React framework with SSR</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://nextjs.org/">Next.js</ExternalLink></span> - React framework with SSR</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://www.typescriptlang.org/">TypeScript</Link></span> - Type-safe development</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://www.typescriptlang.org/">TypeScript</ExternalLink></span> - Type-safe development</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://tailwindcss.com/">Tailwind CSS</Link></span> - Utility-first styling</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://tailwindcss.com/">Tailwind CSS</ExternalLink></span> - Utility-first styling</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://casl.js.org/v6/en/package/casl-react">CASL React</Link></span> - Declarative permissions</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://casl.js.org/v6/en/package/casl-react">CASL React</ExternalLink></span> - Declarative permissions</span>
                 </li>
               </ul>
             </div>
@@ -143,15 +170,15 @@ export default async function Page() {
               <ul className="space-y-3">
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://hono.dev/">Hono</Link></span> - Lightweight web framework</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://hono.dev/">Hono</ExternalLink></span> - Lightweight web framework</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://orm.drizzle.team/">Drizzle ORM</Link></span> - Type-safe SQL toolkit</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://orm.drizzle.team/">Drizzle ORM</ExternalLink></span> - Type-safe SQL toolkit</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://www.postgresql.org/">PostgreSQL</Link></span> - Relational database</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://www.postgresql.org/">PostgreSQL</ExternalLink></span> - Relational database</span>
                 </li>
               </ul>
             </div>
@@ -166,15 +193,61 @@ export default async function Page() {
               <ul className="space-y-3">
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://zod.dev/">Zod</Link></span> - Schema validation library</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://zod.dev/">Zod</ExternalLink></span> - Schema validation library</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://casl.js.org/">CASL</Link></span> - Authorization framework</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://casl.js.org/">CASL</ExternalLink></span> - Authorization framework</span>
                 </li>
                 <li className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                  <span className="text-slate-300"><span className="font-semibold text-white"><Link href="https://www.typescriptlang.org/">TypeScript</Link></span> - Shared type definitions</span>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://www.typescriptlang.org/">TypeScript</ExternalLink></span> - Shared type definitions</span>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="bg-green-500/20 w-12 h-12 rounded-lg flex items-center justify-center">
+                  <TestTube2 className="text-green-400 w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-bold text-white">Testing</h3>
+              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://vitest.dev/">Vitest</ExternalLink></span> - Unit, component & integration tests</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://testing-library.com/">Testing Library</ExternalLink></span> - Component & hook testing</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://playwright.dev/">Playwright</ExternalLink></span> - End-to-end tests</span>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="bg-yellow-500/20 w-12 h-12 rounded-lg flex items-center justify-center">
+                  <GitBranch className="text-yellow-400 w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-bold text-white">Infrastructure</h3>
+              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://www.terraform.io/">Terraform</ExternalLink></span> - GCP + Neon provisioning</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://cloud.google.com/run">Cloud Run</ExternalLink></span> - Container hosting</span>
+                </li>
+                <li className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  <span className="text-slate-300"><span className="font-semibold text-white"><ExternalLink href="https://github.com/features/actions">GitHub Actions</ExternalLink></span> - CI/CD pipeline</span>
                 </li>
               </ul>
             </div>
@@ -217,6 +290,16 @@ export default async function Page() {
                 and built-in testing utilities
               </p>
             </div>
+
+            <div className="bg-gradient-to-br from-yellow-500/10 to-green-500/10 border border-yellow-500/30 rounded-xl p-6 text-left md:col-span-2">
+              <h4 className="text-xl font-bold text-white mb-3">Testing &amp; CI/CD</h4>
+              <p className="text-slate-300">
+                Unit, component, integration, and end-to-end tests, all gated on every pull request alongside a
+                Docker image smoke test and coverage tracked against a rolling main-branch baseline. This process
+                has caught and fixed real issues before deployment — including a privilege-escalation
+                vulnerability — not just chased a coverage number.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -244,7 +327,8 @@ export default async function Page() {
             ))}
           </div>
           <p className="text-slate-500 text-sm">
-            Built with modern web technologies as a capstone project showcasing software engineering education
+            Built solo, end to end — from database schema to cloud deployment — as a self-directed deep dive into
+            production engineering practices.
           </p>
         </div>
       </div>
