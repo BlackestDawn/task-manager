@@ -6,7 +6,7 @@
     "dev": "bun --watch --verbose src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target node",
     "start": "bun dist/index.js",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist *.tsbuildinfo",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
@@ -29,7 +29,7 @@
     "@types/bun": "latest",
     "@types/jsonwebtoken": "^9.0.10",
     "drizzle-kit": "^0.31.5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"

@@ -1,6 +1,6 @@
 import type { ErrorHandler } from "hono";
 import { HTTPErrors } from "@task-manager/common";
-import { cfg } from "@backend/src/config";
+import { cfg } from "../../config";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 export const errorHandlingMiddleware: ErrorHandler = (err, c) => {

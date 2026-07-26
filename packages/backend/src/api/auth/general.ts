@@ -14,7 +14,7 @@ export async function handlerLoginUser(c: Context) {
   if (!params.login || !params.password) throw new UserNotAuthenticatedError("invalid username or password");
 
   const user = await getUserByLogin(cfg.db, params.login);
-  if (!user || user.disabled || !checkPasswordHash(params.password, user.password)) {
+  if (!user || user.disabled || !(await checkPasswordHash(params.password, user.password))) {
     throw new UserNotAuthenticatedError("invalid username or password");
   }
 
@@ -71,7 +71,7 @@ export async function handlerRevokeRefreshToken(c: Context) {
 
   const refreshToken = await getRefreshTokenByToken(cfg.db, { token: refreshTokenValue });
 
-  if (refreshToken?.userId !== user.id || user.accessLevel !== "admin") {
+  if (refreshToken?.userId !== user.id && user.accessLevel !== "admin") {
     throw new UserForbiddenError("Not allowed to revoke token");
   }
   const result = await revokeRefreshToken(cfg.db, { token: refreshTokenValue });

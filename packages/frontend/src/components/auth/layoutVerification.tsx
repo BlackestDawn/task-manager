@@ -30,7 +30,7 @@ export default function LayoutVerification() {
       // If ClientAuthProvider is present, window.__INITIAL_AUTH_STATE__ should be read
       // We can't directly test useContext here, but we can check the setup
       hasContext = hasInitialState || hasAuthScript;
-    } catch (e) {
+    } catch {
       hasContext = false;
     }
 
@@ -42,7 +42,7 @@ export default function LayoutVerification() {
       layoutCorrect: hasAuthScript && windowState,
     };
 
-    setChecks(allChecks);
+    Promise.resolve().then(() => setChecks(allChecks));
 
     // Log to console for debugging
     console.log('🔍 Layout Verification:', allChecks);

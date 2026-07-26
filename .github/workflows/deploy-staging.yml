@@ -1,0 +1,81 @@
+name: Deploy to staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  REGION: ${{ secrets.GCP_REGION }}
+  REPO: apps
+  APP_NAME: task-manager
+  FRONTEND_URL: https://tasks-staging.${{ secrets.DOMAIN }}
+  BACKEND_URL: https://tasks-api-staging.${{ secrets.DOMAIN }}
+  BACKEND_IMAGE: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/apps/task-manager-backend:${{ github.sha }}
+  FRONTEND_IMAGE: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/apps/task-manager-frontend:${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Build and push backend image
+        run: |
+          docker build -f packages/backend/Dockerfile -t "$BACKEND_IMAGE" .
+          docker push "$BACKEND_IMAGE"
+
+      - name: Build and push frontend image
+        run: |
+          docker build -f packages/frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL="${BACKEND_URL}/api" \
+            -t "$FRONTEND_IMAGE" .
+          docker push "$FRONTEND_IMAGE"
+
+      # Migrations run automatically on backend boot (see
+      # packages/backend/src/index.ts) — no separate migrate step needed.
+
+      - name: Deploy backend to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: task-manager-backend-staging
+          region: ${{ env.REGION }}
+          image: ${{ env.BACKEND_IMAGE }}
+          flags: --service-account=${{ secrets.GCP_RUNTIME_SA }} --allow-unauthenticated --port=3020
+          env_vars: |
+            PLATFORM=prod
+            APP_DOMAIN=${{ env.FRONTEND_URL }}
+          secrets: |
+            DB_URL=${{ env.APP_NAME }}-staging-database-url:latest
+            JWT_SECRET=${{ env.APP_NAME }}-staging-jwt-secret:latest
+
+      - name: Deploy frontend to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: task-manager-frontend-staging
+          region: ${{ env.REGION }}
+          image: ${{ env.FRONTEND_IMAGE }}
+          flags: --service-account=${{ secrets.GCP_RUNTIME_SA }} --allow-unauthenticated --port=3000
+          env_vars: |
+            NODE_ENV=production
+            PLATFORM=prod

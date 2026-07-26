@@ -1,0 +1,227 @@
+name: PR pre-checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check code
+        run: bun run lint
+
+      - name: Check build
+        run: bun run build
+
+      - name: Run unit tests
+        env:
+          # Dummy values so the backend's config.ts (envOrThrow at module
+          # scope) can load — these tests don't touch a real database.
+          DB_URL: postgresql://postgres:postgres@localhost:5432/taskmanager
+          PLATFORM: prod
+          JWT_SECRET: ci-test-secret
+        run: bun run test
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    # DB query builder tests (packages/backend/src/db/queries/*.integration.test.ts)
+    # against a real Postgres — see vitest.integration.config.ts. Locally
+    # this same suite runs via `bun run test:integration`, which manages its
+    # own disposable container instead of relying on a GitHub-managed
+    # service container.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: taskmanager_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build common
+        run: bun run build:common
+
+      - name: Run integration tests
+        env:
+          # config.ts needs all three at module load (envOrThrow), even
+          # though the query-builder tests only exercise DB_URL.
+          DB_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
+          PLATFORM: prod
+          JWT_SECRET: ci-test-secret
+        run: bunx vitest run --config vitest.integration.config.ts
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    # Full Playwright E2E suite against production builds of both services —
+    # see scripts/run-e2e-tests.sh, which this job runs as-is. That script
+    # owns its own disposable Postgres container (Docker is preinstalled on
+    # this runner), the same way it does locally via `bun run test:e2e`.
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: bun run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  docker-smoke-test:
+    runs-on: ubuntu-latest
+    # Minimal check that the actual images deploy-staging.yml/deploy-prod.yml
+    # ship (not just `bun run build`) build and boot correctly — e2e-tests
+    # above already covers real user flows by running the services straight
+    # from source, so this only needs to prove the Docker artifacts come up.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: taskmanager_smoke
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build backend image
+        run: docker build -f packages/backend/Dockerfile -t task-manager-backend:smoke .
+
+      - name: Build frontend image
+        run: |
+          docker build -f packages/frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=http://localhost:3020/api \
+            -t task-manager-frontend:smoke .
+
+      - name: Start backend container
+        run: |
+          docker run -d --name backend-smoke --network host \
+            -e DB_URL=postgresql://postgres:postgres@localhost:5432/taskmanager_smoke \
+            -e PLATFORM=prod \
+            -e JWT_SECRET=smoke-test-secret \
+            -e PORT=3020 \
+            task-manager-backend:smoke
+
+      - name: Wait for backend /health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3020/health > /dev/null; then
+              echo "Backend is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Backend never became healthy"
+          docker logs backend-smoke
+          exit 1
+
+      - name: Start frontend container
+        run: docker run -d --name frontend-smoke --network host task-manager-frontend:smoke
+
+      - name: Wait for frontend to respond
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000 > /dev/null; then
+              echo "Frontend is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Frontend never became healthy"
+          docker logs frontend-smoke
+          exit 1
+
+      - name: Show container logs on failure
+        if: failure()
+        run: |
+          echo "--- backend logs ---"
+          docker logs backend-smoke || true
+          echo "--- frontend logs ---"
+          docker logs frontend-smoke || true
+
+      - name: Clean up containers
+        if: always()
+        run: docker rm -f backend-smoke frontend-smoke || true
+
+  coverage:
+    runs-on: ubuntu-latest
+    # Diffs this PR's unit-test coverage against coverage-baseline.json,
+    # which .github/workflows/coverage-baseline.yml keeps up to date on every
+    # push to main — fails if any metric drops by more than the script's
+    # tolerance, rather than enforcing a fixed threshold.
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build common
+        run: bun run build:common
+
+      - name: Run tests with coverage
+        env:
+          DB_URL: postgresql://postgres:postgres@localhost:5432/taskmanager
+          PLATFORM: prod
+          JWT_SECRET: ci-test-secret
+        run: bun run test:coverage
+
+      - name: Compare against main's baseline
+        run: bun run scripts/compare-coverage.ts
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14

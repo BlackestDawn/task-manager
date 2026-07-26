@@ -5,7 +5,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rm -rf *.tsbuildinfo"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",
@@ -22,14 +23,19 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@next/eslint-plugin-next": "^16.0.0",
+    "@next/eslint-plugin-next": "^15.5.6",
+    "@testing-library/jest-dom": "^6",
+    "@testing-library/react": "^16",
+    "@testing-library/user-event": "^14",
     "@types/bun": "latest",
     "@types/node": "^24.9.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "eslint": "^9.38.0",
     "eslint-config-next": "^15.5.6",
-    "eslint-plugin-react-hooks": "^7.0.1"
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "jsdom": "^26",
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "react": "^19.1.1",

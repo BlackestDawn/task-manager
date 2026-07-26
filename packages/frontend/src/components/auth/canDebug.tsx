@@ -1,7 +1,7 @@
 // packages/frontend/src/components/auth/canDebug.tsx
 'use client';
 import { useAuthContext } from "./clientAuthProvider";
-import type { User, Task, Group } from "@task-manager/common";
+import type { User, Task, Group, Actions, Subjects } from "@task-manager/common";
 
 interface CanDebugProps {
   action: string;
@@ -24,13 +24,13 @@ export function CanDebug({ action, subject, field }: CanDebugProps) {
 
   const isString = typeof subject === 'string';
   const hasTypename = !isString && subject && '__typename' in subject;
-  const typename = hasTypename ? (subject as any).__typename : 'N/A';
+  const typename = hasTypename ? String((subject as Record<string, unknown>).__typename) : 'N/A';
 
   let canDo = false;
   try {
     canDo = field
-      ? ability.can(action as any, subject as any, field)
-      : ability.can(action as any, subject as any);
+      ? ability.can(action as Actions, subject as Subjects, field)
+      : ability.can(action as Actions, subject as Subjects);
   } catch (error) {
     console.error('Error checking ability:', error);
   }
@@ -69,7 +69,7 @@ export function CanDebug({ action, subject, field }: CanDebugProps) {
 
             <div>
               <span className="text-gray-400">Object ID:</span>{' '}
-              <span className="text-cyan-400">{(subject as any).id || 'N/A'}</span>
+              <span className="text-cyan-400">{String((subject as Record<string, unknown>).id ?? 'N/A')}</span>
             </div>
           </>
         )}

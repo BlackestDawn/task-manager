@@ -3,34 +3,25 @@ import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, X } from "lucide-react";
+import { useMounted } from "@/hooks/useMounted";
 
 export default function RedirectNotification() {
   const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const [redirectedFrom, setRedirectedFrom] = useState<string | null>(null);
-  const [mounted, setMounted] = useState<boolean>(false);
+  const mounted = useMounted();
+  const redirectedFrom = searchParams.get("redirect");
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (!mounted || !redirectedFrom) return;
 
-  useEffect(() => {
-    if (!mounted) return;
+    Promise.resolve().then(() => setIsVisible(true));
 
-    const fromPath = searchParams.get("redirect");
-    const wasRedirected = !!fromPath;
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+    }, 5000);
 
-    if (wasRedirected) {
-      setRedirectedFrom(fromPath);
-      setIsVisible(true);
-
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [searchParams, mounted]);
+    return () => clearTimeout(timer);
+  }, [redirectedFrom, mounted]);
 
   const handleClose = useCallback(() => {
     setIsVisible(false);

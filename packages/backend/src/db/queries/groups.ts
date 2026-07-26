@@ -1,28 +1,42 @@
-import { eq, and, inArray, sql } from "drizzle-orm";
+import { eq, and, inArray, sql, count, getTableColumns } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { groups, users, userGroups, tasks, taskGroups } from "../schema";
 import type { DoByUUIDRequest, CreateGroupRequest, UpdateGroupRequest, AddUserToGroupRequest, RemoveUserFromGroupRequest, AssignTaskToGroupRequest, RemoveTaskFromGroupRequest } from "@task-manager/common";
 import { getGroupRolesForUser } from "./users";
 import { getGroupsForTask } from "./tasks";
 import { AlreadyExistsConflictError } from "@task-manager/common";
+import { taskTypename, userTypename, groupTypename } from "./typenameColumns";
 
 export async function getGroupById(db: DBConn, params: DoByUUIDRequest) {
-  const [result] = await db.select().from(groups).where(eq(groups.id, params.id));
-  return {
-    __typename: 'Group',
-    ...result,
-  };
+  const [result] = await db.select({
+    ...getTableColumns(groups),
+    __typename: groupTypename,
+  }).from(groups).where(eq(groups.id, params.id));
+  if (!result) return null;
+  return result;
 }
 
 export async function getGroups(db: DBConn, params?: DoByUUIDRequest) {
+  // Raw sql`...` template interpolation of column references doesn't
+  // qualify them by table, so a plain `${groups.id}` inside a subquery
+  // whose FROM table has its own `id` column (user_groups, task_groups)
+  // silently resolves to that inner column instead — correlate via the
+  // query builder instead so drizzle qualifies everything correctly.
+  const userCountSubquery = db.select({ value: count() }).from(userGroups).where(eq(userGroups.groupId, groups.id));
+  const taskCountSubquery = db.select({ value: count() }).from(taskGroups).where(eq(taskGroups.groupId, groups.id));
+
   let query = db.select({
     id: groups.id,
     name: groups.name,
     description: groups.description,
     createdAt: groups.createdAt,
     updatedAt: groups.updatedAt,
-    userCount: sql<number>`(select count(*) from ${userGroups} where ${userGroups.groupId} = ${groups.id})`.as('userCount'),
-    taskCount: sql<number>`(select count(*) from ${taskGroups} where ${taskGroups.groupId} = ${groups.id})`.as('taskCount'),
+    __typename: groupTypename,
+    // count(*) is bigint, which postgres.js returns as a string to avoid
+    // precision loss — cast to int32 (group/task counts are always small)
+    // so callers actually get a JS number, matching the sql<number> type.
+    userCount: sql<number>`(${userCountSubquery})::int`.as('userCount'),
+    taskCount: sql<number>`(${taskCountSubquery})::int`.as('taskCount'),
   }).from(groups);
 
   /*   if (params?.id) {
@@ -38,29 +52,27 @@ export async function getGroups(db: DBConn, params?: DoByUUIDRequest) {
       );
     } */
 
-  const result = await query;
-  return result.map(group => ({
-    __typename: 'Group',
-    ...group,
-  }));
+  return await query;
 }
 
 export async function createGroup(db: DBConn, params: CreateGroupRequest) {
   const existing = await db.select().from(groups).where(eq(groups.name, params.name));
   if (existing.length > 0) throw new AlreadyExistsConflictError("Group already exists");
-  const [result] = await db.insert(groups).values(params).returning();
-  return {
-    __typename: 'Group',
-    ...result,
-  };
+  const [result] = await db.insert(groups).values(params).returning({
+    ...getTableColumns(groups),
+    __typename: groupTypename,
+  });
+  // A single-row INSERT ... RETURNING always yields exactly one row.
+  return result!;
 }
 
 export async function updateGroup(db: DBConn, params: { id: string, data: UpdateGroupRequest }) {
-  const [result] = await db.update(groups).set(params.data).where(eq(groups.id, params.id)).returning();
-  return {
-    __typename: 'Group',
-    ...result,
-  };
+  const [result] = await db.update(groups).set(params.data).where(eq(groups.id, params.id)).returning({
+    ...getTableColumns(groups),
+    __typename: groupTypename,
+  });
+  if (!result) return null;
+  return result;
 }
 
 export async function removeGroup(db: DBConn, params: DoByUUIDRequest) {
@@ -73,14 +85,10 @@ export async function addUserToGroup(db: DBConn, params: { id: string, data: Add
     eq(userGroups.groupId, params.id),
   ));
   if (existing.length > 0) throw new AlreadyExistsConflictError("User already in group");
-  const [result] = await db.insert(userGroups).values({
+  await db.insert(userGroups).values({
     groupId: params.id,
     ...params.data,
-  }).returning();
-  return {
-    __typename: 'User',
-    ...result,
-  };
+  });
 }
 
 export async function removeUserFromGroup(db: DBConn, params: { id: string, data: RemoveUserFromGroupRequest }) {
@@ -91,7 +99,10 @@ export async function removeUserFromGroup(db: DBConn, params: { id: string, data
 }
 
 export async function getGroupMembers(db: DBConn, params: DoByUUIDRequest) {
-  const userRows = await db.select().from(users)
+  const userRows = await db.select({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  }).from(users)
     .where(inArray(
       users.id,
       db.select({
@@ -104,7 +115,6 @@ export async function getGroupMembers(db: DBConn, params: DoByUUIDRequest) {
       const groups = await getGroupRolesForUser(db, { id: user.id });
 
       return {
-        __typename: 'User',
         ...user,
         groups: groups,
       };
@@ -135,7 +145,10 @@ export async function removeTaskFromGroup(db: DBConn, params: { id: string, data
 }
 
 export async function getGroupTasks(db: DBConn, params: DoByUUIDRequest) {
-  const taskRows = await db.select().from(tasks)
+  const taskRows = await db.select({
+    ...getTableColumns(tasks),
+    __typename: taskTypename,
+  }).from(tasks)
     .where(inArray(
       tasks.id,
       db.select({
@@ -148,7 +161,6 @@ export async function getGroupTasks(db: DBConn, params: DoByUUIDRequest) {
       const groups = await getGroupsForTask(db, { id: task.id });
 
       return {
-        __typename: 'Task',
         ...task,
         groups: groups,
       };

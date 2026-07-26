@@ -18,6 +18,23 @@ export async function handlerUpdateUser(c: Context) {
   const abilities = c.get("capabilities");
   if (!abilities.canEditObject(existingUser)) throw new UserForbiddenError("User not authorized");
 
+  // canEditObject is an object-level check and doesn't respect field
+  // restrictions (e.g. the "login" forbid, or the self-update forbid on
+  // "accessLevel"), so fields that carry their own restrictions need an
+  // explicit per-field check whenever the request actually touches them.
+  if ("login" in jsonBody && !abilities.canEditObjectField(existingUser, "login")) {
+    throw new UserForbiddenError("User not authorized");
+  }
+  if ("accessLevel" in jsonBody) {
+    if (!abilities.canEditObjectField(existingUser, "accessLevel")) {
+      throw new UserForbiddenError("User not authorized");
+    }
+    const actor = c.get("user") as User;
+    if (jsonBody.accessLevel === "admin" && actor.accessLevel !== "admin") {
+      throw new UserForbiddenError("User not authorized");
+    }
+  }
+
   const updateParams = {
     id: idParam.id,
     data: validateUpdateUserRequest({

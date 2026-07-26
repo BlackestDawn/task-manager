@@ -1,9 +1,14 @@
-import { describe, it, expect, beforeAll, afterAll, vi, beforeEach } from "vitest";
-import { makeJWT, validateJWT, hashPassword, checkPasswordHash, getAuthTokenFromHeaders } from "./authentication";
-import { UserForbiddenError, NotFoundError, BadRequestError, UserNotAuthenticatedError } from "@task-manager/common";
+import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
+import { makeJWT, validateJWT, hashPassword, checkPasswordHash, getAuthTokenFromHeaders, makeRefreshToken } from "./authentication";
+import { UserForbiddenError } from "@task-manager/common";
 import jwt from "jsonwebtoken";
 import { cfg } from "../../config";
 import type { Context } from "hono";
+import { registerRefreashToken } from "../../db/queries/auth";
+
+vi.mock("../../db/queries/auth", () => ({
+  registerRefreashToken: vi.fn(),
+}));
 
 describe("Password Hashing", () => {
   const password = "correctPassword123!";
@@ -289,5 +294,68 @@ describe("getAuthTokenFromHeaders", () => {
     });
 
     await expect(getAuthTokenFromHeaders(headers)).rejects.toThrow("Malformed Authorization header");
+  });
+});
+
+describe("makeRefreshToken", () => {
+  const userId = "123e4567-e89b-12d3-a456-426614174000";
+
+  beforeEach(() => {
+    vi.mocked(registerRefreashToken).mockReset();
+  });
+
+  it("should return the created refresh token", async () => {
+    const created = {
+      token: "a-generated-token",
+      userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+      revokedAt: null,
+    };
+    vi.mocked(registerRefreashToken).mockResolvedValueOnce(created);
+
+    const result = await makeRefreshToken(userId);
+    expect(result).toEqual(created);
+  });
+
+  it("should generate a random hex token and store it with the user ID", async () => {
+    vi.mocked(registerRefreashToken).mockImplementationOnce(async (_db, params) => ({
+      ...params,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      revokedAt: null,
+    }));
+
+    await makeRefreshToken(userId);
+
+    expect(registerRefreashToken).toHaveBeenCalledTimes(1);
+    const [, params] = vi.mocked(registerRefreashToken).mock.calls[0]!;
+    expect(params.userId).toBe(userId);
+    expect(params.token).toMatch(/^[0-9a-f]{64}$/);
+    expect(params.expiresAt).toBeInstanceOf(Date);
+  });
+
+  it("should generate a different token on each call", async () => {
+    vi.mocked(registerRefreashToken).mockImplementation(async (_db, params) => ({
+      ...params,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      revokedAt: null,
+    }));
+
+    await makeRefreshToken(userId);
+    await makeRefreshToken(userId);
+
+    const calls = vi.mocked(registerRefreashToken).mock.calls;
+    expect(calls[0]![1].token).not.toBe(calls[1]![1].token);
+  });
+
+  it("should throw when the database returns no result", async () => {
+    vi.mocked(registerRefreashToken).mockResolvedValueOnce(undefined as any);
+
+    await expect(makeRefreshToken(userId)).rejects.toThrow(
+      "failed to create refresh token"
+    );
   });
 });

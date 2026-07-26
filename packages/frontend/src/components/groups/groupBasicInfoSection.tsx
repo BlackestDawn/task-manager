@@ -122,6 +122,12 @@ export default function GroupBasicInfoSection({ group, isEditing, onEdit, onCanc
 
   return (
     <div className="px-4 py-5 sm:p-6">
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
+
       <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
         <div className="sm:col-span-1">
           <dt className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">

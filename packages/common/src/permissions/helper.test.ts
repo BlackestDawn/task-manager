@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { AbilityChecker } from './helper';
 import { defineAbilityFor } from './roles';
 import type { UserContext } from './types';
@@ -646,6 +646,49 @@ describe('AbilityChecker', () => {
     });
   });
 
+  describe('canMarkTaskDone', () => {
+    it('should return false when subject is undefined', () => {
+      const checker = new AbilityChecker({ user: { id: USER_ID, groups: [], accessLevel: 'user' } });
+      expect(checker.canMarkTaskDone(undefined)).toBe(false);
+    });
+
+    it('should return true for a "user" role group member, even without update rights', () => {
+      const userContext = {
+        id: USER_ID,
+        groups: [{ id: GROUP_ID, role: 'user' as const }],
+        accessLevel: 'user' as const,
+      };
+      const checker = new AbilityChecker({ user: userContext });
+      const task = { __typename: 'Task', groups: [{ id: GROUP_ID }] };
+
+      expect(checker.canMarkTaskDone(task)).toBe(true);
+      // Regression guard: "user" role is deliberately NOT granted the
+      // broader "update" action on group tasks — only "markDone" — so a
+      // check that (mistakenly) maps to "update" would wrongly reject this.
+      expect(checker.canEditObject(task)).toBe(false);
+    });
+
+    it('should return false for a "viewer" role group member', () => {
+      const userContext = {
+        id: USER_ID,
+        groups: [{ id: GROUP_ID, role: 'viewer' as const }],
+        accessLevel: 'user' as const,
+      };
+      const checker = new AbilityChecker({ user: userContext });
+      const task = { __typename: 'Task', groups: [{ id: GROUP_ID }] };
+
+      expect(checker.canMarkTaskDone(task)).toBe(false);
+    });
+
+    it('should return true for the task owner', () => {
+      const userContext = { id: USER_ID, groups: [], accessLevel: 'user' as const };
+      const checker = new AbilityChecker({ user: userContext });
+      const task = { __typename: 'Task', userId: USER_ID };
+
+      expect(checker.canMarkTaskDone(task)).toBe(true);
+    });
+  });
+
   describe('edge cases with no user (anonymous)', () => {
     it('should return false for all permission checks when initialized with no user', () => {
       const checker = new AbilityChecker({});
@@ -663,6 +706,7 @@ describe('AbilityChecker', () => {
       expect(checker.canRemoveTask(group)).toBe(false);
       expect(checker.canAssignUser(group)).toBe(false);
       expect(checker.canRemoveUser(group)).toBe(false);
+      expect(checker.canMarkTaskDone(task)).toBe(false);
     });
   });
 

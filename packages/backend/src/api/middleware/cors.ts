@@ -1,7 +1,7 @@
 import { envOrDefault } from '@task-manager/common';
 
 export const corsOptions = {
-  origin: (origin) => {
+  origin: (origin: string) => {
     const allowedOrigins = [
       envOrDefault('APP_DOMAIN', 'http://localhost:3000'),
       'http://localhost:3000',

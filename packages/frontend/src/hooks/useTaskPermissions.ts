@@ -14,7 +14,7 @@ export function useTaskPermissions() {
 
   const canDeleteTask = (task?: Task) => abilities.canDeleteObject(task);
 
-  const canMarkDone = (task?: Task) => abilities.canEditObjectField(task, "completed");
+  const canMarkDone = (task?: Task) => abilities.canMarkTaskDone(task);
 
   return {
     canViewTask,

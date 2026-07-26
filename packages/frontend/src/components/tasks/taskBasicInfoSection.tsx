@@ -25,6 +25,14 @@ export default function TaskBasicInfoSection({ task, isEditing, onEdit, onCancel
     finishBy: task.finishBy || null,
   });
 
+  const formatDateForInput = (date: Date | null): string => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -90,6 +98,12 @@ export default function TaskBasicInfoSection({ task, isEditing, onEdit, onCancel
             </button>
           </div>
         </div>
+
+        {error && (
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6 bg-red-50 dark:bg-red-900/20">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
 
         {showDeleteConfirm && (
           <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:px-6 bg-red-50 dark:bg-red-900/20">
@@ -186,8 +200,8 @@ export default function TaskBasicInfoSection({ task, isEditing, onEdit, onCancel
             <input
               id="finishBy"
               type="date"
-              value={formData.finishBy ? new Date(formData.finishBy).toISOString().split('T')[0] : ""}
-              onChange={(e) => setFormData({ ...formData, finishBy: new Date(e.target.value) || null })}
+              value={formData.finishBy ? formatDateForInput(new Date(formData.finishBy)) : ""}
+              onChange={(e) => setFormData({ ...formData, finishBy: e.target.value ? new Date(e.target.value) : null })}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm"
             />
           </div>

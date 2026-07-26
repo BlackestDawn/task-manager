@@ -4,10 +4,14 @@ import {
   validateLoginResponse,
   validateRefreashToken,
   validateRegisterRefreashToken,
+  validateRefreashTokenByToken,
+  validateRefreshAccessTokenResponse,
   type LoginRequest,
   type LoginResponse,
   type RefreashToken,
   type RegisterRefreashToken,
+  type DoRefreashTokenByToken,
+  type RefreshAccessTokenResponse,
 } from "./auth";
 import { UserNotAuthenticatedError } from "../classes/errors";
 
@@ -345,5 +349,76 @@ describe("validateRegisterRefreashToken", () => {
     const requestWithSpecialToken = { ...validRequest, token: specialToken };
     const result = validateRegisterRefreashToken(requestWithSpecialToken);
     expect(result.token).toBe(specialToken);
+  });
+});
+
+describe("validateRefreashTokenByToken", () => {
+  const validRequest: DoRefreashTokenByToken = {
+    token: "some-refresh-token-12345",
+  };
+
+  it("should validate a valid request", () => {
+    const result = validateRefreashTokenByToken(validRequest);
+    expect(result.token).toBe(validRequest.token);
+  });
+
+  it("should throw error for missing token", () => {
+    expect(() => validateRefreashTokenByToken({})).toThrow(
+      "Invalid refresh token by token"
+    );
+  });
+
+  it("should throw error for empty token", () => {
+    expect(() =>
+      validateRefreashTokenByToken({ token: "" })
+    ).toThrow("Invalid refresh token by token");
+  });
+
+  it("should throw error for wrong data type", () => {
+    expect(() => validateRefreashTokenByToken("not an object")).toThrow(
+      "Invalid refresh token by token"
+    );
+    expect(() => validateRefreashTokenByToken(null)).toThrow(
+      "Invalid refresh token by token"
+    );
+  });
+
+  it("should ignore extra properties", () => {
+    const requestWithExtra = { ...validRequest, extra: "field" };
+    const result = validateRefreashTokenByToken(requestWithExtra);
+    expect(result.token).toBe(validRequest.token);
+    expect((result as any).extra).toBeUndefined();
+  });
+});
+
+describe("validateRefreshAccessTokenResponse", () => {
+  const validResponse: RefreshAccessTokenResponse = {
+    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test",
+  };
+
+  it("should validate a valid response", () => {
+    const result = validateRefreshAccessTokenResponse(validResponse);
+    expect(result.accessToken).toBe(validResponse.accessToken);
+  });
+
+  it("should throw error for missing accessToken", () => {
+    expect(() => validateRefreshAccessTokenResponse({})).toThrow(
+      "Invalid refresh access token response"
+    );
+  });
+
+  it("should throw error for empty accessToken", () => {
+    expect(() =>
+      validateRefreshAccessTokenResponse({ accessToken: "" })
+    ).toThrow("Invalid refresh access token response");
+  });
+
+  it("should throw error for wrong data type", () => {
+    expect(() => validateRefreshAccessTokenResponse("not an object")).toThrow(
+      "Invalid refresh access token response"
+    );
+    expect(() => validateRefreshAccessTokenResponse(null)).toThrow(
+      "Invalid refresh access token response"
+    );
   });
 });

@@ -14,13 +14,13 @@
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node --format esm --splitting && bunx tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist",
     "dev": "bun --watch src/index.ts",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist *.tsbuildinfo",
     "test": "vitest --run"
   },
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"

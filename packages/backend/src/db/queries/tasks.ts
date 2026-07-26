@@ -1,20 +1,21 @@
-import { eq, sql, or, inArray } from "drizzle-orm";
+import { eq, sql, or, inArray, getTableColumns } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import type { CreateTaskRequest, UpdateTaskRequest, DoByUUIDRequest, Task, UpdateTaskDoneStatusRequest, Group } from "@task-manager/common";
 import { tasks, taskGroups, groups, userGroups } from "../schema";
+import { taskTypename, groupTypename } from "./typenameColumns";
 
 export async function getGroupsForTask(db: DBConn, params: DoByUUIDRequest) {
-  const result = await db.select().from(groups)
+  const result = await db.select({
+    ...getTableColumns(groups),
+    __typename: groupTypename,
+  }).from(groups)
     .where(inArray(
       groups.id,
       db.select({
         groupId: taskGroups.groupId,
       }).from(taskGroups).where(eq(taskGroups.taskId, params.id))
     ));
-  return result.map(group => ({
-    __typename: 'Group',
-    ...group,
-  })) as Group[];
+  return result as Group[];
 }
 
 async function getGroupIdsForTask(db: DBConn, params: DoByUUIDRequest) {
@@ -31,21 +32,25 @@ async function getGroupIdsForTask(db: DBConn, params: DoByUUIDRequest) {
 }
 
 export async function createTask(db: DBConn, params: CreateTaskRequest) {
-  const [result] = await db.insert(tasks).values(params).returning();
+  const [result] = await db.insert(tasks).values(params).returning({
+    ...getTableColumns(tasks),
+    __typename: taskTypename,
+  });
   return {
-    __typename: 'Task',
     ...result,
     groups: [],
   };
 }
 
 export async function updateTask(db: DBConn, params: { id: string, data: UpdateTaskRequest }) {
-  const [result] = await db.update(tasks).set(params).where(eq(tasks.id, params.id)).returning();
+  const [result] = await db.update(tasks).set(params.data).where(eq(tasks.id, params.id)).returning({
+    ...getTableColumns(tasks),
+    __typename: taskTypename,
+  });
   if (!result) return null;
   const groups = await getGroupIdsForTask(db, params);
 
   return {
-    __typename: 'Task',
     ...result,
     groups,
   };
@@ -56,13 +61,15 @@ export async function deleteTask(db: DBConn, params: DoByUUIDRequest) {
 }
 
 export async function getAllTasks(db: DBConn) {
-  const taskRows = await db.select().from(tasks);
+  const taskRows = await db.select({
+    ...getTableColumns(tasks),
+    __typename: taskTypename,
+  }).from(tasks);
   const result = await Promise.all(
     taskRows.map(async (task) => {
       const groups = await getGroupIdsForTask(db, { id: task.id });
 
       return {
-        __typename: 'Task',
         ...task,
         groups: groups,
       };
@@ -73,7 +80,11 @@ export async function getAllTasks(db: DBConn) {
 }
 
 export async function getTaskById(db: DBConn, params: DoByUUIDRequest) {
-  const [result] = await db.select().from(tasks).where(eq(tasks.id, params.id));
+  const [result] = await db.select({
+    ...getTableColumns(tasks),
+    __typename: taskTypename,
+  }).from(tasks).where(eq(tasks.id, params.id));
+  if (!result) return null;
   const groups = await db.select(
     {
       id: taskGroups.groupId,
@@ -81,7 +92,6 @@ export async function getTaskById(db: DBConn, params: DoByUUIDRequest) {
   ).from(taskGroups).where(eq(taskGroups.taskId, params.id));
 
   return {
-    __typename: 'Task',
     ...result,
     groups: groups,
   };
@@ -91,27 +101,23 @@ export async function updateTaskDoneStatus(db: DBConn, params: { id: string, dat
   const [result] = await db.update(tasks).set({
     completed: params.data.completed,
     completedAt: params.data.completed ? sql`now()` : null,
-  }).where(eq(tasks.id, params.id)).returning();
+  }).where(eq(tasks.id, params.id)).returning({
+    ...getTableColumns(tasks),
+    __typename: taskTypename,
+  });
+  if (!result) return null;
   const groups = await getGroupIdsForTask(db, params);
   return {
-    __typename: 'Task',
-    ...result,
-    groups,
-  };
-}
-
-export async function getTasksByUserId(db: DBConn, params: DoByUUIDRequest) {
-  const result = await db.select().from(tasks).where(eq(tasks.userId, params.id));
-  const groups = await getGroupIdsForTask(db, params);
-  return {
-    __typename: 'Task',
     ...result,
     groups,
   };
 }
 
 export async function getAllTasksForUser(db: DBConn, params: DoByUUIDRequest) {
-  const taskRows = await db.selectDistinctOn([tasks.id]).from(tasks)
+  const taskRows = await db.selectDistinctOn([tasks.id], {
+    ...getTableColumns(tasks),
+    __typename: taskTypename,
+  }).from(tasks)
     .where(or(
       eq(tasks.userId, params.id),
       inArray(tasks.id,
@@ -131,7 +137,6 @@ export async function getAllTasksForUser(db: DBConn, params: DoByUUIDRequest) {
       const groups = await getGroupIdsForTask(db, { id: task.id });
 
       return {
-        __typename: 'Task',
         ...task,
         groups: groups,
       };

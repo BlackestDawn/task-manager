@@ -93,7 +93,7 @@ export default function GroupMembersListSection({ group, members, isEditing, onE
 
   useEffect(() => {
     if (isEditing && allUsers.length === 0) {
-      setLoadingUsers(true);
+      Promise.resolve().then(() => setLoadingUsers(true));
       getUsersAction().then(users => {
         setAllUsers(users);
         setLoadingUsers(false);

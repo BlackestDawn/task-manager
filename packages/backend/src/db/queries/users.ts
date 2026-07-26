@@ -1,8 +1,9 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, getTableColumns } from "drizzle-orm";
 import { type DBConn } from "../../config";
 import { users, groups, userGroups } from "../schema";
 import type { CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, DoByUUIDRequest, UpdateUserDisabledRequest } from "@task-manager/common";
 import { AlreadyExistsConflictError } from "@task-manager/common";
+import { userTypename, groupTypename } from "./typenameColumns";
 
 export async function getGroupRolesForUser(db: DBConn, params: DoByUUIDRequest) {
   const result = await db.select({
@@ -15,21 +16,25 @@ export async function getGroupRolesForUser(db: DBConn, params: DoByUUIDRequest) 
 export async function createUser(db: DBConn, params: CreateUserRequest) {
   const existing = await db.select().from(users).where(eq(users.login, params.login));
   if (existing.length > 0) throw new AlreadyExistsConflictError("User already exists");
-  const [result] = await db.insert(users).values(params).returning();
+  const [result] = await db.insert(users).values(params).returning({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  });
   return {
-    __typename: 'User',
     ...result,
     groups: [],
   };
 }
 
 export async function updateUser(db: DBConn, params: { id: string, data: UpdateUserRequest }) {
-  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
+  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  });
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
 
   return {
-    __typename: 'User',
     ...result,
     groups: groups,
   };
@@ -40,13 +45,15 @@ export async function deleteUser(db: DBConn, params: DoByUUIDRequest) {
 }
 
 export async function getUsers(db: DBConn) {
-  const userRows = await db.select().from(users);
+  const userRows = await db.select({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  }).from(users);
   const result = await Promise.all(
     userRows.map(async (user) => {
       const groups = await getGroupRolesForUser(db, { id: user.id });
 
       return {
-        __typename: 'User',
         ...user,
         groups: groups,
       };
@@ -57,43 +64,52 @@ export async function getUsers(db: DBConn) {
 }
 
 export async function getUserById(db: DBConn, params: DoByUUIDRequest) {
-  const [result] = await db.select().from(users).where(eq(users.id, params.id));
+  const [result] = await db.select({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  }).from(users).where(eq(users.id, params.id));
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
 
   return {
-    __typename: 'User',
     ...result,
     groups: groups,
   };
 }
 
 export async function updatePassword(db: DBConn, params: { id: string, data: UpdatePasswordRequest }) {
-  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
+  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  });
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
 
   return {
-    __typename: 'User',
     ...result,
     groups: groups,
   };
 }
 
 export async function getUserByLogin(db: DBConn, login: string) {
-  const [result] = await db.select().from(users).where(eq(users.login, login));
+  const [result] = await db.select({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  }).from(users).where(eq(users.login, login));
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, { id: result.id });
 
   return {
-    __typename: 'User',
     ...result,
     groups: groups,
   };
 }
 
 export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
-  const result = await db.select().from(groups)
+  const result = await db.select({
+    ...getTableColumns(groups),
+    __typename: groupTypename,
+  }).from(groups)
     .where(inArray(
       groups.id,
       db.select({
@@ -104,12 +120,14 @@ export async function getGroupsForUser(db: DBConn, params: DoByUUIDRequest) {
 }
 
 export async function updateUserDisabledStatus(db: DBConn, params: { id: string, data: UpdateUserDisabledRequest }) {
-  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning();
+  const [result] = await db.update(users).set(params.data).where(eq(users.id, params.id)).returning({
+    ...getTableColumns(users),
+    __typename: userTypename,
+  });
   if (!result) return null;
   const groups = await getGroupRolesForUser(db, params);
 
   return {
-    __typename: 'User',
     ...result,
     groups: groups,
   };

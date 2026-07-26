@@ -43,6 +43,11 @@ describe('defineAbilityFor', () => {
       expect(ability.can('update', userItem, 'login')).toBe(false);
     });
 
+    it('should not allow updating their own disabled or accessLevel fields', () => {
+      expect(ability.can('update', userItem, 'disabled')).toBe(false);
+      expect(ability.can('update', userItem, 'accessLevel')).toBe(false);
+    });
+
     it('should allow reading all users', () => {
       expect(ability.can('read', 'User')).toBe(true);
     });
@@ -274,6 +279,7 @@ describe('defineAbilityFor', () => {
     };
     const ability = defineAbilityFor(userContext);
     const userItem: any = { __typename: 'User', id: OTHER_USER_ID };
+    const selfItem: any = { __typename: 'User', id: USER_ID };
     const groupItem: any = { __typename: 'Group', id: GROUP_ID };
 
     it('should allow managing all groups', () => {
@@ -287,15 +293,26 @@ describe('defineAbilityFor', () => {
       expect(ability.can('create', 'User')).toBe(true);
     });
 
-    it('should allow updating specific user fields', () => {
+    it('should allow updating specific user fields on other users', () => {
       expect(ability.can('update', userItem, 'disabled')).toBe(true);
       expect(ability.can('update', userItem, 'name')).toBe(true);
       expect(ability.can('update', userItem, 'email')).toBe(true);
       expect(ability.can('update', userItem, 'password')).toBe(true);
+      expect(ability.can('update', userItem, 'accessLevel')).toBe(true);
     });
 
     it('should not allow updating login field', () => {
       expect(ability.can('update', userItem, 'login')).toBe(false);
+    });
+
+    it('should not allow updating their own disabled or accessLevel fields', () => {
+      expect(ability.can('update', selfItem, 'disabled')).toBe(false);
+      expect(ability.can('update', selfItem, 'accessLevel')).toBe(false);
+    });
+
+    it('should still allow updating their own name/email/password', () => {
+      expect(ability.can('update', selfItem, 'name')).toBe(true);
+      expect(ability.can('update', selfItem, 'email')).toBe(true);
     });
 
     it('should allow deleting users', () => {
@@ -325,6 +342,12 @@ describe('defineAbilityFor', () => {
       expect(ability.can('delete', 'User')).toBe(true);
       expect(ability.can('manage', 'Group')).toBe(true);
       expect(ability.can('manage', 'Task')).toBe(true);
+    });
+
+    it('is exempt from the self-update restriction on disabled/accessLevel', () => {
+      const selfItem: any = { __typename: 'User', id: USER_ID };
+      expect(ability.can('update', selfItem, 'disabled')).toBe(true);
+      expect(ability.can('update', selfItem, 'accessLevel')).toBe(true);
     });
   });
 

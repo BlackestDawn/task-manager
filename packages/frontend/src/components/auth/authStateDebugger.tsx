@@ -1,22 +1,24 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useAuthContext } from './clientAuthProvider';
+import { useMounted } from '@/hooks/useMounted';
 import { checkAuthAction } from '@/lib/actions/auth';
+import type { AuthState } from '@/lib/data/interfaces/auth';
 
 export default function AuthStateDebugger() {
-  const [mounted, setMounted] = useState(false);
-  const [serverAuthState, setServerAuthState] = useState<any>(null);
-  const [windowState, setWindowState] = useState<any>(null);
+  const mounted = useMounted();
+  const [serverAuthState, setServerAuthState] = useState<AuthState | null>(null);
+  const [windowState, setWindowState] = useState<AuthState | null>(null);
   const [cookies, setCookies] = useState<string>('');
   const { user, isAuthenticated, ability } = useAuthContext();
 
   useEffect(() => {
-    setMounted(true);
-
     // Check window state
     if (typeof window !== 'undefined') {
-      setWindowState(window.__INITIAL_AUTH_STATE__);
-      setCookies(document.cookie);
+      Promise.resolve().then(() => {
+        setWindowState(window.__INITIAL_AUTH_STATE__ ?? null);
+        setCookies(document.cookie);
+      });
 
       // Check server auth state
       checkAuthAction().then(state => {
