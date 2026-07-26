@@ -70,7 +70,11 @@ jobs:
 
       - name: Run integration tests
         env:
+          # config.ts needs all three at module load (envOrThrow), even
+          # though the query-builder tests only exercise DB_URL.
           DB_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
+          PLATFORM: prod
+          JWT_SECRET: ci-test-secret
         run: bunx vitest run --config vitest.integration.config.ts
 
   e2e-tests:
