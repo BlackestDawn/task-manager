@@ -44,7 +44,7 @@ export default function UserBasicInfoSection({ user, isEditing, onEdit, onCancel
 
       if (formData.login !== user.login) updates.login = formData.login;
       if (formData.name !== user.name) updates.name = formData.name;
-      if (formData.email !== user.email) updates.email = formData.email;
+      if (formData.email !== (user.email || "")) updates.email = formData.email;
       if (canChangeAccessLevel && formData.accessLevel !== user.accessLevel) updates.accessLevel = formData.accessLevel;
 
       if (Object.keys(updates).length === 0) {
