@@ -16,7 +16,7 @@ merge to main ──▶ build & push images ──▶ deploy Cloud Run staging (
 
 ## One-time bootstrap
 
-> **Prerequisite**: the shared Workload Identity Pool/provider (`github-actions`) and the `apps` Artifact Registry repo must already exist in the target GCP project before running anything below — `deploy/terraform/gcp` only reads them via data sources, it doesn't create them. Apply the bootstrap stack that owns those first if this is a new GCP project.
+> **Prerequisite**: the shared Workload Identity Pool/provider (`github-actions`) and the `apps` Artifact Registry repo must already exist in the target GCP project before running anything below — `deploy/terraform/gcp` only reads them via data sources, it doesn't create them. Apply [various-terraform/gcp-bootstrap](https://github.com/BlackestDawn/various-terraform) first if this is a new GCP project.
 
 1. **GCP stack** — creates this app's deployer/runtime service accounts, IAM bindings, and empty Secret Manager secret containers.
 
